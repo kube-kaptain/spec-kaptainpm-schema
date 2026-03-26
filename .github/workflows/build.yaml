@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: CC0-1.0
+# This file is released to the public domain. Use freely without attribution.
+#
+# Builds, validates, and releases the KaptainPM JSON Schema.
+
+name: Spec Check Filter Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    uses: kube-kaptain/buildon-github-actions/.github/workflows/spec-check-filter-release.yaml@1.0.86
+    permissions:
+      contents: write
+      packages: write
+      checks: write
+    with:
+      spec-type: 'schema'
+      tag-version-max-parts: 2
+      hook-post-versions-and-naming-script-sub-path: bin/generate-kind-schemas.bash

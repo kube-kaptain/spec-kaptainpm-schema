@@ -1,0 +1,958 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# KaptainPM schema source - superset of all three output schemas.
+#
+# This file is NOT published directly. The generate-kind-schemas.bash hook
+# transforms it into three output schemas during build:
+#
+#   spec-kaptainpm-schema.yaml          Base     - project root KaptainPM.yaml and final merged file
+#   spec-kaptainpm-schema-layer.yaml    Layer    - layer image KaptainPM.yaml files
+#   spec-kaptainpm-schema-layerset.yaml Layerset - composite layer image KaptainPM.yaml files
+#
+# Structural differences from this source:
+#   Base     minus layer-payload
+#   Layer    minus layer-payload; minus spec.layers (layers cannot compose other layers)
+#   Layerset minus layer-payload; minus user-data; spec reduced to spec.layers only
+#
+# Token substitution: ${Version} and ${ProjectName} are replaced at build time.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.yaml"
+
+name: ${ProjectName}
+version: "${Version}"
+source: https://github.com/kube-kaptain/${ProjectName}
+latest: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/main/${ProjectName}.yaml
+tagged: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/${Version}/${ProjectName}.yaml
+release: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.yaml
+validate-using: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.json
+
+title: KaptainPM
+description: >
+  Kaptain project manifest schema (version ${Version}).
+type: object
+required:
+  - apiVersion
+additionalProperties: false
+properties:
+
+  apiVersion:
+    type: string
+    const: "kaptain.io/v1alpha1"
+    description: API version - must be kaptain.io/v1alpha1
+
+  kind:
+    type: string
+    description: >
+      Build process name matching the workflow/reference used
+      (e.g. KubeAppDockerDockerfile). Typically provided by a layer.
+      Mismatch between KaptainPM kind and the calling workflow is an
+      immediate failure in the preamble.
+
+  metadata:
+    type: object
+    description: >
+      Reserved - no schema defined yet. Valid to declare; ignored by the
+      build system until a schema is formalised.
+
+  user-data:
+    type: object
+    description: >
+      Free-form custom data for layer-provided tools. No enforced schema.
+      Deep merged like any other map field - layers provide defaults,
+      local overrides win.
+
+  spec:
+    type: object
+    additionalProperties: false
+    description: Build configuration
+    properties:
+
+      credentials:
+        $ref: "#/$defs/credentials"
+
+      layers:
+        $ref: "#/$defs/ociReferenceList"
+        description: >
+          Configuration layers applied before this project's settings.
+          Deep-merged in order; local settings always win. Bootstrap
+          registry logins must be in the project root file (needed before
+          layer resolution). Additional logins declared in layers are
+          applied in a second login phase post-merge.
+
+      templates:
+        $ref: "#/$defs/ociReferenceList"
+        description: >
+          Manifest template sets pulled in and token-substituted to become
+          this project's own manifest output. Replaces generators or
+          hand-written manifests.
+
+      contents:
+        $ref: "#/$defs/ociReferenceList"
+        description: >
+          Finished manifest artifacts from other projects bundled into
+          this deliverable. Front and centre in product/environment builds.
+
+      data:
+        $ref: "#/$defs/specData"
+
+      global:
+        $ref: "#/$defs/specGlobal"
+
+      main:
+        $ref: "#/$defs/specMain"
+
+      platform:
+        $ref: "#/$defs/specPlatform"
+
+  # layer-payload is a layer-only top-level field.
+  # The hook removes it from the Project and Final schemas.
+  layer-payload:
+    $ref: "#/$defs/layerPayload"
+
+$defs:
+
+  # ---------------------------------------------------------------------------
+  # layer-payload - layer image additional file manifest (layer-only field)
+  # ---------------------------------------------------------------------------
+
+  layerPayload:
+    type: array
+    description: >
+      Additional files the layer image carries alongside KaptainPM.yaml.
+      Layer-only - the unknown-key validator rejects this in project root files.
+    items:
+      $ref: "#/$defs/layerPayloadItem"
+
+  layerPayloadItem:
+    type: object
+    additionalProperties: false
+    required:
+      - source
+      - destination
+    description: A file or directory entry in the layer image to be extracted
+    properties:
+      source:
+        type: string
+        description: >
+          Absolute path of the file or directory inside the image from
+          container root (e.g. /scripts/build.bash)
+      destination:
+        type: string
+        description: >
+          Relative directory path from repo root where contents land.
+          mkdir -p is run before any copy or unpack operation.
+          (e.g. .kaptain/scripts/)
+      unpack:
+        type: string
+        enum:
+          - tar.gz
+          - tar.bz2
+          - tar.xz
+          - tar
+          - zip
+          - gz
+          - bz2
+          - xz
+        description: >
+          Archive format for unpacking. Absent means plain copy.
+          Invalid on directory sources.
+
+  # ---------------------------------------------------------------------------
+  # spec.credentials
+  # ---------------------------------------------------------------------------
+
+  credentials:
+    type: array
+    description: >
+      Build-time credential names. Names only - values are sourced from
+      the platform (GitHub Actions secrets, local files, etc.). Validated
+      early in the preamble; fails immediately if any declared credential
+      is unavailable. Must be complete in the project root file before
+      the wrapper can expose any secrets (runtime enforcement, not schema).
+    items:
+      type: string
+      pattern: "^[A-Z][A-Z0-9_]*$"
+      description: Credential name as an uppercase env var name
+
+  # ---------------------------------------------------------------------------
+  # OCI reference types
+  # ---------------------------------------------------------------------------
+
+  ociReferenceList:
+    type: array
+    items:
+      $ref: "#/$defs/ociReference"
+
+  ociReference:
+    description: >
+      OCI image reference. Three forms are supported:
+        Short    name:version              (default registry and namespace)
+        Prefixed prefix/name:version       (default registry, explicit namespace)
+        Full     domain/path/name:version  (explicit registry - first segment contains a dot)
+      Version is one or more dot-separated integers. The -PRERELEASE suffix is
+      accepted for in-flight PR builds (e.g. 1.0-PRERELEASE).
+    oneOf:
+      - description: "Short form: name:version"
+        type: string
+        pattern: "^[a-z][a-z0-9-]*:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
+      - description: "Prefixed form: prefix/name:version"
+        type: string
+        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
+      - description: "Full OCI form: domain/.../name:version (first segment contains a dot)"
+        type: string
+        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
+
+  # ---------------------------------------------------------------------------
+  # spec.data
+  # ---------------------------------------------------------------------------
+
+  specData:
+    type: object
+    additionalProperties: false
+    description: Content that feeds into built artifacts
+    properties:
+      config:
+        type: object
+        description: >
+          Token values for all manifests. Field names are token names, field
+          values are token values. Must not duplicate names declared in
+          global.tokens.configSubPath files.
+        additionalProperties:
+          type: string
+      secrets:
+        type: object
+        description: >
+          Token values for k8s Secret manifest contents only. Applied last,
+          after config substitution.
+        additionalProperties:
+          type: string
+
+  # ---------------------------------------------------------------------------
+  # spec.global
+  # ---------------------------------------------------------------------------
+
+  specGlobal:
+    type: object
+    additionalProperties: false
+    description: Shared settings used across all pipeline stages
+    properties:
+      tokens:
+        type: object
+        additionalProperties: false
+        description: Token substitution configuration
+        properties:
+          delimiterStyle:
+            type: string
+            enum:
+              - shell
+              - mustache
+              - helm
+              - double-curly
+              - at-sign
+              - dollar-sign
+              - percent
+              - hash
+              - xml
+            description: 'Token syntax style (default: shell)'
+          nameStyle:
+            type: string
+            enum:
+              - PascalCase
+              - camelCase
+              - UPPER_SNAKE
+              - lower_snake
+              - kebab-case
+              - UPPER-KEBAB
+            description: 'Token name casing convention (default: PascalCase)'
+          nameValidation:
+            type: string
+            enum:
+              - MATCH
+              - ALL
+            description: >
+              MATCH enforces the nameStyle, ALL accepts any casing (default: MATCH)
+          configSubPath:
+            type: string
+            description: 'Directory with user-defined token files (default: src/config)'
+          valueTrailingNewline:
+            type: string
+            enum:
+              - strip-for-single-line
+              - preserve-all
+              - strip-all
+            description: 'Trailing newline handling for token values (default: strip-for-single-line)'
+      outputSubPath:
+        type: string
+        description: 'Build output directory (default: target)'
+      release:
+        type: object
+        additionalProperties: false
+        description: Versioning and release branch configuration
+        properties:
+          branch:
+            type: string
+            description: 'Primary release branch (default: main)'
+          additionalBranches:
+            type: string
+            description: Comma-separated additional release branches
+          versioning:
+            type: object
+            additionalProperties: false
+            properties:
+              strategy:
+                type: string
+                enum:
+                  - git-auto-closest-highest
+                  - file-pattern-match
+                  - compound-file-pattern-match
+                description: 'Version calculation strategy (default: git-auto-closest-highest)'
+              maxParts:
+                type: string
+                pattern: "^[0-9]+$"
+                description: 'Maximum version parts allowed before failure (default: 3)'
+
+  # ---------------------------------------------------------------------------
+  # spec.platform
+  # ---------------------------------------------------------------------------
+
+  specPlatform:
+    type: object
+    additionalProperties: false
+    description: Platform-specific build configuration
+    properties:
+      github:
+        type: object
+        additionalProperties: false
+        description: GitHub Actions-specific configuration
+        properties:
+          release:
+            type: object
+            additionalProperties: false
+            description: GitHub Releases configuration
+            properties:
+              enabled:
+                type: boolean
+                description: 'Create a GitHub Release on version tags (default: false)'
+              substitutedFiles:
+                type: string
+                description: Comma-separated files to token-substitute before attaching to the release
+              verbatimFiles:
+                type: string
+                description: Comma-separated files to attach to the release as-is
+              notes:
+                type: string
+                description: Inline release notes (mutually exclusive with notesFile)
+              notesFile:
+                type: string
+                description: Path to a file containing release notes (mutually exclusive with notes)
+              addVersionToFilenames:
+                type: boolean
+                description: 'Add version suffix to release artifact filenames (default: false)'
+
+  # ---------------------------------------------------------------------------
+  # spec.main
+  # ---------------------------------------------------------------------------
+
+  specMain:
+    type: object
+    additionalProperties: false
+    description: Pipeline stage configuration
+    properties:
+
+      quality:
+        type: object
+        additionalProperties: false
+        description: Branch and commit naming enforcement
+        properties:
+          branches:
+            type: object
+            additionalProperties: false
+            properties:
+              blockSlashes:
+                type: boolean
+                description: Reject branch names containing forward slashes
+              blockDoubleHyphens:
+                type: boolean
+                description: Reject branch names containing double hyphens
+              requireConventional:
+                type: boolean
+                description: Require conventional branch naming convention
+          commits:
+            type: object
+            additionalProperties: false
+            properties:
+              requireConventional:
+                type: boolean
+                description: Require conventional commit message format
+              blockConventional:
+                type: boolean
+                description: Block conventional commit message format
+
+      docker:
+        type: object
+        additionalProperties: false
+        description: Container image build and retag configuration
+        properties:
+          runtime:
+            type: string
+            enum: [podman, docker]
+            description: 'Container runtime (default: auto-detected from environment)'
+          registry:
+            type: object
+            additionalProperties: false
+            properties:
+              logins:
+                type: object
+                description: Registry login configuration keyed by domain
+                additionalProperties:
+                  $ref: "#/$defs/registryLogin"
+              pushTargets:
+                type: array
+                description: Additional registries to push the built image to
+                items:
+                  $ref: "#/$defs/pushTarget"
+          dockerfile:
+            type: object
+            additionalProperties: false
+            description: Dockerfile build configuration
+            properties:
+              subPath:
+                type: string
+                description: 'Directory containing the Dockerfile (default: src/docker)'
+          retag:
+            type: object
+            additionalProperties: false
+            description: Retag an upstream image rather than building from a Dockerfile
+            required: [source]
+            properties:
+              source:
+                type: object
+                additionalProperties: false
+                required: [imageName, tag]
+                properties:
+                  registry:
+                    type: string
+                    description: 'Source registry domain (default: docker.io)'
+                  namespace:
+                    type: string
+                    description: Source namespace/organisation
+                  imageName:
+                    type: string
+                    description: Source image name
+                  tag:
+                    type: string
+                    description: Source image tag
+          platform:
+            type: string
+            description: >
+              Docker build platform(s). Single value or comma-separated for
+              multi-platform manifest list (e.g. linux/amd64,linux/arm64).
+              Default: linux/amd64
+
+      generators:
+        type: object
+        additionalProperties: false
+        description: Kubernetes manifest generators
+        properties:
+          common:
+            type: object
+            additionalProperties: false
+            description: Labels and annotations applied to all generated manifests
+            properties:
+              additionalLabels:
+                type: object
+                additionalProperties:
+                  type: string
+              additionalAnnotations:
+                type: object
+                additionalProperties:
+                  type: string
+          workload:
+            type: object
+            additionalProperties: false
+            description: >
+              Shared workload configuration. workload.type selects which
+              type-specific sibling section applies.
+            properties:
+              type:
+                type: string
+                enum: [deployment, statefulset, daemonset, cronjob, job, none]
+                description: 'Workload type (default: deployment)'
+              replicas:
+                type: string
+                pattern: "^[0-9]+$"
+                description: 'Desired replica count (default: 1)'
+              container:
+                type: object
+                additionalProperties: false
+                properties:
+                  port:
+                    type: string
+                    pattern: "^[0-9]+$"
+                    description: Primary container port
+                  resources:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      memory:
+                        type: string
+                        description: Memory request (e.g. 256Mi)
+                      memoryLimit:
+                        type: string
+                        description: Memory limit (defaults to memory value)
+                      cpu:
+                        type: string
+                        description: CPU limit (e.g. 500m)
+                      cpuRequest:
+                        type: string
+                        description: CPU request (defaults to cpu value)
+              probes:
+                type: object
+                additionalProperties: false
+                properties:
+                  liveness:
+                    $ref: "#/$defs/probeConfig"
+                  readiness:
+                    $ref: "#/$defs/probeConfig"
+                  startup:
+                    $ref: "#/$defs/probeConfig"
+              scheduling:
+                type: object
+                additionalProperties: false
+                properties:
+                  nodeSelector:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: Node selector key/value pairs
+                  tolerations:
+                    type: array
+                    items:
+                      $ref: "#/$defs/toleration"
+          deployment:
+            type: object
+            additionalProperties: false
+            description: Deployment-specific settings (workload.type=deployment)
+            properties:
+              strategy:
+                type: string
+                enum: [RollingUpdate, Recreate]
+                description: 'Update strategy (default: RollingUpdate)'
+          statefulset:
+            type: object
+            additionalProperties: false
+            description: StatefulSet-specific settings (workload.type=statefulset)
+            properties:
+              pvc:
+                type: object
+                additionalProperties: false
+                description: PersistentVolumeClaim configuration
+                properties:
+                  storageSize:
+                    type: string
+                    description: PVC storage size (e.g. 10Gi)
+                  storageClass:
+                    type: string
+                    description: Storage class name
+          daemonset:
+            type: object
+            additionalProperties: false
+            description: DaemonSet-specific settings (workload.type=daemonset)
+          cronjob:
+            type: object
+            additionalProperties: false
+            description: CronJob-specific settings (workload.type=cronjob)
+            properties:
+              schedule:
+                type: string
+                description: Cron schedule expression (e.g. 0 * * * *)
+              concurrencyPolicy:
+                type: string
+                enum: [Allow, Forbid, Replace]
+                description: 'How concurrent executions are handled (default: Allow)'
+          job:
+            type: object
+            additionalProperties: false
+            description: Job-specific settings (workload.type=job)
+          service:
+            type: object
+            additionalProperties: false
+            description: Service manifest generator configuration
+            properties:
+              type:
+                type: string
+                enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
+                description: 'Service type (default: ClusterIP)'
+              port:
+                type: string
+                pattern: "^[0-9]+$"
+                description: 'Service port (default: matches container port)'
+          configmap:
+            allOf:
+              - $ref: "#/$defs/namedGeneratorBase"
+            additionalProperties: false
+            description: ConfigMap manifest generator configuration
+            properties:
+              subPath:
+                type: string
+                description: 'Source directory (default: src/configmap)'
+              nameSuffix:
+                type: string
+                description: Suffix appended to generated ConfigMap name
+              nameChecksumInjection:
+                type: boolean
+                description: 'Inject ConfigMap checksum into workload annotations (default: true)'
+          secretTemplate:
+            allOf:
+              - $ref: "#/$defs/namedGeneratorBase"
+            additionalProperties: false
+            description: Secret template manifest generator configuration
+            properties:
+              subPath:
+                type: string
+                description: 'Source directory (default: src/secret-template)'
+              nameSuffix:
+                type: string
+                description: Suffix appended to generated Secret template name
+          serviceAccount:
+            type: object
+            additionalProperties: false
+            description: ServiceAccount manifest generator configuration
+            properties:
+              create:
+                type: boolean
+                description: 'Whether to generate a ServiceAccount manifest (default: true)'
+              name:
+                type: string
+                description: 'ServiceAccount name override (default: project name)'
+          podDisruptionBudget:
+            type: object
+            additionalProperties: false
+            description: PodDisruptionBudget manifest generator configuration
+            properties:
+              minAvailable:
+                type: string
+                description: Minimum available pods (number or percentage e.g. 50%)
+              maxUnavailable:
+                type: string
+                description: Maximum unavailable pods (number or percentage e.g. 1)
+
+      manifests:
+        type: object
+        additionalProperties: false
+        description: >
+          Manifest packaging and publishing. Applies to all manifests regardless
+          of source (generated, hand-written, or hook-produced).
+        properties:
+          subPath:
+            type: string
+            description: 'Directory containing manifests (default: src/kubernetes)'
+          repoProvider:
+            type: object
+            additionalProperties: false
+            properties:
+              type:
+                type: string
+                enum: [docker]
+                description: 'Manifest storage provider type (default: docker)'
+              packagingBaseImage:
+                type: string
+                description: 'Base image for manifest packaging (default: scratch)'
+
+      hooks:
+        type: object
+        additionalProperties: false
+        description: >
+          Lifecycle hook script paths, relative to .github/. Hooks are
+          injectable scripts that run at specific pipeline points.
+        properties:
+          preBuild:
+            type: string
+            description: Runs at the start of the build, before quality checks
+          preTaggingTests:
+            type: string
+            description: Runs before version tagging
+          postVersionsAndNaming:
+            type: string
+            description: Runs after version calculation completes
+          preDockerPrepare:
+            type: string
+            description: Runs before Docker build preparation
+          postDockerTests:
+            type: string
+            description: Runs after Docker build and validation
+          prePackagePrepare:
+            type: string
+            description: Runs before manifest packaging
+          postPackageTests:
+            type: string
+            description: Runs after manifest packaging
+          postBuild:
+            type: string
+            description: Runs at the end of the build
+
+      aws:
+        type: object
+        additionalProperties: false
+        description: AWS build configuration
+        properties:
+          eksClusterManagement:
+            type: object
+            additionalProperties: false
+            description: EKS cluster management build configuration
+            properties:
+                  baseImage:
+                    type: object
+                    additionalProperties: false
+                    description: Base image used for the EKS management build
+                    properties:
+                      registry:
+                        type: string
+                        description: 'Base image registry (default: ghcr.io)'
+                      namespace:
+                        type: string
+                        description: 'Base image namespace (default: kube-kaptain)'
+                      name:
+                        type: string
+                        description: 'Base image name (default: aws/aws-eks-cluster-management)'
+                      tag:
+                        type: string
+                        description: Base image tag
+                  privateNetworking:
+                    type: boolean
+                    description: 'Include private subnets section in cluster config (default: true)'
+                  publicNetworking:
+                    type: boolean
+                    description: 'Include public subnets section in cluster config (default: false)'
+                  ciliumEbpfNetworking:
+                    type: boolean
+                    description: 'Generate controlplane-only yaml for Cilium eBPF networking (default: false)'
+                  secretsSubPath:
+                    type: string
+                    description: 'Source directory for encrypted secrets (default: src/secrets)'
+
+      changeSource:
+        type: object
+        additionalProperties: false
+        description: Change source tracking configuration
+        properties:
+          noteEnabled:
+            type: boolean
+            description: >
+              Write git notes recording the source branch and PR author during
+              PR builds, read back during release builds (default: true)
+
+  # ---------------------------------------------------------------------------
+  # Shared building blocks
+  # ---------------------------------------------------------------------------
+
+  namedGeneratorBase:
+    description: Shared fields for named manifest generators (configmap, secretTemplate)
+    type: object
+    properties:
+      subPath:
+        type: string
+      nameSuffix:
+        type: string
+
+  registryLogin:
+    description: Registry authentication configuration. Type field selects the login method.
+    type: object
+    required: [type]
+    oneOf:
+      - description: Username and password
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: username-password
+          usernameSecret:
+            type: string
+            description: Credential name containing the registry username
+          passwordSecret:
+            type: string
+            description: Credential name containing the registry password
+        required: [type, usernameSecret, passwordSecret]
+
+      - description: GitHub Actions implicit token (no secret needed)
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: github-token
+          token:
+            type: string
+            description: Token env var name (typically GITHUB_TOKEN)
+          actor:
+            type: string
+            description: Login actor (typically github-actions)
+        required: [type, token]
+
+      - description: AWS ECR with static IAM credentials
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: aws-ecr
+          region:
+            type: string
+            description: AWS region (e.g. us-east-1)
+          accessKeyIdSecret:
+            type: string
+            description: Credential name containing the AWS access key ID
+          secretAccessKeySecret:
+            type: string
+            description: Credential name containing the AWS secret access key
+        required: [type, region, accessKeyIdSecret, secretAccessKeySecret]
+
+      - description: AWS ECR with GitHub Actions OIDC (no long-lived credentials)
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: aws-ecr-github-actions-oidc
+          roleArn:
+            type: string
+            description: IAM role ARN to assume via OIDC
+          region:
+            type: string
+            description: AWS region (e.g. us-east-1)
+          sessionName:
+            type: string
+            description: 'Session name for the assumed role (default: github-actions)'
+        required: [type, roleArn, region]
+
+      - description: GCP Artifact Registry with service account key
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: gcp-gar
+          serviceAccountKeySecret:
+            type: string
+            description: Credential name containing the GCP service account JSON key
+        required: [type, serviceAccountKeySecret]
+
+      - description: GCP Artifact Registry with GitHub Actions OIDC
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: gcp-gar-github-actions-oidc
+          workloadIdentityProvider:
+            type: string
+            description: Full workload identity provider resource name
+          serviceAccount:
+            type: string
+            description: Service account email to impersonate
+        required: [type, workloadIdentityProvider, serviceAccount]
+
+      - description: Azure Container Registry with service principal credentials
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: azure-acr
+          clientIdSecret:
+            type: string
+            description: Credential name containing the Azure client ID
+          clientSecretSecret:
+            type: string
+            description: Credential name containing the Azure client secret
+          tenantIdSecret:
+            type: string
+            description: Credential name containing the Azure tenant ID
+        required: [type, clientIdSecret, clientSecretSecret, tenantIdSecret]
+
+      - description: Azure Container Registry with GitHub Actions OIDC
+        additionalProperties: false
+        properties:
+          type:
+            type: string
+            const: azure-acr-github-actions-oidc
+          clientId:
+            type: string
+            description: Azure application (client) ID
+          tenantId:
+            type: string
+            description: Azure directory (tenant) ID
+          subscriptionId:
+            type: string
+            description: Azure subscription ID
+        required: [type, clientId, tenantId, subscriptionId]
+
+  pushTarget:
+    type: object
+    additionalProperties: false
+    required: [registry]
+    description: Additional registry to push the built image to
+    properties:
+      registry:
+        type: string
+        description: Target registry domain
+      namespace:
+        type: string
+        description: 'Target namespace/organisation (default: matches primary push)'
+
+  probeConfig:
+    type: object
+    additionalProperties: false
+    description: Kubernetes health probe configuration
+    properties:
+      checkType:
+        type: string
+        enum: [http-get, tcp-socket, exec, grpc]
+        description: 'Probe mechanism (default: http-get)'
+      httpPath:
+        type: string
+        description: 'HTTP path for http-get probes (default: /healthz)'
+      periodSeconds:
+        type: string
+        pattern: "^[0-9]+$"
+        description: 'How often to perform the probe in seconds (default: 10)'
+      initialDelaySeconds:
+        type: string
+        pattern: "^[0-9]+$"
+        description: 'Seconds after container start before first probe (default: 0)'
+      timeoutSeconds:
+        type: string
+        pattern: "^[0-9]+$"
+        description: 'Seconds after which the probe times out (default: 1)'
+      failureThreshold:
+        type: string
+        pattern: "^[0-9]+$"
+        description: 'Consecutive failures before the probe is considered failed (default: 3)'
+      successThreshold:
+        type: string
+        pattern: "^[0-9]+$"
+        description: 'Consecutive successes before the probe is considered successful (default: 1)'
+      terminationGracePeriodSeconds:
+        type: string
+        pattern: "^[0-9]+$"
+        description: Grace period override for pod termination on probe failure
+
+  toleration:
+    type: object
+    additionalProperties: false
+    description: Kubernetes node toleration
+    properties:
+      key:
+        type: string
+        description: Taint key to tolerate
+      operator:
+        type: string
+        enum: [Equal, Exists]
+        description: 'Operator (default: Equal)'
+      value:
+        type: string
+        description: Taint value to match (used with operator Equal)
+      effect:
+        type: string
+        enum: [NoSchedule, PreferNoSchedule, NoExecute]
+        description: Taint effect to tolerate (empty matches all effects)
+      tolerationSeconds:
+        type: integer
+        minimum: 0
+        description: Duration in seconds the toleration tolerates the taint (NoExecute only)
