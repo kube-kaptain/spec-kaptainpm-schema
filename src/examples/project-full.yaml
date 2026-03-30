@@ -1,0 +1,377 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Full project KaptainPM.yaml example with all fields populated.
+# Validates against spec-kaptainpm-schema.yaml (project/base variant).
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+metadata:
+  description: "example project with all fields populated"
+
+user-data:
+  my-custom-tool:
+    setting-a: value
+  team-scripts:
+    lint-config: strict
+
+spec:
+
+  layers:
+    - kaptain-base-layer:1.2.3
+
+  templates:
+    - web-service-template:1.0
+
+  contents:
+    - my-app-manifests:3.0.1
+
+  credentials:
+    - GHCR_TOKEN
+    - DOCKERHUB_TOKEN
+
+  data:
+    config:
+      AppPort: '8080'
+      AppName: my-service
+      LogLevel: info
+    secrets:
+      SmallApiKey: 'example-secret-value'
+
+  global:
+    outputSubPath: kaptain-out
+    configSubPath: src/config
+    secretsSubPath: src/secrets
+    tokens:
+      delimiterStyle: shell
+      nameStyle: PascalCase
+      nameValidation: MATCH
+      allowBuiltinOverride: false
+      substitutionPasses: '1'
+      valueTrailingNewline: strip-for-single-line
+    release:
+      branch: main
+      additionalBranches: release-v1
+      versioning:
+        maxParts: '3'
+        strategy: git-auto-closest-highest
+        patternType: dockerfile-env-kubectl
+        useSourceVersionExact: false
+        source:
+          subPath: src/docker
+          fileName: Dockerfile
+          pattern: 'ENV VERSION=(.+)'
+          prefixParts: '2'
+        sourceTwo:
+          subPath: src/docker
+          fileName: Dockerfile.secondary
+          pattern: 'ENV SECONDARY_VERSION=(.+)'
+          prefixParts: '1'
+
+  main:
+    quality:
+      branches:
+        blockSlashes: false
+        blockDoubleHyphens: true
+        requireConventional: false
+      commits:
+        requireConventional: false
+        blockConventional: false
+        blockDuplicateMessages: false
+
+    docker:
+      runtime: docker
+      platform: linux/amd64
+      registry:
+        logins:
+          ghcr.io:
+            type: github-token
+            token: GITHUB_TOKEN
+            actor: github-actions
+          docker.io:
+            type: username-password
+            usernameSecret: DOCKERHUB_USER
+            passwordSecret: DOCKERHUB_TOKEN
+        targetRegistry: ghcr.io
+        targetNamespace: kube-kaptain
+        pushTargets:
+          - registry: docker.io
+            namespace: kube-kaptain
+      dockerfile:
+        substitutionFiles: Dockerfile
+        subPath: src/docker
+        subPathLinuxAmd64: src/docker-linux-amd64
+        subPathLinuxArm64: src/docker-linux-arm64
+        squash: squash
+        noCache: true
+      retag:
+        sourceRegistry: docker.io
+        sourceNamespace: library
+        sourceImageName: nginx
+        sourceTag: '1.25'
+
+    generators:
+      common:
+        additionalLabels: 'team=platform'
+        additionalAnnotations: 'owner=platform-team'
+
+      workload:
+        type: deployment
+        replicas: '3'
+        revisionHistoryLimit: '10'
+        minReadySeconds: '5'
+        nameSuffix: '-web'
+        combinedSubPath: src/workload-combined
+        envSubPath: src/workload-env
+        additionalLabels: 'component=web'
+        additionalAnnotations: 'prometheus.io/scrape=true'
+
+        container:
+          port: '8080'
+          command: '/app/start'
+          args: '--config /etc/app/config.yaml'
+          imageReferenceStyle: combined
+          readonlyRootFilesystem: true
+          resources:
+            memory: 256Mi
+            cpuRequest: 100m
+            cpuLimit: '1'
+            ephemeralStorage: 50Mi
+          mounts:
+            configmap:
+              path: /configmap
+              keysForEnv: 'APP_CONFIG'
+            secret:
+              path: /secret
+              keysForEnv: 'DB_PASSWORD'
+
+        security:
+          seccompProfile: DISABLED
+          automountServiceAccountToken: false
+          imagePullSecrets: ENABLED
+
+        terminationGracePeriodSeconds: '30'
+        prestopCommand: 'sleep 5'
+
+        scheduling:
+          affinityStrategy: spread-nodes-and-zones-ha
+          tolerations: 'key=dedicated,value=platform,effect=NoSchedule'
+          nodeSelector: 'node-type=platform'
+          dnsPolicy: ClusterFirst
+          priorityClassName: high-priority
+
+        probes:
+          liveness:
+            checkType: http-get
+            httpPath: /health
+            httpScheme: HTTP
+            tcpPort: '8080'
+            execCommand: '/bin/health-check'
+            grpcPort: '9090'
+            grpcService: grpc.health.v1.Health
+            initialDelaySeconds: '10'
+            periodSeconds: '10'
+            timeoutSeconds: '5'
+            failureThreshold: '3'
+            terminationGracePeriodSeconds: '30'
+          readiness:
+            checkType: http-get
+            httpPath: /ready
+            httpScheme: HTTP
+            tcpPort: '8080'
+            execCommand: '/bin/ready-check'
+            grpcPort: '9090'
+            grpcService: grpc.health.v1.Health
+            initialDelaySeconds: '5'
+            periodSeconds: '5'
+            timeoutSeconds: '3'
+            failureThreshold: '3'
+            successThreshold: '1'
+          startup:
+            checkType: http-get
+            httpPath: /startup
+            httpScheme: HTTP
+            tcpPort: '8080'
+            execCommand: '/bin/startup-check'
+            grpcPort: '9090'
+            grpcService: grpc.health.v1.Health
+            initialDelaySeconds: '0'
+            periodSeconds: '5'
+            timeoutSeconds: '3'
+            failureThreshold: '30'
+            terminationGracePeriodSeconds: '60'
+
+      deployment:
+        envSubPath: src/deployment-env
+        additionalLabels: 'workload-type=deployment'
+        additionalAnnotations: 'deploy-strategy=rolling'
+        rollingUpdate:
+          maxSurge: '1'
+          maxUnavailable: '0'
+
+      statefulset:
+        envSubPath: src/statefulset-env
+        additionalLabels: 'workload-type=statefulset'
+        additionalAnnotations: 'storage=persistent'
+        serviceName: my-service-headless
+        podManagementPolicy: OrderedReady
+        allowUnreliablePodManagementPolicy: 'true'
+        updateStrategy:
+          type: RollingUpdate
+          partition: '0'
+        pvc:
+          enabled: 'true'
+          storageClass: fast-ssd
+          storageSize: 10Gi
+          accessMode: ReadWriteOnce
+          volumeName: data
+          mountPath: /data
+
+      daemonset:
+        envSubPath: src/daemonset-env
+        additionalLabels: 'workload-type=daemonset'
+        additionalAnnotations: 'node-agent=true'
+        updateStrategy:
+          type: RollingUpdate
+          maxUnavailable: '1'
+        hostNetwork: 'false'
+        hostPid: 'false'
+        hostIpc: 'false'
+        runAsNonRoot: true
+        privileged: 'false'
+        dnsPolicy: ClusterFirst
+        tolerations: 'key=node-role.kubernetes.io/control-plane,effect=NoSchedule'
+        nodeSelector: 'node-type=worker'
+
+      cronjob:
+        nameSuffix: '-cleanup'
+        combinedSubPath: src/cronjob-combined
+        concurrencyPolicy: Forbid
+        startingDeadlineSeconds: '300'
+        successfulJobsHistoryLimit: '3'
+        failedJobsHistoryLimit: '5'
+        backoffLimit: '2'
+        completions: '1'
+        parallelism: '1'
+        activeDeadlineSeconds: '3600'
+        ttlSecondsAfterFinished: '86400'
+        restartPolicy: Never
+        envSubPath: src/cronjob-env
+        additionalLabels: 'workload-type=cronjob'
+        additionalAnnotations: 'schedule=nightly'
+        portsEnabled: 'false'
+        probes:
+          livenessEnabled: 'false'
+          readinessEnabled: 'false'
+          startupEnabled: 'false'
+
+      job:
+        nameSuffix: '-migration'
+        combinedSubPath: src/job-combined
+        backoffLimit: '3'
+        completions: '1'
+        parallelism: '1'
+        activeDeadlineSeconds: '1800'
+        ttlSecondsAfterFinished: '86400'
+        restartPolicy: Never
+        envSubPath: src/job-env
+        additionalLabels: 'workload-type=job'
+        additionalAnnotations: 'purpose=migration'
+        portsEnabled: 'false'
+        probes:
+          livenessEnabled: 'false'
+          readinessEnabled: 'false'
+          startupEnabled: 'false'
+
+      service:
+        enabled: 'true'
+        type: ClusterIP
+        port: '80'
+        targetPort: '8080'
+        protocol: TCP
+        portName: http
+        nodePort: '30080'
+        externalName: external.example.com
+        externalTrafficPolicy: Cluster
+        nameSuffix: '-svc'
+        combinedSubPath: src/service-combined
+        additionalLabels: 'networking=service'
+        additionalAnnotations: 'service.beta.kubernetes.io/load-balancer-type=nlb'
+
+      configmap:
+        subPath: src/configmap
+        nameSuffix: '-cfg'
+        combinedSubPath: src/configmap-combined
+        nameChecksumInjection: true
+        additionalLabels: 'config=app'
+        additionalAnnotations: 'reloader.stakater.com/auto=true'
+
+      secretTemplate:
+        subPath: src/secret.template
+        nameSuffix: '-sec'
+        combinedSubPath: src/secret-combined
+        nameChecksumInjection: true
+        additionalLabels: 'config=secret'
+        additionalAnnotations: 'reloader.stakater.com/auto=true'
+
+      serviceAccount:
+        enabled: true
+        nameSuffix: '-sa'
+        combinedSubPath: src/serviceaccount-combined
+        additionalLabels: 'iam=workload-identity'
+        additionalAnnotations: 'eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/my-role'
+
+      podDisruptionBudget:
+        enabled: 'true'
+        nameSuffix: '-pdb'
+        combinedSubPath: src/pdb-combined
+        strategy: max-unavailable
+        value: '1'
+        additionalLabels: 'reliability=ha'
+        additionalAnnotations: 'budget=standard'
+
+    manifests:
+      subPath: src/kubernetes
+      repoProvider:
+        type: docker
+        packagingBaseImage: scratch
+
+    changeSource:
+      noteEnabled: true
+
+    hooks:
+      preBuild: bin/pre-build.bash
+      preTaggingTests: bin/pre-tagging-tests.bash
+      postVersionsAndNaming: bin/post-versions-and-naming.bash
+      preDockerPrepare: bin/pre-docker-prepare.bash
+      postDockerTests: bin/post-docker-tests.bash
+      prePackagePrepare: bin/pre-package-prepare.bash
+      postPackageTests: bin/post-package-tests.bash
+      postBuild: bin/post-build.bash
+
+    specBuild:
+      type: schema
+      jsonSchemaUrl: src/schemas/json-schema-draft-2020-12.json
+      packagingBaseImage: scratch
+
+    aws:
+      eksClusterManagement:
+        baseImage:
+          registry: ghcr.io
+          namespace: kube-kaptain
+          name: aws/aws-eks-cluster-management
+          tag: '1.10'
+        clusterYamlSubPath: src/eks
+        privateNetworking: true
+        publicNetworking: false
+        ciliumEbpfNetworking: false
+
+  platform:
+    githubActions:
+      release:
+        enabled: 'true'
+        addVersionToFilenames: 'true'
+        notes: 'Automated release'
+        notesFile: RELEASE_NOTES.md
+        substitutedFiles: 'README.md'
+        verbatimFiles: 'LICENSE.md'

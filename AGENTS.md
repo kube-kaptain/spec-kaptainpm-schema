@@ -19,6 +19,10 @@ src/
     generate-kind-schemas.bash   # Hook: generates three schemas from the source
   workflows/
     build.yaml                   # Calls spec-check-filter-release with the hook wired in
+  examples/
+    project-full.yaml            # All fields populated - validates against project variant
+    layer-full.yaml              # All fields populated - validates against layer variant
+    layerset-full.yaml           # All fields populated - validates against layerset variant
 README.md                        # For humans to understand the project
 AGENTS.md                        # These instructions
 CLAUDE.md                        # Redirect to AGENTS.md
