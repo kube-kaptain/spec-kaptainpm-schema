@@ -17,6 +17,8 @@ jobs:
       spec-type: 'schema'
       tag-version-max-parts: 2
       docker-platform: 'linux/amd64,linux/arm64'
+      dockerfile-sub-path-linux-amd64: 'src/docker'
+      dockerfile-sub-path-linux-arm64: 'src/docker'
 
       hook-post-versions-and-naming-script-sub-path: bin/generate-kind-schemas.bash
       hook-post-docker-tests-script-sub-path: bin/verify-schemas-on-examples.bash
