@@ -4,17 +4,18 @@
 #
 # Hook: hook-post-versions-and-naming
 #
-# Generates the three KaptainPM schema files from the single source schema.
+# Generates the four KaptainPM schema files from the single source schema.
 # Output files land in ${OUTPUT_SUB_PATH}/specs/yaml/ where spec-package-prepare
 # will pick them up and convert to JSON. Version is in the file content via
 # ${Version} token substitution (not the filename).
 #
-# Source: src/schema/spec-kaptainpm-schema.yaml  (superset of all three schemas)
+# Source: src/schema/spec-kaptainpm-schema.yaml  (superset of all schemas)
 #
 # Outputs:
-#   spec-kaptainpm-schema.yaml          Base     - project root and final merged files
-#   spec-kaptainpm-schema-layer.yaml    Layer    - layer image KaptainPM.yaml files
-#   spec-kaptainpm-schema-layerset.yaml Layerset - composite layer image KaptainPM.yaml files
+#   spec-kaptainpm-schema.yaml                    Base            - project root and final merged files
+#   spec-kaptainpm-schema-layer.yaml              Layer           - layer image KaptainPM.yaml files
+#   spec-kaptainpm-schema-layerset.yaml           Layerset        - built/published layerset (pinned versions, metadata required)
+#   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed, metadata optional)
 #
 # Inputs (provided by build system):
 #   OUTPUT_SUB_PATH  - Build output directory
@@ -65,17 +66,61 @@ yq eval '
   del(.properties.spec.properties.layers)
 ' "${source_schema}" | strip_source_header "layer" > "${yaml_dir}/spec-kaptainpm-schema-layer.yaml"
 
-# Layerset schema: base minus user-data, with spec reduced to layers only
-# A layerset only composes - no config content, no user-data, no layer-payload
-# kind is allowed: a layerset typically declares the build type for its consumers
+# Layerset schema: like layerset-source but with artifactReferenceFixed (no ranges)
+# and required metadata.labels and metadata.annotations for build traceability.
+# Used to validate built/published layerset images where all versions are pinned.
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
+  .properties.spec.properties.layers."$ref" = "#/$defs/artifactReferenceFixedList" |
+  .properties.metadata = {
+    "type": "object",
+    "required": ["labels", "annotations"],
+    "additionalProperties": true,
+    "description": "Project metadata with required build traceability fields.",
+    "properties": {
+      "labels": {
+        "type": "object",
+        "required": ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"],
+        "additionalProperties": true,
+        "description": "Queryable build metadata labels.",
+        "properties": {
+          "kaptain.org/version": {"type": "string", "description": "Build version"},
+          "kaptain.org/project-name": {"type": "string", "description": "Project name"},
+          "kaptain.org/owner": {"type": "string", "description": "Repository owner"}
+        }
+      },
+      "annotations": {
+        "type": "object",
+        "required": ["kaptain.org/built-by", "kaptain.org/source-repository", "kaptain.org/image-uri"],
+        "additionalProperties": true,
+        "description": "Informational build metadata annotations.",
+        "properties": {
+          "kaptain.org/built-by": {"type": "string", "description": "Build platform identifier"},
+          "kaptain.org/source-repository": {"type": "string", "description": "Source repository (owner/name)"},
+          "kaptain.org/image-uri": {"type": "string", "description": "Full artifact image URI"}
+        }
+      }
+    }
+  } |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.json"
 ' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
+
+# Layerset-source schema: source/pre-build layerset with ranges allowed
+# A layerset only composes - no config content, no user-data, no layer-payload
+# kind is allowed: a layerset typically declares the build type for its consumers
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml"
+yq eval '
+  del(.properties["layer-payload"]) |
+  del(.properties["user-data"]) |
+  .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
+  ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
+  .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
+  ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.json"
+' "${source_schema}" | strip_source_header "layerset-source" > "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml"
 
 echo "Schema generation complete"

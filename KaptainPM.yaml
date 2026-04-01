@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+
+apiVersion: kaptain.org/1.3
+kind: spec-check-filter-release
+metadata:
+  description: "KaptainPM schema - JSON Schema for KaptainPM.yaml project manifests"
+
+spec:
+
+  global:
+    release:
+      versioning:
+        maxParts: '2'
+
+  main:
+    specBuild:
+      type: schema
+      packagingBaseImage: scratch
+
+    docker:
+      platform: linux/amd64,linux/arm64
+
+    hooks:
+      postVersionsAndNaming: .github/bin/generate-kind-schemas.bash
+      postDockerTests: .github/bin/verify-schemas-on-examples.bash
+
+  platform:
+    githubActions:
+      release:
+        verbatimFiles: 'src/examples/project-full.yaml,src/examples/layer-full.yaml,src/examples/layerset-full.yaml,src/examples/layerset-source-full.yaml'

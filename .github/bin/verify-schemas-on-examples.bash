@@ -13,8 +13,16 @@
 set -euo pipefail
 
 OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:?OUTPUT_SUB_PATH is required}"
+DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
 
-yaml_dir="${OUTPUT_SUB_PATH}/specs/yaml"
+# Use substituted schemas (tokens resolved) from the docker build context.
+# Multi-platform builds have per-platform dirs; content is identical so use the first.
+if [[ "${DOCKER_PLATFORM}" == *,* ]]; then
+  first_platform="${DOCKER_PLATFORM%%,*}"
+  yaml_dir="${OUTPUT_SUB_PATH}/docker-${first_platform//\//-}/substituted/yaml"
+else
+  yaml_dir="${OUTPUT_SUB_PATH}/docker/substituted/yaml"
+fi
 
 echo "Validating examples against generated schemas..."
 echo ""
@@ -27,6 +35,9 @@ echo "  layer-full.yaml: ok"
 
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml" src/examples/layerset-full.yaml
 echo "  layerset-full.yaml: ok"
+
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml" src/examples/layerset-source-full.yaml
+echo "  layerset-source-full.yaml: ok"
 
 echo ""
 echo "Example validation complete"
