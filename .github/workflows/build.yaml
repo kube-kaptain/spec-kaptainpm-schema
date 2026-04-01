@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    uses: kube-kaptain/buildon-github-actions/.github/workflows/spec-check-filter-release.yaml@1.0.90
+    uses: kube-kaptain/buildon-github-actions/.github/workflows/spec-check-filter-release.yaml@1.0.91
     permissions:
       contents: write
       packages: write
@@ -16,6 +16,7 @@ jobs:
     with:
       spec-type: 'schema'
       tag-version-max-parts: 2
+      docker-platform: 'linux/amd64,linux/arm64'
       hook-post-versions-and-naming-script-sub-path: bin/generate-kind-schemas.bash
       hook-post-docker-tests-script-sub-path: bin/verify-schemas-on-examples.bash
       github-release-verbatim-files: 'src/examples/project-full.yaml,src/examples/layer-full.yaml,src/examples/layerset-full.yaml'
