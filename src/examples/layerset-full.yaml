@@ -3,16 +3,24 @@
 #
 # Full layerset KaptainPM.yaml example with all allowed fields populated.
 # Validates against spec-kaptainpm-schema-layerset.yaml (layerset variant).
-# Layersets are pure composition units - they only contain spec.layers.
+# Built layersets have pinned versions and required build traceability metadata.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
 metadata:
-  description: "example layerset composing a complete build type"
+  description: "example resolved layerset with pinned versions and build metadata"
+  labels:
+    kaptain.org/version: "1.2.3"
+    kaptain.org/project-name: "layerset-example"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layerset-example"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layerset-example:1.2.3"
 
 spec:
   layers:
-    - layer-quality-defaults:1.0
+    - layer-quality-defaults:1.0.5
     - layer-docker-config:2.1
-    - layer-k8s-generators:1.5
+    - layer-k8s-generators:1.5.2
     - layer-monitoring:1.2

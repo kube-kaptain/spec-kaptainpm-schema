@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Full layerset-source KaptainPM.yaml example with all allowed fields populated.
+# Validates against spec-kaptainpm-schema-layerset-source.yaml (source variant).
+# Source layersets may use version ranges - resolved to exact versions at build time.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+metadata:
+  description: "example layerset composing a complete build type"
+
+spec:
+  layers:
+    - layer-quality-defaults:[1.0,2.0)
+    - layer-docker-config:2.1
+    - layer-k8s-generators:[1.5,2.0)
+    - layer-monitoring:1.2

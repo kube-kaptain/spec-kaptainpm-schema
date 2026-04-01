@@ -19,4 +19,4 @@ jobs:
       docker-platform: 'linux/amd64,linux/arm64'
       hook-post-versions-and-naming-script-sub-path: bin/generate-kind-schemas.bash
       hook-post-docker-tests-script-sub-path: bin/verify-schemas-on-examples.bash
-      github-release-verbatim-files: 'src/examples/project-full.yaml,src/examples/layer-full.yaml,src/examples/layerset-full.yaml'
+      github-release-verbatim-files: 'src/examples/project-full.yaml,src/examples/layer-full.yaml,src/examples/layerset-full.yaml,src/examples/layerset-source-full.yaml'
