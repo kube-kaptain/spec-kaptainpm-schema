@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Minimal layerset KaptainPM.yaml — only required fields.
+# Validates against spec-kaptainpm-schema-layerset.yaml (layerset variant).
+
+apiVersion: kaptain.org/1.2
+metadata:
+  labels:
+    kaptain.org/version: "1.0"
+    kaptain.org/project-name: "layerset-minimal"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layerset-minimal"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layerset-minimal:1.0"
+spec:
+  layers:
+    - layer-quality-defaults:1.0

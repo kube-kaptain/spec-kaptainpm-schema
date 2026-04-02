@@ -29,15 +29,28 @@ echo ""
 
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema.yaml" src/examples/project-full.yaml
 echo "  project-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema.yaml" src/examples/project-min.yaml
+echo "  project-min.yaml: ok"
+
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final.yaml" src/examples/final-full.yaml
+echo "  final-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final.yaml" src/examples/final-min.yaml
+echo "  final-min.yaml: ok"
 
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-full.yaml
 echo "  layer-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-min.yaml
+echo "  layer-min.yaml: ok"
 
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml" src/examples/layerset-full.yaml
 echo "  layerset-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml" src/examples/layerset-min.yaml
+echo "  layerset-min.yaml: ok"
 
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml" src/examples/layerset-source-full.yaml
 echo "  layerset-source-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml" src/examples/layerset-source-min.yaml
+echo "  layerset-source-min.yaml: ok"
 
 echo ""
 echo "Example validation complete"

@@ -74,6 +74,7 @@ yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
+  .properties.spec.required = ["layers"] |
   .properties.spec.properties.layers."$ref" = "#/$defs/artifactReferenceFixedList" |
   .properties.metadata = {
     "type": "object",
@@ -110,6 +111,18 @@ yq eval '
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.json"
 ' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
 
+# Final schema: same as base but kind is required
+# Used to validate kaptainpm/final/KaptainPM.yaml after layer merge
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-final.yaml"
+yq eval '
+  del(.properties["layer-payload"]) |
+  .required = (.required + ["kind"] | unique) |
+  .name = "${ProjectName}-final" |
+  ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |
+  .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |
+  ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.json"
+' "${source_schema}" | strip_source_header "final" > "${yaml_dir}/spec-kaptainpm-schema-final.yaml"
+
 # Layerset-source schema: source/pre-build layerset with ranges allowed
 # A layerset only composes - no config content, no user-data, no layer-payload
 # kind is allowed: a layerset typically declares the build type for its consumers
@@ -118,6 +131,7 @@ yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
+  .properties.spec.required = ["layers"] |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.json"

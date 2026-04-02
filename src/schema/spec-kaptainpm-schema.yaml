@@ -1,18 +1,20 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
 #
-# KaptainPM schema source - superset of all four output schemas.
+# KaptainPM schema source - superset of all five output schemas.
 #
 # This file is NOT published directly. The generate-kind-schemas.bash hook
-# transforms it into four output schemas during build:
+# transforms it into five output schemas during build:
 #
-#   spec-kaptainpm-schema.yaml                    Base            - project root KaptainPM.yaml and final merged file
+#   spec-kaptainpm-schema.yaml                    Base            - project root KaptainPM.yaml
+#   spec-kaptainpm-schema-final.yaml              Final           - kaptainpm/final/KaptainPM.yaml after layer merge
 #   spec-kaptainpm-schema-layer.yaml              Layer           - layer image KaptainPM.yaml files
 #   spec-kaptainpm-schema-layerset.yaml           Layerset        - built/published layerset (pinned versions, metadata required)
 #   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed, metadata optional)
 #
 # Structural differences from this source:
 #   Base            minus layer-payload
+#   Final           like Base but kind is required
 #   Layer           minus layer-payload; minus spec.layers (layers cannot compose other layers)
 #   Layerset        like Layerset Source but artifactReferenceFixed (no ranges); metadata.labels and metadata.annotations required
 #   Layerset Source minus layer-payload; minus user-data; spec reduced to spec.layers only

@@ -6,22 +6,28 @@ JSON Schema for KaptainPM project manifest files (`KaptainPM.yaml`).
 
 Defines and validates the structure of `KaptainPM.yaml` — the project manifest
 used by all Kaptain built projects. Published as a versioned OCI image as well
-as 4 json and 4 yaml versioned files on the gh release for every release build.
+as 5 json and 5 yaml versioned files on the gh release for every release build.
 
 ## Project Structure
 
 ```
 src/
   schema/
-    spec-kaptainpm-schema.yaml          # Single source schema (superset of all four)
+    spec-kaptainpm-schema.yaml          # Single source schema (superset of all five)
   examples/
     project-full.yaml                   # All fields populated - validates against project variant
+    project-min.yaml                    # Only required fields - validates against project variant
+    final-full.yaml                     # All fields populated - validates against final variant (kind required)
+    final-min.yaml                      # Only required fields - validates against final variant (kind required)
     layer-full.yaml                     # All fields populated - validates against layer variant
+    layer-min.yaml                      # Only required fields - validates against layer variant
     layerset-full.yaml                  # All fields populated - validates against layerset variant (built, pinned)
+    layerset-min.yaml                   # Only required fields - validates against layerset variant (built, pinned)
     layerset-source-full.yaml           # All fields populated - validates against layerset-source variant (ranges)
+    layerset-source-min.yaml            # Only required fields - validates against layerset-source variant (ranges)
 .github/
   bin/
-    generate-kind-schemas.bash          # Hook: generates four schemas from the source
+    generate-kind-schemas.bash          # Hook: generates five schemas from the source
     verify-schemas-on-examples.bash     # Hook: validates examples against generated schemas
   workflows/
     build.yaml                          # Calls spec-check-filter-release with the hook wired in
@@ -30,19 +36,21 @@ AGENTS.md                               # These instructions
 CLAUDE.md                               # Redirect to AGENTS.md
 ```
 
-## Four Schemas
+## Five Schemas
 
-The source schema is the superset. The hook generates four schemas from it:
+The source schema is the superset. The hook generates five schemas from it:
 
 | Output file                                      | Variant          | Used for                                                           |
 |--------------------------------------------------|------------------|--------------------------------------------------------------------|
-| `spec-kaptainpm-schema.yaml`                     | Project          | Project root `KaptainPM.yaml` and `kaptainpm/final/KaptainPM.yaml` |
+| `spec-kaptainpm-schema.yaml`                     | Project          | Project root `KaptainPM.yaml`                                      |
+| `spec-kaptainpm-schema-final.yaml`               | Final            | `kaptainpm/final/KaptainPM.yaml` after layer merge                 |
 | `spec-kaptainpm-schema-layer.yaml`               | Layer            | Config layer image `KaptainPM.yaml` files                          |
 | `spec-kaptainpm-schema-layerset.yaml`            | Layerset         | Built/published layerset images (pinned versions, metadata required)|
 | `spec-kaptainpm-schema-layerset-source.yaml`     | Layerset Source  | Source layerset before build (ranges allowed, metadata optional)    |
 
 Differences from source:
 - **Project**: `layer-payload` removed
+- **Final**: like Project but `kind` is required
 - **Layer**: `layer-payload` removed; `spec.layers` removed (config layers cannot reference other layers)
 - **Layerset**: like Layerset Source but `spec.layers` uses `artifactReferenceFixed` (no ranges); `metadata.labels` required (`kaptain.org/version`, `kaptain.org/project-name`, `kaptain.org/owner`); `metadata.annotations` required (`kaptain.org/built-by`, `kaptain.org/source-repository`, `kaptain.org/image-uri`)
 - **Layerset Source**: `layer-payload` removed; `user-data` removed; all `spec.*` except `spec.layers` removed; `kind` kept (layersets typically declare the build type for their consumers)
