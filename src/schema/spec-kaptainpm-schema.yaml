@@ -521,26 +521,22 @@ $defs:
               Docker build platform(s). Single value or comma-separated for
               multi-platform manifest list (e.g. linux/amd64,linux/arm64).
               Default: linux/amd64
-          registry:
+          logins:
             type: object
-            additionalProperties: false
-            properties:
-              logins:
-                type: object
-                description: Registry login configuration keyed by domain
-                additionalProperties:
-                  $ref: "#/$defs/registryLogin"
-              targetRegistry:
-                type: string
-                description: Target registry domain for built images
-              targetNamespace:
-                type: string
-                description: Target namespace/organisation for built images
-              pushTargets:
-                type: array
-                description: Additional registries to push the built image to
-                items:
-                  $ref: "#/$defs/pushTarget"
+            description: Registry login configuration keyed by domain
+            additionalProperties:
+              $ref: "#/$defs/registryLogin"
+          targetRegistry:
+            type: string
+            description: Target registry domain for built images
+          targetNamespace:
+            type: string
+            description: Target namespace/organisation for built images
+          pushTargets:
+            type: array
+            description: Additional registries to push the built image to
+            items:
+              $ref: "#/$defs/pushTarget"
           dockerfile:
             type: object
             additionalProperties: false
@@ -581,6 +577,18 @@ $defs:
               sourceTag:
                 type: string
                 description: Source image tag
+
+      externalImage:
+        type: object
+        additionalProperties: false
+        description: External image reference for manifests-only workflows (no docker build)
+        properties:
+          name:
+            type: string
+            description: Docker image name (if provided, substitutes into manifests; if empty, token remains for later substitution)
+          tag:
+            type: string
+            description: Docker image tag (if provided, substitutes into manifests; if empty, token remains for later substitution)
 
       generators:
         type: object

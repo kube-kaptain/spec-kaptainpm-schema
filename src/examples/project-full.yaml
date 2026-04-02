@@ -82,21 +82,20 @@ spec:
     docker:
       runtime: docker
       platform: linux/amd64
-      registry:
-        logins:
-          ghcr.io:
-            type: github-token
-            token: GITHUB_TOKEN
-            actor: github-actions
-          docker.io:
-            type: username-password
-            usernameSecret: DOCKERHUB_USER
-            passwordSecret: DOCKERHUB_TOKEN
-        targetRegistry: ghcr.io
-        targetNamespace: kube-kaptain
-        pushTargets:
-          - registry: docker.io
-            namespace: kube-kaptain
+      logins:
+        ghcr.io:
+          type: github-token
+          token: GITHUB_TOKEN
+          actor: github-actions
+        docker.io:
+          type: username-password
+          usernameSecret: DOCKERHUB_USER
+          passwordSecret: DOCKERHUB_TOKEN
+      targetRegistry: ghcr.io
+      targetNamespace: kube-kaptain
+      pushTargets:
+        - registry: docker.io
+          namespace: kube-kaptain
       dockerfile:
         substitutionFiles: Dockerfile
         subPath: src/docker
@@ -109,6 +108,10 @@ spec:
         sourceNamespace: library
         sourceImageName: nginx
         sourceTag: '1.25'
+
+    externalImage:
+      name: my-org/my-app
+      tag: '1.2.3'
 
     generators:
       common:
