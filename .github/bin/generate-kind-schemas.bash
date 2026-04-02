@@ -4,18 +4,23 @@
 #
 # Hook: hook-post-versions-and-naming
 #
-# Generates the four KaptainPM schema files from the single source schema.
+# Generates the six KaptainPM schema files from the single source schema.
 # Output files land in ${OUTPUT_SUB_PATH}/specs/yaml/ where spec-package-prepare
 # will pick them up and convert to JSON. Version is in the file content via
 # ${Version} token substitution (not the filename).
 #
+# All schemas enforce string types on metadata labels and annotations when present.
+# Built artifact schemas (layer, layerset) additionally require those fields.
+#
 # Source: src/schema/spec-kaptainpm-schema.yaml  (superset of all schemas)
 #
 # Outputs:
-#   spec-kaptainpm-schema.yaml                    Base            - project root and final merged files
-#   spec-kaptainpm-schema-layer.yaml              Layer           - layer image KaptainPM.yaml files
-#   spec-kaptainpm-schema-layerset.yaml           Layerset        - built/published layerset (pinned versions, metadata required)
-#   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed, metadata optional)
+#   spec-kaptainpm-schema.yaml                    Base            - project root KaptainPM.yaml files
+#   spec-kaptainpm-schema-final.yaml              Final           - merged final KaptainPM.yaml (kind required)
+#   spec-kaptainpm-schema-layer-source.yaml       Layer Source    - source layer before build (no metadata required)
+#   spec-kaptainpm-schema-layer.yaml              Layer           - built layer images (metadata required)
+#   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed)
+#   spec-kaptainpm-schema-layerset.yaml           Layerset        - built layerset images (pinned versions, metadata required)
 #
 # Inputs (provided by build system):
 #   OUTPUT_SUB_PATH  - Build output directory
@@ -58,12 +63,26 @@ yq eval '
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-${Version}.json"
 ' "${source_schema}" | strip_source_header "base" > "${yaml_dir}/spec-kaptainpm-schema.yaml"
 
-# Layer schema: source minus spec.layers (config layers cannot reference other layers)
+# Layer-source schema: pre-build layer with no metadata requirements
 # A layer has content; only a layerset composes other layers
-# $id and release already correct in source (point to the layer schema)
+# kind is allowed: a layer typically declares the build type
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml"
+yq eval '
+  del(.properties.spec.properties.layers) |
+  ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
+  .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
+  ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.json"
+' "${source_schema}" | strip_source_header "layer-source" > "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml"
+
+# Layer schema: built/published layer with required metadata for build traceability
+# Like layer-source but metadata.labels and metadata.annotations are required
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer.yaml"
 yq eval '
-  del(.properties.spec.properties.layers)
+  del(.properties.spec.properties.layers) |
+  .properties.metadata.description = "Project metadata with required build traceability fields." |
+  .properties.metadata.required = ["labels", "annotations"] |
+  .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
+  .properties.metadata.properties.annotations.required = ["kaptain.org/built-by", "kaptain.org/source-repository", "kaptain.org/image-uri"]
 ' "${source_schema}" | strip_source_header "layer" > "${yaml_dir}/spec-kaptainpm-schema-layer.yaml"
 
 # Layerset schema: like layerset-source but with artifactReferenceFixed (no ranges)
@@ -76,47 +95,27 @@ yq eval '
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
   .properties.spec.required = ["layers"] |
   .properties.spec.properties.layers."$ref" = "#/$defs/artifactReferenceFixedList" |
-  .properties.metadata = {
-    "type": "object",
-    "required": ["labels", "annotations"],
-    "additionalProperties": true,
-    "description": "Project metadata with required build traceability fields.",
-    "properties": {
-      "labels": {
-        "type": "object",
-        "required": ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"],
-        "additionalProperties": true,
-        "description": "Queryable build metadata labels.",
-        "properties": {
-          "kaptain.org/version": {"type": "string", "description": "Build version"},
-          "kaptain.org/project-name": {"type": "string", "description": "Project name"},
-          "kaptain.org/owner": {"type": "string", "description": "Repository owner"}
-        }
-      },
-      "annotations": {
-        "type": "object",
-        "required": ["kaptain.org/built-by", "kaptain.org/source-repository", "kaptain.org/image-uri"],
-        "additionalProperties": true,
-        "description": "Informational build metadata annotations.",
-        "properties": {
-          "kaptain.org/built-by": {"type": "string", "description": "Build platform identifier"},
-          "kaptain.org/source-repository": {"type": "string", "description": "Source repository (owner/name)"},
-          "kaptain.org/image-uri": {"type": "string", "description": "Full artifact image URI"}
-        }
-      }
-    }
-  } |
+  .properties.metadata.description = "Project metadata with required build traceability fields." |
+  .properties.metadata.required = ["labels", "annotations"] |
+  .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
+  .properties.metadata.properties.annotations.required = ["kaptain.org/built-by", "kaptain.org/source-repository", "kaptain.org/image-uri"] |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.json"
 ' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
 
-# Final schema: same as base but kind is required
-# Used to validate kaptainpm/final/KaptainPM.yaml after layer merge
+# Final schema: same as base but kind is required and build traceability
+# metadata is disallowed (stripped by kaptain-init, injected later by build steps)
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-final.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   .required = (.required + ["kind"] | unique) |
+  .properties.metadata.properties.labels.properties["kaptain.org/version"] = false |
+  .properties.metadata.properties.labels.properties["kaptain.org/project-name"] = false |
+  .properties.metadata.properties.labels.properties["kaptain.org/owner"] = false |
+  .properties.metadata.properties.annotations.properties["kaptain.org/built-by"] = false |
+  .properties.metadata.properties.annotations.properties["kaptain.org/source-repository"] = false |
+  .properties.metadata.properties.annotations.properties["kaptain.org/image-uri"] = false |
   .name = "${ProjectName}-final" |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |

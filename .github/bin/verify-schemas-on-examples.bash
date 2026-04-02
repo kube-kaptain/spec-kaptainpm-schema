@@ -37,6 +37,11 @@ echo "  final-full.yaml: ok"
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final.yaml" src/examples/final-min.yaml
 echo "  final-min.yaml: ok"
 
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml" src/examples/layer-source-full.yaml
+echo "  layer-source-full.yaml: ok"
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml" src/examples/layer-source-min.yaml
+echo "  layer-source-min.yaml: ok"
+
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-full.yaml
 echo "  layer-full.yaml: ok"
 check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-min.yaml

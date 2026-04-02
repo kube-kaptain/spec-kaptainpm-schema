@@ -59,9 +59,24 @@ properties:
 
   metadata:
     type: object
+    additionalProperties: true
     description: >
-      Project metadata. Currently only description is conventional;
-      no strict schema enforced.
+      Project metadata including build traceability labels and annotations.
+      When present, label and annotation values must be strings.
+    properties:
+      description:
+        type: string
+        description: Human-readable project description.
+      labels:
+        type: object
+        additionalProperties:
+          type: string
+        description: Queryable build metadata labels. All values must be strings.
+      annotations:
+        type: object
+        additionalProperties:
+          type: string
+        description: Informational build metadata annotations. All values must be strings.
 
   user-data:
     type: object

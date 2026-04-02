@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Minimal layer-source KaptainPM.yaml — only required fields.
+# Validates against spec-kaptainpm-schema-layer-source.yaml (source variant).
+
+apiVersion: kaptain.org/1.2
