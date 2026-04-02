@@ -2,6 +2,15 @@
 # Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
 #
 # Minimal layer KaptainPM.yaml — only required fields.
-# Validates against spec-kaptainpm-schema-layer.yaml (layer variant).
+# Validates against spec-kaptainpm-schema-layer.yaml (built layer variant).
 
 apiVersion: kaptain.org/1.2
+metadata:
+  labels:
+    kaptain.org/version: "1.0"
+    kaptain.org/project-name: "layer-minimal"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layer-minimal"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layer/layer-minimal:1.0"

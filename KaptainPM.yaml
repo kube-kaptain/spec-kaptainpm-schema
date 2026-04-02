@@ -28,4 +28,4 @@ spec:
   platform:
     githubActions:
       release:
-        verbatimFiles: 'src/examples/project-full.yaml,src/examples/project-min.yaml,src/examples/final-full.yaml,src/examples/final-min.yaml,src/examples/layer-full.yaml,src/examples/layer-min.yaml,src/examples/layerset-full.yaml,src/examples/layerset-min.yaml,src/examples/layerset-source-full.yaml,src/examples/layerset-source-min.yaml'
+        verbatimFiles: 'src/examples/project-full.yaml,src/examples/project-min.yaml,src/examples/final-full.yaml,src/examples/final-min.yaml,src/examples/layer-source-full.yaml,src/examples/layer-source-min.yaml,src/examples/layer-full.yaml,src/examples/layer-min.yaml,src/examples/layerset-source-full.yaml,src/examples/layerset-source-min.yaml,src/examples/layerset-full.yaml,src/examples/layerset-min.yaml'

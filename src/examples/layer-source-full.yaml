@@ -1,22 +1,15 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
 #
-# Full layer KaptainPM.yaml example with all fields populated.
-# Validates against spec-kaptainpm-schema-layer.yaml (built layer variant).
-# Built layers have injected metadata. Layers have layer-payload but cannot have spec.layers.
+# Full layer-source KaptainPM.yaml example with all fields populated.
+# Validates against spec-kaptainpm-schema-layer-source.yaml (source variant).
+# Source layers are pre-build — metadata labels/annotations not yet injected.
+# Layers have layer-payload but cannot have spec.layers.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
 metadata:
   description: "example config layer with all fields populated"
-  labels:
-    kaptain.org/version: "1.0"
-    kaptain.org/project-name: "layer-full-example"
-    kaptain.org/owner: "kube-kaptain"
-  annotations:
-    kaptain.org/built-by: "github-actions"
-    kaptain.org/source-repository: "kube-kaptain/layer-full-example"
-    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layer/layer-full-example:1.0"
 
 user-data:
   my-layer-tool:
