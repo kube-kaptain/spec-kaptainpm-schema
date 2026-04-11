@@ -1298,6 +1298,116 @@ $defs:
                 type: boolean
                 description: 'Generate controlplane-only yaml for Cilium eBPF networking (default: false)'
 
+      vendorHelmRendered:
+        type: object
+        additionalProperties: false
+        description: Vendor helm chart rendered to plain kubernetes manifests at build time
+        properties:
+          repoUrl:
+            type: string
+            description: Traditional helm repo URL (mutually exclusive with ociChart)
+          chartName:
+            type: string
+            description: Chart name within the repo (required with repoUrl)
+          ociChart:
+            type: string
+            description: OCI chart reference (mutually exclusive with repoUrl+chartName)
+          moveFiles:
+            type: array
+            description: >
+              Explicit list of files to keep from rendered output and where to
+              place them. Files not listed are discarded.
+            minItems: 1
+            items:
+              type: object
+              additionalProperties: false
+              required:
+                - source
+                - destination
+              properties:
+                source:
+                  type: string
+                  description: Filename in C-split/ to copy
+                destination:
+                  type: string
+                  description: Target filename in D-moved-files/
+          sedReplace:
+            type: object
+            additionalProperties: false
+            description: Sed in-place replacements applied after file mapping
+            properties:
+              global:
+                type: array
+                description: Sed patterns applied to all mapped files
+                items:
+                  type: string
+              perFile:
+                type: array
+                description: Sed patterns applied to specific files
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - file
+                    - patterns
+                  properties:
+                    file:
+                      type: string
+                      description: Target filename in E-sed-replaced/
+                    patterns:
+                      type: array
+                      description: Sed patterns to apply to this file
+                      items:
+                        type: string
+          yqTransform:
+            type: object
+            additionalProperties: false
+            description: Inline yq expressions applied after sed replacements
+            properties:
+              global:
+                type: array
+                description: yq expressions applied to all mapped files
+                items:
+                  type: string
+              perFile:
+                type: array
+                description: yq expressions applied to specific files
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - file
+                    - expressions
+                  properties:
+                    file:
+                      type: string
+                      description: Target filename in F-yq-transformed/
+                    expressions:
+                      type: array
+                      description: yq expressions to apply to this file
+                      items:
+                        type: string
+          imageRetags:
+            type: array
+            description: Docker images to pull and retag as part of this build
+            items:
+              type: object
+              additionalProperties: false
+              required:
+                - sourceImageUri
+                - tagSuffix
+              properties:
+                sourceImageUri:
+                  type: string
+                  description: >
+                    Full source image URI including tag
+                    (e.g., docker.io/envoyproxy/gateway:v1.3.0)
+                tagSuffix:
+                  type: string
+                  description: >
+                    Suffix appended to the build version for the target tag
+                    (e.g., gateway -> 1.2.3-gateway)
+
   # ---------------------------------------------------------------------------
   # Shared building blocks
   # ---------------------------------------------------------------------------
