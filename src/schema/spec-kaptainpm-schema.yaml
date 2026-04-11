@@ -1407,6 +1407,15 @@ $defs:
                   description: >
                     Suffix appended to the build version for the target tag
                     (e.g., gateway -> 1.2.3-gateway)
+          useProjectNameAsFullnameOverride:
+            type: boolean
+            default: true
+            description: >
+              Pass --set fullnameOverride=<project-name> to helm template so
+              rendered resource names use the project name directly instead of
+              the chart's release-name + chart-name concatenation. Set to false
+              to use the chart's default naming or to control fullnameOverride
+              via the values file instead.
 
   # ---------------------------------------------------------------------------
   # Shared building blocks
