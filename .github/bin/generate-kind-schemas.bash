@@ -27,7 +27,7 @@
 
 set -euo pipefail
 
-OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:?OUTPUT_SUB_PATH is required}"
+OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:-kaptain-out}"
 
 source_schema="src/schema/spec-kaptainpm-schema.yaml"
 yaml_dir="${OUTPUT_SUB_PATH}/specs/yaml"
