@@ -1187,6 +1187,13 @@ $defs:
           subPath:
             type: string
             description: 'Directory containing manifests (default: src/kubernetes)'
+          defaults:
+            type: object
+            additionalProperties: false
+            properties:
+              subPath:
+                type: string
+                description: 'Directory containing default token values (default: src/defaults)'
           repoProvider:
             type: object
             additionalProperties: false

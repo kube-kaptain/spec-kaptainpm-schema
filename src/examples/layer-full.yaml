@@ -342,6 +342,8 @@ spec:
 
     manifests:
       subPath: src/kubernetes
+      defaults:
+        subPath: src/defaults
       repoProvider:
         type: docker
         packagingBaseImage: scratch
