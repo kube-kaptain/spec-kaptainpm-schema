@@ -13,6 +13,7 @@
 set -euo pipefail
 
 OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:?OUTPUT_SUB_PATH is required}"
+VERSION="${VERSION:?VERSION is required}"
 DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
 
 # Use substituted schemas (tokens resolved) from the docker build context.
@@ -27,34 +28,34 @@ fi
 echo "Validating examples against generated schemas..."
 echo ""
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema.yaml" src/examples/project-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml" src/examples/project-full.yaml
 echo "  project-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema.yaml" src/examples/project-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml" src/examples/project-min.yaml
 echo "  project-min.yaml: ok"
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final.yaml" src/examples/final-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final-${VERSION}.yaml" src/examples/final-full.yaml
 echo "  final-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final.yaml" src/examples/final-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-final-${VERSION}.yaml" src/examples/final-min.yaml
 echo "  final-min.yaml: ok"
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml" src/examples/layer-source-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml" src/examples/layer-source-full.yaml
 echo "  layer-source-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml" src/examples/layer-source-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml" src/examples/layer-source-min.yaml
 echo "  layer-source-min.yaml: ok"
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml" src/examples/layer-full.yaml
 echo "  layer-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer.yaml" src/examples/layer-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml" src/examples/layer-min.yaml
 echo "  layer-min.yaml: ok"
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml" src/examples/layerset-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml" src/examples/layerset-full.yaml
 echo "  layerset-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml" src/examples/layerset-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml" src/examples/layerset-min.yaml
 echo "  layerset-min.yaml: ok"
 
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml" src/examples/layerset-source-full.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source-${VERSION}.yaml" src/examples/layerset-source-full.yaml
 echo "  layerset-source-full.yaml: ok"
-check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml" src/examples/layerset-source-min.yaml
+check-jsonschema --schemafile "${yaml_dir}/spec-kaptainpm-schema-layerset-source-${VERSION}.yaml" src/examples/layerset-source-min.yaml
 echo "  layerset-source-min.yaml: ok"
 
 echo ""
