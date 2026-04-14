@@ -1265,6 +1265,18 @@ $defs:
             type: string
             description: 'Base image for spec packaging (default: scratch)'
 
+      layer:
+        type: object
+        additionalProperties: false
+        description: Layer and layerset build configuration
+        properties:
+          packagingBaseImage:
+            type: string
+            description: 'Base image for layer packaging (default: scratch)'
+          tokenSubstitution:
+            type: boolean
+            description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
+
       aws:
         type: object
         additionalProperties: false

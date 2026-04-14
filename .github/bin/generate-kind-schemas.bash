@@ -28,6 +28,7 @@
 set -euo pipefail
 
 OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:-kaptain-out}"
+VERSION="${VERSION:?VERSION is required}"
 
 source_schema="src/schema/spec-kaptainpm-schema.yaml"
 yaml_dir="${OUTPUT_SUB_PATH}/specs/yaml"
@@ -55,40 +56,40 @@ strip_source_header() {
 
 # Base schema: everything in source minus layer-payload
 # Used for project root KaptainPM.yaml and kaptainpm/final/KaptainPM.yaml
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-${Version}.json"
-' "${source_schema}" | strip_source_header "base" > "${yaml_dir}/spec-kaptainpm-schema.yaml"
+' "${source_schema}" | strip_source_header "base" > "${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml"
 
 # Layer-source schema: pre-build layer with no metadata requirements
 # A layer has content; only a layerset composes other layers
 # kind is allowed: a layer typically declares the build type
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.json"
-' "${source_schema}" | strip_source_header "layer-source" > "${yaml_dir}/spec-kaptainpm-schema-layer-source.yaml"
+' "${source_schema}" | strip_source_header "layer-source" > "${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml"
 
 # Layer schema: built/published layer with required metadata for build traceability
 # Like layer-source but metadata.labels and metadata.annotations are required
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
   .properties.metadata.description = "Project metadata with required build traceability fields." |
   .properties.metadata.required = ["labels", "annotations"] |
   .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
   .properties.metadata.properties.annotations.required = ["kaptain.org/built-by", "kaptain.org/source-repository", "kaptain.org/image-uri"]
-' "${source_schema}" | strip_source_header "layer" > "${yaml_dir}/spec-kaptainpm-schema-layer.yaml"
+' "${source_schema}" | strip_source_header "layer" > "${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml"
 
 # Layerset schema: like layerset-source but with artifactReferenceFixed (no ranges)
 # and required metadata.labels and metadata.annotations for build traceability.
 # Used to validate built/published layerset images where all versions are pinned.
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
@@ -102,11 +103,11 @@ yq eval '
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.json"
-' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset.yaml"
+' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml"
 
 # Final schema: same as base but kind is required and build traceability
 # metadata is disallowed (stripped by kaptain-init, injected later by build steps)
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-final.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-final-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   .required = (.required + ["kind"] | unique) |
@@ -120,12 +121,12 @@ yq eval '
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-final-${Version}.json"
-' "${source_schema}" | strip_source_header "final" > "${yaml_dir}/spec-kaptainpm-schema-final.yaml"
+' "${source_schema}" | strip_source_header "final" > "${yaml_dir}/spec-kaptainpm-schema-final-${VERSION}.yaml"
 
 # Layerset-source schema: source/pre-build layerset with ranges allowed
 # A layerset only composes - no config content, no user-data, no layer-payload
 # kind is allowed: a layerset typically declares the build type for its consumers
-echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml"
+echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-source-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
@@ -134,6 +135,6 @@ yq eval '
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.json"
-' "${source_schema}" | strip_source_header "layerset-source" > "${yaml_dir}/spec-kaptainpm-schema-layerset-source.yaml"
+' "${source_schema}" | strip_source_header "layerset-source" > "${yaml_dir}/spec-kaptainpm-schema-layerset-source-${VERSION}.yaml"
 
 echo "Schema generation complete"
