@@ -298,7 +298,7 @@ $defs:
         properties:
           stripRepositoryNamePrefix:
             type: string
-            pattern: "^[a-z0-9]+$"
+            pattern: "^[a-z0-9]+([a-z0-9-]*[a-z0-9]+)?$"
             description: >
               WARNING: Do not use this configuration unless you have an
               isolated cluster set or other runtime as it means you could
