@@ -53,6 +53,8 @@ spec:
     outputSubPath: kaptain-out
     configSubPath: src/config
     secretsSubPath: src/secrets
+    projectName:
+      stripRepositoryNamePrefix: teamname
     tokens:
       delimiterStyle: shell
       nameStyle: PascalCase
