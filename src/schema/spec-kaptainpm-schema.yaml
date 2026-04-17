@@ -291,6 +291,26 @@ $defs:
       secretsSubPath:
         type: string
         description: 'Directory with user-defined secret files (default: src/secrets)'
+      projectName:
+        type: object
+        additionalProperties: false
+        description: Project name derivation from repository name
+        properties:
+          stripRepositoryNamePrefix:
+            type: string
+            pattern: "^[a-z0-9]+$"
+            description: >
+              WARNING: Do not use this configuration unless you have an
+              isolated cluster set or other runtime as it means you could
+              get project name collisions if a repo is named the same
+              without the prefix or has a different prefix with that
+              prefix stripped.
+
+              Prefix to strip from repository name to derive project
+              name. The prefix and its trailing hyphen are removed. For
+              example, if the repository is teamname-api-user-service
+              and this is set to teamname, the project name becomes
+              api-user-service.
       tokens:
         type: object
         additionalProperties: false
