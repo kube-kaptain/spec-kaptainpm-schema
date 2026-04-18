@@ -362,8 +362,11 @@ $defs:
                 pattern: "^(true|false)$"
             description: 'Allow user tokens to override built-in tokens (default: false)'
           substitutionPasses:
-            type: string
-            pattern: "^[0-9]+$"
+            oneOf:
+              - type: integer
+                minimum: 1
+              - type: string
+                pattern: "^[1-9][0-9]*$"
             description: 'Number of token substitution passes (default: 1)'
           valueTrailingNewline:
             type: string
@@ -388,8 +391,11 @@ $defs:
             additionalProperties: false
             properties:
               maxParts:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: 'Maximum version parts allowed before failure (default: 3)'
               strategy:
                 type: string
@@ -426,8 +432,11 @@ $defs:
                     type: string
                     description: 'Regex with capture group for custom pattern type'
                   prefixParts:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                      - type: string
+                        pattern: "^[1-9][0-9]*$"
                     description: 'Parts from source as prefix (output = prefix + 1)'
               sourceTwo:
                 type: object
@@ -444,8 +453,11 @@ $defs:
                     type: string
                     description: 'Regex with capture group for secondary source'
                   prefixParts:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                      - type: string
+                        pattern: "^[1-9][0-9]*$"
                     description: 'Parts from secondary source as prefix'
 
   # ---------------------------------------------------------------------------
@@ -672,16 +684,25 @@ $defs:
                 enum: [deployment, statefulset, daemonset, cronjob, job, none]
                 description: 'Workload type (default: deployment)'
               replicas:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired replica count'
               revisionHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Number of old ReplicaSets to retain (default: 10)'
               minReadySeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Minimum seconds a pod must be ready (default: 0)'
               nameSuffix:
                 type: string
@@ -703,8 +724,12 @@ $defs:
                 additionalProperties: false
                 properties:
                   port:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                        maximum: 65535
+                      - type: string
+                        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
                     description: 'Primary container port (default: 1024)'
                   command:
                     type: string
@@ -779,8 +804,11 @@ $defs:
                     type: string
                     description: 'Image pull secrets (default: ENABLED)'
               terminationGracePeriodSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Pod termination grace period (default: 10)'
               prestopCommand:
                 type: string
@@ -874,8 +902,11 @@ $defs:
                     enum: [RollingUpdate, OnDelete]
                     description: 'Update strategy type (default: RollingUpdate)'
                   partition:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 0
+                      - type: string
+                        pattern: "^[0-9]+$"
                     description: Partition ordinal for canary updates
               pvc:
                 type: object
@@ -983,36 +1014,60 @@ $defs:
                 enum: [Allow, Forbid, Replace]
                 description: 'How concurrent executions are handled (default: Forbid)'
               startingDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: Deadline in seconds for starting the job
               successfulJobsHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Successful jobs to retain (default: 1)'
               failedJobsHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Failed jobs to retain (default: 5)'
               backoffLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired completions (default: 1)'
               parallelism:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: TTL seconds after job finished
               restartPolicy:
                 type: string
@@ -1068,24 +1123,39 @@ $defs:
                 type: string
                 description: Combined sub-path for Job manifests
               backoffLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired completions (default: 1)'
               parallelism:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'TTL seconds after job finished (default: 86400)'
               restartPolicy:
                 type: string
@@ -1145,8 +1215,12 @@ $defs:
                 enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
                 description: 'Service type (default: ClusterIP)'
               port:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 65535
+                  - type: string
+                    pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
                 description: 'Service port (default: 80)'
               targetPort:
                 type: string
@@ -1159,8 +1233,12 @@ $defs:
                 type: string
                 description: Named port
               nodePort:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 30000
+                    maximum: 32767
+                  - type: string
+                    pattern: "^(30[0-9]{3}|31[0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7])$"
                 description: Node port (NodePort type only)
               externalName:
                 type: string
@@ -1728,40 +1806,66 @@ $defs:
         enum: [HTTP, HTTPS]
         description: 'HTTP scheme for http-get probes (default: HTTP)'
       tcpPort:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 65535
+          - type: string
+            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
         description: TCP port for tcp-socket probes
       execCommand:
         type: string
         description: Command for exec probes
       grpcPort:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 65535
+          - type: string
+            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
         description: gRPC port for grpc probes
       grpcService:
         type: string
         description: gRPC service name for grpc probes
       initialDelaySeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+            pattern: "^[0-9]+$"
         description: Seconds after container start before first probe
       periodSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: How often to perform the probe in seconds
       timeoutSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Seconds after which the probe times out
       failureThreshold:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Consecutive failures before the probe is considered failed
       successThreshold:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Consecutive successes before the probe is considered successful
       terminationGracePeriodSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+            pattern: "^[0-9]+$"
         description: Grace period override for pod termination on probe failure
