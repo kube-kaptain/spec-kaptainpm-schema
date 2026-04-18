@@ -468,10 +468,16 @@ $defs:
             description: GitHub Releases configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Create a GitHub Release on version tags (default: true)'
               addVersionToFilenames:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Add version suffix to release artifact filenames (default: true)'
               notes:
                 type: string
@@ -876,7 +882,10 @@ $defs:
                 description: PersistentVolumeClaim configuration
                 properties:
                   enabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable PVC generation (default: true)'
                   storageClass:
                     type: string
@@ -921,13 +930,22 @@ $defs:
                     type: string
                     description: 'Max unavailable pods during rolling update (default: 1)'
               hostNetwork:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host network (default: false)'
               hostPid:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host PID namespace (default: false)'
               hostIpc:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host IPC namespace (default: false)'
               runAsNonRoot:
                 oneOf:
@@ -1009,20 +1027,32 @@ $defs:
                 type: string
                 description: Additional annotations for CronJob manifests
               portsEnabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable startup probe (default: false)'
 
           job:
@@ -1070,20 +1100,32 @@ $defs:
                 type: string
                 description: Additional annotations for Job manifests
               portsEnabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable startup probe (default: false)'
 
           service:
@@ -1092,7 +1134,10 @@ $defs:
             description: Service manifest generator configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Enable service generation
               type:
                 type: string
@@ -1220,7 +1265,10 @@ $defs:
             description: PodDisruptionBudget manifest generator configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Enable PDB generation
               nameSuffix:
                 type: string
