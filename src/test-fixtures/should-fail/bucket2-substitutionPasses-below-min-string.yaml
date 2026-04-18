@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 2 (minimum 1, no max). Quoted string one below the lower boundary.
+# Pre-section-2-migration: accepted (pattern ^[0-9]+$ matches '0') - currently RED.
+# Post-section-2-migration: rejected (pattern ^[1-9][0-9]*$ disallows '0') - GREEN.
+
+apiVersion: kaptain.org/1.2
+spec:
+  global:
+    tokens:
+      substitutionPasses: '0'

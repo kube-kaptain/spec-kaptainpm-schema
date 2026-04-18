@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 3 (1-65535). Bare integer one below the lower boundary.
+# Pre-section-2-migration: rejected (type:string).
+# Post-section-2-migration: rejected (integer minimum:1).
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      workload:
+        container:
+          port: 0

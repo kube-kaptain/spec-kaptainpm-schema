@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Per-field bucket 1 check: cronjob completions must reject negatives.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      cronjob:
+        completions: '-1'

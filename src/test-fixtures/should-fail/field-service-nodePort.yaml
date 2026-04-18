@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Per-field bucket 4 check: service nodePort must reject below-min (<30000).
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      service:
+        nodePort: '29999'

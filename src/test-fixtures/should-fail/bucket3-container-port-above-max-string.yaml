@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 3 (1-65535). Quoted string one above the upper boundary.
+# Pre-section-2-migration: accepted (pattern ^[0-9]+$ matches '65536') - currently RED.
+# Post-section-2-migration: rejected (bounded port regex maxes at 65535) - GREEN.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      workload:
+        container:
+          port: '65536'

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 2 (minimum 1, no max). Bare integer at the lower boundary.
+# Pre-section-2-migration: rejected (type:string) - currently RED.
+# Post-section-2-migration: accepted (integer minimum:1) - GREEN.
+
+apiVersion: kaptain.org/1.2
+spec:
+  global:
+    tokens:
+      substitutionPasses: 1
