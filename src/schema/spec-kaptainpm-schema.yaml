@@ -863,6 +863,7 @@ $defs:
                 description: 'Pod management policy (default: OrderedReady)'
               allowUnreliablePodManagementPolicy:
                 type: string
+                enum: ["I_LIKE_DOWNTIME"]
                 description: Allow unreliable pod management policy override
               updateStrategy:
                 type: object
