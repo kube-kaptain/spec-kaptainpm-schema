@@ -356,7 +356,10 @@ $defs:
             description: >
               MATCH enforces the nameStyle, ALL accepts any casing (default: MATCH)
           allowBuiltinOverride:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: 'Allow user tokens to override built-in tokens (default: false)'
           substitutionPasses:
             type: string
@@ -403,7 +406,10 @@ $defs:
                   - custom
                 description: 'Pattern type for file-pattern-match strategies'
               useSourceVersionExact:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use the source version exactly without incrementing (default: false)'
               source:
                 type: object
@@ -500,26 +506,44 @@ $defs:
             additionalProperties: false
             properties:
               blockSlashes:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Reject branch names containing forward slashes
               blockDoubleHyphens:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Reject branch names containing double hyphens
               requireConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Require conventional branch naming convention
           commits:
             type: object
             additionalProperties: false
             properties:
               requireConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Require conventional commit message format
               blockConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Block conventional commit message format
               blockDuplicateMessages:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Block duplicate commit messages in a PR
 
       docker:
@@ -578,7 +602,10 @@ $defs:
                 type: string
                 description: 'Squash image layers (podman only, default: squash)'
               noCache:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Disable docker build cache (default: true)'
           retag:
             type: object
@@ -684,7 +711,10 @@ $defs:
                     enum: [combined, split]
                     description: 'Image reference style (default: combined)'
                   readonlyRootFilesystem:
-                    type: boolean
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Mount root filesystem read-only (default: true)'
                   resources:
                     type: object
@@ -734,7 +764,10 @@ $defs:
                     type: string
                     description: 'Seccomp profile (default: DISABLED)'
                   automountServiceAccountToken:
-                    type: boolean
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Automount service account token (default: false)'
                   imagePullSecrets:
                     type: string
@@ -897,7 +930,10 @@ $defs:
                 type: string
                 description: 'Use host IPC namespace (default: false)'
               runAsNonRoot:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Run as non-root user (default: true)'
               privileged:
                 type: string
@@ -1115,7 +1151,10 @@ $defs:
                 type: string
                 description: Combined sub-path for ConfigMap manifests
               nameChecksumInjection:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Inject ConfigMap checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1139,7 +1178,10 @@ $defs:
                 type: string
                 description: Combined sub-path for Secret template manifests
               nameChecksumInjection:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Inject Secret checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1154,7 +1196,10 @@ $defs:
             description: ServiceAccount manifest generator configuration
             properties:
               enabled:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Whether to generate a ServiceAccount manifest (default: false)'
               nameSuffix:
                 type: string
@@ -1232,7 +1277,10 @@ $defs:
         description: Change source tracking configuration
         properties:
           noteEnabled:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: >
               Write git notes recording the source branch and PR author during
               PR builds, read back during release builds (default: true)
@@ -1294,7 +1342,10 @@ $defs:
             type: string
             description: 'Base image for layer packaging (default: scratch)'
           tokenSubstitution:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
 
       aws:
@@ -1328,13 +1379,22 @@ $defs:
                 type: string
                 description: 'Source directory for cluster YAML files (default: src/eks)'
               privateNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Include private subnets section in cluster config (default: true)'
               publicNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Include public subnets section in cluster config (default: false)'
               ciliumEbpfNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Generate controlplane-only yaml for Cilium eBPF networking (default: false)'
 
       vendorHelmRendered:
@@ -1447,7 +1507,10 @@ $defs:
                     Suffix appended to the build version for the target tag
                     (e.g., gateway -> 1.2.3-gateway)
           useProjectNameAsFullnameOverride:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             default: true
             description: >
               Pass --set fullnameOverride=<project-name> to helm template so
