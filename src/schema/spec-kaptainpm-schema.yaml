@@ -919,13 +919,13 @@ $defs:
                       - type: string
                         pattern: "^(true|false)$"
                     description: 'Enable PVC generation (default: true)'
-                  storageClass:
+                  storageClassName:
                     type: string
                     description: Storage class name
                   storageSize:
                     type: string
                     description: 'PVC storage size (default: 1Gi)'
-                  accessMode:
+                  accessModes:
                     type: string
                     enum: [ReadWriteOnce, ReadOnlyMany, ReadWriteMany]
                     description: 'PVC access mode (default: ReadWriteOnce)'

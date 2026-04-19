@@ -233,9 +233,9 @@ spec:
           partition: '0'
         pvc:
           enabled: 'true'
-          storageClass: standard
+          storageClassName: standard
           storageSize: 1Gi
-          accessMode: ReadWriteOnce
+          accessModes: ReadWriteOnce
           volumeName: data
           mountPath: /data
 
