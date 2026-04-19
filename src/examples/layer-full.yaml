@@ -227,15 +227,15 @@ spec:
         additionalAnnotations: 'storage=persistent'
         serviceName: layer-default-headless
         podManagementPolicy: OrderedReady
-        allowUnreliablePodManagementPolicy: 'false'
+        allowUnreliablePodManagementPolicy: 'I_LIKE_DOWNTIME'
         updateStrategy:
           type: RollingUpdate
           partition: '0'
         pvc:
           enabled: 'true'
-          storageClass: standard
+          storageClassName: standard
           storageSize: 1Gi
-          accessMode: ReadWriteOnce
+          accessModes: ReadWriteOnce
           volumeName: data
           mountPath: /data
 

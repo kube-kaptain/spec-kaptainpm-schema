@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Section 1 boolean fields written in bare YAML form (parsed as native boolean
+# by the YAML loader before schema validation runs). Validates against the
+# project variant of the KaptainPM schema.
+
+apiVersion: kaptain.org/1.2
+spec:
+  global:
+    tokens:
+      allowBuiltinOverride: true
+  main:
+    docker:
+      dockerfile:
+        noCache: false

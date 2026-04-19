@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 1 (minimum 0, no max). Quoted string one below the lower boundary.
+# Pre-section-2-migration: rejected (pattern ^[0-9]+$ disallows '-').
+# Post-section-2-migration: rejected (pattern still disallows negatives).
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      workload:
+        replicas: '-1'

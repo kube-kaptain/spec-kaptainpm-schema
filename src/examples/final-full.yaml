@@ -220,15 +220,15 @@ spec:
         additionalAnnotations: 'storage=persistent'
         serviceName: my-service-headless
         podManagementPolicy: OrderedReady
-        allowUnreliablePodManagementPolicy: 'true'
+        allowUnreliablePodManagementPolicy: 'I_LIKE_DOWNTIME'
         updateStrategy:
           type: RollingUpdate
           partition: '0'
         pvc:
           enabled: 'true'
-          storageClass: fast-ssd
+          storageClassName: fast-ssd
           storageSize: 10Gi
-          accessMode: ReadWriteOnce
+          accessModes: ReadWriteOnce
           volumeName: data
           mountPath: /data
 

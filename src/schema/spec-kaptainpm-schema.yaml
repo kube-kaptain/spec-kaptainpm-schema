@@ -356,11 +356,17 @@ $defs:
             description: >
               MATCH enforces the nameStyle, ALL accepts any casing (default: MATCH)
           allowBuiltinOverride:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: 'Allow user tokens to override built-in tokens (default: false)'
           substitutionPasses:
-            type: string
-            pattern: "^[0-9]+$"
+            oneOf:
+              - type: integer
+                minimum: 1
+              - type: string
+                pattern: "^[1-9][0-9]*$"
             description: 'Number of token substitution passes (default: 1)'
           valueTrailingNewline:
             type: string
@@ -385,8 +391,11 @@ $defs:
             additionalProperties: false
             properties:
               maxParts:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: 'Maximum version parts allowed before failure (default: 3)'
               strategy:
                 type: string
@@ -403,7 +412,10 @@ $defs:
                   - custom
                 description: 'Pattern type for file-pattern-match strategies'
               useSourceVersionExact:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use the source version exactly without incrementing (default: false)'
               source:
                 type: object
@@ -420,8 +432,11 @@ $defs:
                     type: string
                     description: 'Regex with capture group for custom pattern type'
                   prefixParts:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                      - type: string
+                        pattern: "^[1-9][0-9]*$"
                     description: 'Parts from source as prefix (output = prefix + 1)'
               sourceTwo:
                 type: object
@@ -438,8 +453,11 @@ $defs:
                     type: string
                     description: 'Regex with capture group for secondary source'
                   prefixParts:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                      - type: string
+                        pattern: "^[1-9][0-9]*$"
                     description: 'Parts from secondary source as prefix'
 
   # ---------------------------------------------------------------------------
@@ -462,10 +480,16 @@ $defs:
             description: GitHub Releases configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Create a GitHub Release on version tags (default: true)'
               addVersionToFilenames:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Add version suffix to release artifact filenames (default: true)'
               notes:
                 type: string
@@ -500,26 +524,44 @@ $defs:
             additionalProperties: false
             properties:
               blockSlashes:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Reject branch names containing forward slashes
               blockDoubleHyphens:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Reject branch names containing double hyphens
               requireConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Require conventional branch naming convention
           commits:
             type: object
             additionalProperties: false
             properties:
               requireConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Require conventional commit message format
               blockConventional:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Block conventional commit message format
               blockDuplicateMessages:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Block duplicate commit messages in a PR
 
       docker:
@@ -578,7 +620,10 @@ $defs:
                 type: string
                 description: 'Squash image layers (podman only, default: squash)'
               noCache:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Disable docker build cache (default: true)'
           retag:
             type: object
@@ -639,16 +684,25 @@ $defs:
                 enum: [deployment, statefulset, daemonset, cronjob, job, none]
                 description: 'Workload type (default: deployment)'
               replicas:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired replica count'
               revisionHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Number of old ReplicaSets to retain (default: 10)'
               minReadySeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Minimum seconds a pod must be ready (default: 0)'
               nameSuffix:
                 type: string
@@ -670,8 +724,12 @@ $defs:
                 additionalProperties: false
                 properties:
                   port:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 1
+                        maximum: 65535
+                      - type: string
+                        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
                     description: 'Primary container port (default: 1024)'
                   command:
                     type: string
@@ -684,7 +742,10 @@ $defs:
                     enum: [combined, split]
                     description: 'Image reference style (default: combined)'
                   readonlyRootFilesystem:
-                    type: boolean
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Mount root filesystem read-only (default: true)'
                   resources:
                     type: object
@@ -734,14 +795,20 @@ $defs:
                     type: string
                     description: 'Seccomp profile (default: DISABLED)'
                   automountServiceAccountToken:
-                    type: boolean
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Automount service account token (default: false)'
                   imagePullSecrets:
                     type: string
                     description: 'Image pull secrets (default: ENABLED)'
               terminationGracePeriodSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Pod termination grace period (default: 10)'
               prestopCommand:
                 type: string
@@ -824,6 +891,7 @@ $defs:
                 description: 'Pod management policy (default: OrderedReady)'
               allowUnreliablePodManagementPolicy:
                 type: string
+                enum: ["I_LIKE_DOWNTIME"]
                 description: Allow unreliable pod management policy override
               updateStrategy:
                 type: object
@@ -834,8 +902,11 @@ $defs:
                     enum: [RollingUpdate, OnDelete]
                     description: 'Update strategy type (default: RollingUpdate)'
                   partition:
-                    type: string
-                    pattern: "^[0-9]+$"
+                    oneOf:
+                      - type: integer
+                        minimum: 0
+                      - type: string
+                        pattern: "^[0-9]+$"
                     description: Partition ordinal for canary updates
               pvc:
                 type: object
@@ -843,15 +914,18 @@ $defs:
                 description: PersistentVolumeClaim configuration
                 properties:
                   enabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable PVC generation (default: true)'
-                  storageClass:
+                  storageClassName:
                     type: string
                     description: Storage class name
                   storageSize:
                     type: string
                     description: 'PVC storage size (default: 1Gi)'
-                  accessMode:
+                  accessModes:
                     type: string
                     enum: [ReadWriteOnce, ReadOnlyMany, ReadWriteMany]
                     description: 'PVC access mode (default: ReadWriteOnce)'
@@ -888,16 +962,28 @@ $defs:
                     type: string
                     description: 'Max unavailable pods during rolling update (default: 1)'
               hostNetwork:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host network (default: false)'
               hostPid:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host PID namespace (default: false)'
               hostIpc:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Use host IPC namespace (default: false)'
               runAsNonRoot:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Run as non-root user (default: true)'
               privileged:
                 type: string
@@ -928,36 +1014,60 @@ $defs:
                 enum: [Allow, Forbid, Replace]
                 description: 'How concurrent executions are handled (default: Forbid)'
               startingDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: Deadline in seconds for starting the job
               successfulJobsHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Successful jobs to retain (default: 1)'
               failedJobsHistoryLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Failed jobs to retain (default: 5)'
               backoffLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired completions (default: 1)'
               parallelism:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: TTL seconds after job finished
               restartPolicy:
                 type: string
@@ -973,20 +1083,32 @@ $defs:
                 type: string
                 description: Additional annotations for CronJob manifests
               portsEnabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable startup probe (default: false)'
 
           job:
@@ -1001,24 +1123,39 @@ $defs:
                 type: string
                 description: Combined sub-path for Job manifests
               backoffLimit:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Desired completions (default: 1)'
               parallelism:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                  - type: string
+                    pattern: "^[1-9][0-9]*$"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 0
+                  - type: string
+                    pattern: "^[0-9]+$"
                 description: 'TTL seconds after job finished (default: 86400)'
               restartPolicy:
                 type: string
@@ -1034,20 +1171,32 @@ $defs:
                 type: string
                 description: Additional annotations for Job manifests
               portsEnabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    type: string
+                    oneOf:
+                      - type: boolean
+                      - type: string
+                        pattern: "^(true|false)$"
                     description: 'Enable startup probe (default: false)'
 
           service:
@@ -1056,15 +1205,22 @@ $defs:
             description: Service manifest generator configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Enable service generation
               type:
                 type: string
                 enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
                 description: 'Service type (default: ClusterIP)'
               port:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 65535
+                  - type: string
+                    pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
                 description: 'Service port (default: 80)'
               targetPort:
                 type: string
@@ -1077,8 +1233,12 @@ $defs:
                 type: string
                 description: Named port
               nodePort:
-                type: string
-                pattern: "^[0-9]+$"
+                oneOf:
+                  - type: integer
+                    minimum: 30000
+                    maximum: 32767
+                  - type: string
+                    pattern: "^(30[0-9]{3}|31[0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7])$"
                 description: Node port (NodePort type only)
               externalName:
                 type: string
@@ -1115,7 +1275,10 @@ $defs:
                 type: string
                 description: Combined sub-path for ConfigMap manifests
               nameChecksumInjection:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Inject ConfigMap checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1139,7 +1302,10 @@ $defs:
                 type: string
                 description: Combined sub-path for Secret template manifests
               nameChecksumInjection:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Inject Secret checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1154,7 +1320,10 @@ $defs:
             description: ServiceAccount manifest generator configuration
             properties:
               enabled:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Whether to generate a ServiceAccount manifest (default: false)'
               nameSuffix:
                 type: string
@@ -1175,7 +1344,10 @@ $defs:
             description: PodDisruptionBudget manifest generator configuration
             properties:
               enabled:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: Enable PDB generation
               nameSuffix:
                 type: string
@@ -1232,7 +1404,10 @@ $defs:
         description: Change source tracking configuration
         properties:
           noteEnabled:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: >
               Write git notes recording the source branch and PR author during
               PR builds, read back during release builds (default: true)
@@ -1294,7 +1469,10 @@ $defs:
             type: string
             description: 'Base image for layer packaging (default: scratch)'
           tokenSubstitution:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
 
       aws:
@@ -1328,13 +1506,22 @@ $defs:
                 type: string
                 description: 'Source directory for cluster YAML files (default: src/eks)'
               privateNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Include private subnets section in cluster config (default: true)'
               publicNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Include public subnets section in cluster config (default: false)'
               ciliumEbpfNetworking:
-                type: boolean
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Generate controlplane-only yaml for Cilium eBPF networking (default: false)'
 
       vendorHelmRendered:
@@ -1447,7 +1634,10 @@ $defs:
                     Suffix appended to the build version for the target tag
                     (e.g., gateway -> 1.2.3-gateway)
           useProjectNameAsFullnameOverride:
-            type: boolean
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
             default: true
             description: >
               Pass --set fullnameOverride=<project-name> to helm template so
@@ -1616,40 +1806,66 @@ $defs:
         enum: [HTTP, HTTPS]
         description: 'HTTP scheme for http-get probes (default: HTTP)'
       tcpPort:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 65535
+          - type: string
+            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
         description: TCP port for tcp-socket probes
       execCommand:
         type: string
         description: Command for exec probes
       grpcPort:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+            maximum: 65535
+          - type: string
+            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
         description: gRPC port for grpc probes
       grpcService:
         type: string
         description: gRPC service name for grpc probes
       initialDelaySeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+            pattern: "^[0-9]+$"
         description: Seconds after container start before first probe
       periodSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: How often to perform the probe in seconds
       timeoutSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Seconds after which the probe times out
       failureThreshold:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Consecutive failures before the probe is considered failed
       successThreshold:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: Consecutive successes before the probe is considered successful
       terminationGracePeriodSeconds:
-        type: string
-        pattern: "^[0-9]+$"
+        oneOf:
+          - type: integer
+            minimum: 0
+          - type: string
+            pattern: "^[0-9]+$"
         description: Grace period override for pod termination on probe failure

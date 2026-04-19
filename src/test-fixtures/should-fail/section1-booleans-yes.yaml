@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Section 1 boolean field given as quoted 'yes'. The string is preserved by the
+# YAML loader, then the oneOf string branch's ^(true|false)$ pattern must
+# reject it. Both oneOf branches must fail for validation to fail overall.
+
+apiVersion: kaptain.org/1.2
+spec:
+  global:
+    tokens:
+      allowBuiltinOverride: 'yes'

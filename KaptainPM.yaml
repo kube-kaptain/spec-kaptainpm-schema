@@ -17,7 +17,7 @@ spec:
       platform: linux/amd64,linux/arm64
     hooks:
       postVersionsAndNaming: .github/bin/generate-kind-schemas.bash
-      postDockerTests: .github/bin/verify-schemas-on-examples.bash
+      postDockerTests: .github/bin/verify-and-test-schemas.bash
   platform:
     githubActions:
       release:

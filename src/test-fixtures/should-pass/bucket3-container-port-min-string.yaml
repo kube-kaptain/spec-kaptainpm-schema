@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 3 (1-65535). Quoted string at the lower boundary.
+# Pre-section-2-migration: accepted (pattern ^[0-9]+$).
+# Post-section-2-migration: accepted (bounded port regex matches '1').
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      workload:
+        container:
+          port: '1'

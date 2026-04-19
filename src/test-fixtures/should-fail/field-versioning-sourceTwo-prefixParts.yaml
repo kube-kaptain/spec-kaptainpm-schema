@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Per-field bucket 2 check: versioning sourceTwo.prefixParts must reject zero.
+
+apiVersion: kaptain.org/1.2
+spec:
+  global:
+    release:
+      versioning:
+        sourceTwo:
+          prefixParts: '0'

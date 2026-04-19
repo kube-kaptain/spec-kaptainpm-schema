@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bucket 4 (30000-32767). Quoted string one above the upper boundary.
+# Pre-section-2-migration: accepted (pattern ^[0-9]+$ matches '32768') - currently RED.
+# Post-section-2-migration: rejected (bounded nodePort regex maxes at 32767) - GREEN.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    generators:
+      service:
+        nodePort: '32768'
