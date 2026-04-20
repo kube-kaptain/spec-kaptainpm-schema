@@ -739,7 +739,7 @@ $defs:
                     description: Container args override
                   imageReferenceStyle:
                     type: string
-                    enum: [combined, split]
+                    enum: [combined, separate, project-name-prefixed-combined, project-name-prefixed-separate]
                     description: 'Image reference style (default: combined)'
                   readonlyRootFilesystem:
                     oneOf:
