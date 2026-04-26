@@ -361,18 +361,6 @@ spec:
       jsonSchemaUrl: src/schemas/json-schema-draft-2020-12.json
       packagingBaseImage: scratch
 
-    aws:
-      eksClusterManagement:
-        baseImage:
-          registry: ghcr.io
-          namespace: kube-kaptain
-          name: aws/aws-eks-cluster-management
-          tag: '1.10'
-        clusterYamlSubPath: src/eks
-        privateNetworking: true
-        publicNetworking: false
-        ciliumEbpfNetworking: false
-
   platform:
     githubActions:
       release:

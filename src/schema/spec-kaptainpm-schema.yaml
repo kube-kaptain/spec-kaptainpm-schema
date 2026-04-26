@@ -1475,55 +1475,6 @@ $defs:
                 pattern: "^(true|false)$"
             description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
 
-      aws:
-        type: object
-        additionalProperties: false
-        description: AWS build configuration
-        properties:
-          eksClusterManagement:
-            type: object
-            additionalProperties: false
-            description: EKS cluster management build configuration
-            properties:
-              baseImage:
-                type: object
-                additionalProperties: false
-                description: Base image used for the EKS management build
-                properties:
-                  registry:
-                    type: string
-                    description: 'Base image registry (default: ghcr.io)'
-                  namespace:
-                    type: string
-                    description: 'Base image namespace (default: kube-kaptain)'
-                  name:
-                    type: string
-                    description: 'Base image name (default: aws/aws-eks-cluster-management)'
-                  tag:
-                    type: string
-                    description: Base image tag
-              clusterYamlSubPath:
-                type: string
-                description: 'Source directory for cluster YAML files (default: src/eks)'
-              privateNetworking:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
-                description: 'Include private subnets section in cluster config (default: true)'
-              publicNetworking:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
-                description: 'Include public subnets section in cluster config (default: false)'
-              ciliumEbpfNetworking:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
-                description: 'Generate controlplane-only yaml for Cilium eBPF networking (default: false)'
-
       vendorHelmRendered:
         type: object
         additionalProperties: false
