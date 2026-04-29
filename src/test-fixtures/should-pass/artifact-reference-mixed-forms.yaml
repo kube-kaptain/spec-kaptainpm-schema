@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# spec.contents exercising all three artifactReference version forms in one
+# list: bare exact (1.0.1), Maven fixed bracket ([1.0.1]), and Maven range
+# ([1.0,2.0)). All three must pass.
+
+apiVersion: kaptain.org/1.2
+spec:
+  contents:
+    - bundle-exact:1.0.1
+    - bundle-fixed-bracket:[2.0.0]
+    - bundle-range-half-open:[1.0,2.0)
+    - bundle-range-open-upper:[1.7.1.5,)
+    - prefix/prefix-name:[4.5.6]
+    - sub.domain/namespace/my/my-name:[1.2.3]
