@@ -213,19 +213,20 @@ $defs:
         Short    name:version              (default registry and namespace)
         Prefixed prefix/name:version       (default registry, explicit namespace)
         Full     domain/path/name:version  (explicit registry - first segment contains a dot)
-      Version is either an exact version (one or more dot-separated integers,
-      optional -PRERELEASE suffix) or a Maven-style range (e.g. [1.0,2.0),
-      (1.0,), (,2.0]).
+      Version is one of: an exact version (one or more dot-separated integers,
+      optional -PRERELEASE suffix); a Maven-style fixed bracket form pinning
+      that exact version (e.g. [1.0.1]); or a Maven-style range
+      (e.g. [1.0,2.0), (1.0,), (,2.0]).
     oneOf:
       - description: "Short form: name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
-      - description: "Prefixed form: prefix/name:version-or-range"
+        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+      - description: "Prefixed form: prefix/prefix-name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
-      - description: "Full form: domain/.../name:version-or-range (first segment contains a dot)"
+        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+      - description: "Full form: sub.domain/namespace/my/my-name:version-or-range (first segment contains a dot)"
         type: string
-        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
 
   artifactReferenceFixedList:
     type: array
@@ -236,17 +237,18 @@ $defs:
     description: >
       Artifact reference with a pinned exact version (no ranges allowed).
       Used in resolved/built artifacts where all versions must be concrete.
-      Same three forms as artifactReference but version must be exact.
+      Same three forms as artifactReference. Version must be exact, written
+      either bare (1.0.1) or in Maven-style fixed bracket form ([1.0.1]).
     oneOf:
       - description: "Short form: name:version"
         type: string
-        pattern: "^[a-z][a-z0-9-]*:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
-      - description: "Prefixed form: prefix/name:version"
+        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
+      - description: "Prefixed form: prefix/prefix-name:version"
         type: string
-        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
-      - description: "Full form: domain/.../name:version (first segment contains a dot)"
+        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
+      - description: "Full form: sub.domain/namespace/my/my-name:version (first segment contains a dot)"
         type: string
-        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:[0-9]+(\\.[0-9]+)*(-PRERELEASE)?$"
+        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
 
   # ---------------------------------------------------------------------------
   # spec.data
