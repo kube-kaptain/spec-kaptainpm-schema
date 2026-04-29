@@ -1398,6 +1398,25 @@ $defs:
                 type: string
                 description: 'Base image for manifest packaging (default: scratch)'
 
+      product:
+        type: object
+        additionalProperties: false
+        description: >
+          Product build configuration. Applies only to kubernetes-product builds
+          which aggregate manifest bundles listed in spec.contents.
+        properties:
+          allowLocalDefaultsOverride:
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
+            description: >
+              When true, defaults from the local src/defaults directory may
+              override defaults contributed by referenced bundles, with a WARN
+              log per override. When false (default), local defaults must be
+              byte-identical to any bundle-contributed default of the same name
+              or the build fails.
+
       changeSource:
         type: object
         additionalProperties: false
