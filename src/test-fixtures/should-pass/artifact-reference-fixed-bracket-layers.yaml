@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# spec.layers entry using the Maven-style fixed bracket form ([VERSION]) which
+# pins an exact version. Must validate against artifactReference.
+
+apiVersion: kaptain.org/1.2
+spec:
+  layers:
+    - layer-github-flow-strict:[1.0.1]
