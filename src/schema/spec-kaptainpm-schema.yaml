@@ -1418,6 +1418,19 @@ $defs:
               log per override. When false (default), local defaults must be
               byte-identical to any bundle-contributed default of the same name
               or the build fails.
+          allowLocalManifestsOverride:
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
+            description: >
+              When true, manifests from the local src/kubernetes directory may
+              override manifests contributed by referenced bundles, with a WARN
+              log per override. When false (default), local manifests must not
+              collide with any bundle-contributed manifest of the same path or
+              the build fails. The reserved filename
+              kaptain-product-lineage-data.yaml is checked separately and
+              always fails on collision regardless of this flag.
 
       changeSource:
         type: object
