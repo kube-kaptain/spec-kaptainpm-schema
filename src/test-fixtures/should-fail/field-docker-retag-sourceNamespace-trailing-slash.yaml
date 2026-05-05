@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Registry namespace must reject a trailing slash.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    docker:
+      retag:
+        sourceNamespace: library/

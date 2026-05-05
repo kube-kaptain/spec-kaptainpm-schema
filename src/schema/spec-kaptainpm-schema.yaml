@@ -588,14 +588,18 @@ $defs:
           logins:
             type: object
             description: Registry login configuration keyed by domain
+            propertyNames:
+              $ref: "#/$defs/registryDomain"
             additionalProperties:
               $ref: "#/$defs/registryLogin"
           targetRegistry:
-            type: string
+            $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
           targetNamespace:
-            type: string
-            description: Target namespace/organisation for built images
+            $ref: "#/$defs/registryNamespace"
+            description: >
+              Target namespace/organisation for built images. Supports nested
+              paths, but no leading/trailing slashes.
           pushTargets:
             type: array
             description: Additional registries to push the built image to
@@ -633,11 +637,13 @@ $defs:
             description: Retag an upstream image rather than building from a Dockerfile
             properties:
               sourceRegistry:
-                type: string
+                $ref: "#/$defs/registryDomain"
                 description: 'Source registry domain (default: docker.io)'
               sourceNamespace:
-                type: string
-                description: Source namespace/organisation
+                $ref: "#/$defs/registryNamespace"
+                description: >
+                  Source namespace/organisation. Supports nested paths, but
+                  no leading/trailing slashes.
               sourceImageName:
                 type: string
                 description: Source image name
@@ -1450,32 +1456,32 @@ $defs:
         type: object
         additionalProperties: false
         description: >
-          Lifecycle hook script paths, relative to .github/. Hooks are
-          injectable scripts that run at specific pipeline points.
+          Lifecycle hook script paths, relative to the repository root.
+          Hooks are injectable scripts that run at specific pipeline points.
         properties:
           preBuild:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs at the start of the build, before quality checks
           preTaggingTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before version tagging
           postVersionsAndNaming:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after version calculation completes
           preDockerPrepare:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before Docker build preparation
           postDockerTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after Docker build and validation
           prePackagePrepare:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before manifest packaging
           postPackageTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after manifest packaging
           postBuild:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs at the end of the build
 
       specBuild:
@@ -1635,6 +1641,27 @@ $defs:
   # Shared building blocks
   # ---------------------------------------------------------------------------
 
+  registryDomain:
+    type: string
+    pattern: "^[^/]+$"
+    description: >
+      Container registry hostname[:port]. No slashes; paths belong in the
+      namespace field. Used wherever docker login/push/pull targets a registry.
+
+  registryNamespace:
+    type: string
+    pattern: "^[^/](.*[^/])?$"
+    description: >
+      Container registry namespace/organisation. Supports nested paths, but
+      no leading/trailing slashes.
+
+  hookScriptPath:
+    type: string
+    pattern: "^[^/]"
+    description: >
+      Lifecycle hook script path, relative to the repository root.
+      Must not start with a slash.
+
   registryLogin:
     description: Registry authentication configuration. Type field selects the login method.
     type: object
@@ -1768,11 +1795,13 @@ $defs:
     description: Additional registry to push the built image to
     properties:
       registry:
-        type: string
+        $ref: "#/$defs/registryDomain"
         description: Target registry domain
       namespace:
-        type: string
-        description: 'Target namespace/organisation (default: matches primary push)'
+        $ref: "#/$defs/registryNamespace"
+        description: >
+          Target namespace/organisation (default: matches primary push).
+          Supports nested paths, but no leading/trailing slashes.
 
   probeConfig:
     type: object

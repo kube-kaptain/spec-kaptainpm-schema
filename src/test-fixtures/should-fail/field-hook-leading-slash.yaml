@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Hook script paths must be relative to the repository root - reject leading slash.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    hooks:
+      postVersionsAndNaming: /.github/bin/some-hook.bash
