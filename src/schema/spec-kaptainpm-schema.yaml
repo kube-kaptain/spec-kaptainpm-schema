@@ -1456,32 +1456,32 @@ $defs:
         type: object
         additionalProperties: false
         description: >
-          Lifecycle hook script paths, relative to .github/. Hooks are
-          injectable scripts that run at specific pipeline points.
+          Lifecycle hook script paths, relative to the repository root.
+          Hooks are injectable scripts that run at specific pipeline points.
         properties:
           preBuild:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs at the start of the build, before quality checks
           preTaggingTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before version tagging
           postVersionsAndNaming:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after version calculation completes
           preDockerPrepare:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before Docker build preparation
           postDockerTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after Docker build and validation
           prePackagePrepare:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs before manifest packaging
           postPackageTests:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs after manifest packaging
           postBuild:
-            type: string
+            $ref: "#/$defs/hookScriptPath"
             description: Runs at the end of the build
 
       specBuild:
@@ -1654,6 +1654,13 @@ $defs:
     description: >
       Container registry namespace/organisation. Supports nested paths, but
       no leading/trailing slashes.
+
+  hookScriptPath:
+    type: string
+    pattern: "^[^/]"
+    description: >
+      Lifecycle hook script path, relative to the repository root.
+      Must not start with a slash.
 
   registryLogin:
     description: Registry authentication configuration. Type field selects the login method.
