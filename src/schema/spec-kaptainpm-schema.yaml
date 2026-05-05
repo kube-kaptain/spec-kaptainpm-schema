@@ -596,8 +596,10 @@ $defs:
             $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
           targetNamespace:
-            type: string
-            description: Target namespace/organisation for built images
+            $ref: "#/$defs/registryNamespace"
+            description: >
+              Target namespace/organisation for built images. Supports nested
+              paths, but no leading/trailing slashes.
           pushTargets:
             type: array
             description: Additional registries to push the built image to
@@ -638,8 +640,10 @@ $defs:
                 $ref: "#/$defs/registryDomain"
                 description: 'Source registry domain (default: docker.io)'
               sourceNamespace:
-                type: string
-                description: Source namespace/organisation
+                $ref: "#/$defs/registryNamespace"
+                description: >
+                  Source namespace/organisation. Supports nested paths, but
+                  no leading/trailing slashes.
               sourceImageName:
                 type: string
                 description: Source image name
@@ -1641,8 +1645,15 @@ $defs:
     type: string
     pattern: "^[^/]+$"
     description: >
-      Container registry hostname[:port]. No slashes — paths belong in the
+      Container registry hostname[:port]. No slashes; paths belong in the
       namespace field. Used wherever docker login/push/pull targets a registry.
+
+  registryNamespace:
+    type: string
+    pattern: "^[^/](.*[^/])?$"
+    description: >
+      Container registry namespace/organisation. Supports nested paths, but
+      no leading/trailing slashes.
 
   registryLogin:
     description: Registry authentication configuration. Type field selects the login method.
@@ -1780,8 +1791,10 @@ $defs:
         $ref: "#/$defs/registryDomain"
         description: Target registry domain
       namespace:
-        type: string
-        description: 'Target namespace/organisation (default: matches primary push)'
+        $ref: "#/$defs/registryNamespace"
+        description: >
+          Target namespace/organisation (default: matches primary push).
+          Supports nested paths, but no leading/trailing slashes.
 
   probeConfig:
     type: object
