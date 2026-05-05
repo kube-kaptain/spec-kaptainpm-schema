@@ -588,10 +588,12 @@ $defs:
           logins:
             type: object
             description: Registry login configuration keyed by domain
+            propertyNames:
+              $ref: "#/$defs/registryDomain"
             additionalProperties:
               $ref: "#/$defs/registryLogin"
           targetRegistry:
-            type: string
+            $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
           targetNamespace:
             type: string
@@ -633,7 +635,7 @@ $defs:
             description: Retag an upstream image rather than building from a Dockerfile
             properties:
               sourceRegistry:
-                type: string
+                $ref: "#/$defs/registryDomain"
                 description: 'Source registry domain (default: docker.io)'
               sourceNamespace:
                 type: string
@@ -1635,6 +1637,13 @@ $defs:
   # Shared building blocks
   # ---------------------------------------------------------------------------
 
+  registryDomain:
+    type: string
+    pattern: "^[^/]+$"
+    description: >
+      Container registry hostname[:port]. No slashes — paths belong in the
+      namespace field. Used wherever docker login/push/pull targets a registry.
+
   registryLogin:
     description: Registry authentication configuration. Type field selects the login method.
     type: object
@@ -1768,7 +1777,7 @@ $defs:
     description: Additional registry to push the built image to
     properties:
       registry:
-        type: string
+        $ref: "#/$defs/registryDomain"
         description: Target registry domain
       namespace:
         type: string
