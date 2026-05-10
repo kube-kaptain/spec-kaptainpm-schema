@@ -6,6 +6,7 @@
 # Post-section-2-migration: rejected (bounded port regex maxes at 65535) - GREEN.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     generators:

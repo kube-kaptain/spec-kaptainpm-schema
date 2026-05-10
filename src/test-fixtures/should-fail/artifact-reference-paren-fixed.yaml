@@ -6,6 +6,7 @@
 # (which is square-brackets only). Must fail validation.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   contents:
     - bundle-foo:(1.0.1)

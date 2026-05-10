@@ -6,6 +6,7 @@
 # accept them.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   global:
     tokens:

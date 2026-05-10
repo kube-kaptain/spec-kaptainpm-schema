@@ -5,3 +5,4 @@
 # Validates against spec-kaptainpm-schema.yaml (project/base variant).
 
 apiVersion: kaptain.org/1.2
+kind: basic-quality-and-versioning

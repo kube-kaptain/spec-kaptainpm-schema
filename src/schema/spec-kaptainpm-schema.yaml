@@ -13,11 +13,12 @@
 #   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed, metadata optional)
 #
 # Structural differences from this source:
-#   Base            minus layer-payload
-#   Final           like Base but kind is required
-#   Layer           minus layer-payload; minus spec.layers (layers cannot compose other layers)
-#   Layerset        like Layerset Source but artifactReferenceFixed (no ranges); metadata.labels and metadata.annotations required
-#   Layerset Source minus layer-payload; minus user-data; spec reduced to spec.layers only
+#   Base            minus layer-payload (kind required, inherited from source)
+#   Final           like Base (kind required, inherited from source)
+#   Layer Source    minus spec.layers (config layers cannot compose other layers); kind made optional
+#   Layer           like Layer Source but metadata.labels and metadata.annotations required; kind made optional
+#   Layerset        like Layerset Source but artifactReferenceFixed (no ranges); metadata.labels and metadata.annotations required; kind made optional
+#   Layerset Source minus layer-payload; minus user-data; spec reduced to spec.layers only; kind made optional
 #
 # Token substitution: ${Version} and ${ProjectName} are replaced at build time.
 
@@ -38,6 +39,7 @@ description: >
 type: object
 required:
   - apiVersion
+  - kind
 additionalProperties: false
 properties:
 

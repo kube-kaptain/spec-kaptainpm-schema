@@ -5,6 +5,7 @@
 # pins an exact version. Must validate against artifactReference.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   layers:
     - layer-github-flow-strict:[1.0.1]

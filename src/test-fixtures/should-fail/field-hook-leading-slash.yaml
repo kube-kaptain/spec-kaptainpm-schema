@@ -4,6 +4,7 @@
 # Hook script paths must be relative to the repository root - reject leading slash.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     hooks:

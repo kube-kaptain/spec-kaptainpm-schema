@@ -4,6 +4,7 @@
 # Registry namespace supports nested paths (internal slashes allowed).
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     docker:

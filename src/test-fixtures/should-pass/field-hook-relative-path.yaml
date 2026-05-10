@@ -4,6 +4,7 @@
 # Hook script paths are relative to the repository root.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     hooks:

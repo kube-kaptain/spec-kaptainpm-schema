@@ -54,13 +54,18 @@ The source schema is the superset. The hook generates six schemas from it:
 All schemas enforce string types on metadata labels and annotations via `additionalProperties: {type: string}`.
 Built artifact schemas (layer, layerset) additionally require labels and annotations with specific fields.
 
+`kind` is required at the source level, so the Project (in-repo) and Final
+schemas inherit the requirement directly. The layer/layerset variants strip
+`kind` back out of `required` because layers and layersets may legitimately
+serve any or all build kinds.
+
 Differences from source:
-- **Project**: `layer-payload` removed
-- **Final**: like Project but `kind` is required; build traceability metadata (the 6 `kaptain.org/*` fields) disallowed
-- **Layer Source**: `spec.layers` removed (config layers cannot reference other layers)
-- **Layer**: like Layer Source but `metadata.labels` and `metadata.annotations` required with build traceability fields
-- **Layerset Source**: `layer-payload` removed; `user-data` removed; all `spec.*` except `spec.layers` removed; `kind` kept
-- **Layerset**: like Layerset Source but `spec.layers` uses `artifactReferenceFixed` (no ranges); `metadata.labels` and `metadata.annotations` required with build traceability fields
+- **Project**: `layer-payload` removed; `kind` required (inherited from source)
+- **Final**: like Project; build traceability metadata (the 6 `kaptain.org/*` fields) disallowed
+- **Layer Source**: `spec.layers` removed (config layers cannot reference other layers); `kind` allowed but not required
+- **Layer**: like Layer Source but `metadata.labels` and `metadata.annotations` required with build traceability fields; `kind` allowed but not required
+- **Layerset Source**: `layer-payload` removed; `user-data` removed; all `spec.*` except `spec.layers` removed; `kind` allowed but not required
+- **Layerset**: like Layerset Source but `spec.layers` uses `artifactReferenceFixed` (no ranges); `metadata.labels` and `metadata.annotations` required with build traceability fields; `kind` allowed but not required
 
 ### Artifact References
 

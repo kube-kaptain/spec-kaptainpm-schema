@@ -5,6 +5,7 @@
 # the fixed-bracket alternative requires a matching closing ].
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   contents:
     - "bundle-foo:[1.0.1"

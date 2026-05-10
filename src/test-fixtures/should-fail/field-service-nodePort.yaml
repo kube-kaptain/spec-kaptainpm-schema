@@ -4,6 +4,7 @@
 # Per-field bucket 4 check: service nodePort must reject below-min (<30000).
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     generators:

@@ -4,6 +4,7 @@
 # Per-field bucket 3 check: probe liveness grpcPort must reject above-max (>65535).
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     generators:

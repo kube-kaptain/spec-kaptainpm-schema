@@ -4,6 +4,7 @@
 # Registry domain must reject slashes - paths belong in the namespace field.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     docker:

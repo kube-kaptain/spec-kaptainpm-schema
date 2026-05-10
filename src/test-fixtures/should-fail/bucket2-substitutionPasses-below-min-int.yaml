@@ -6,6 +6,7 @@
 # Post-section-2-migration: rejected (integer minimum:1).
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   global:
     tokens:
