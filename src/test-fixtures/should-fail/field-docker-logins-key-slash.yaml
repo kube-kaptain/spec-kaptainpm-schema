@@ -4,6 +4,7 @@
 # Registry login keys are registry domains and must reject slashes.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     docker:

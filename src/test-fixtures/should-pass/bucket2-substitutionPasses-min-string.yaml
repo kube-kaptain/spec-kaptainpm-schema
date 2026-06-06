@@ -6,6 +6,7 @@
 # Post-section-2-migration: accepted (pattern ^[1-9][0-9]*$).
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   global:
     tokens:

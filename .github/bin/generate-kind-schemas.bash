@@ -66,10 +66,11 @@ yq eval '
 
 # Layer-source schema: pre-build layer with no metadata requirements
 # A layer has content; only a layerset composes other layers
-# kind is allowed: a layer typically declares the build type
+# kind is allowed but not required: layers may serve any/all build kinds
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
+  .required = (.required - ["kind"]) |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.json"
@@ -77,9 +78,11 @@ yq eval '
 
 # Layer schema: built/published layer with required metadata for build traceability
 # Like layer-source but metadata.labels and metadata.annotations are required
+# kind is allowed but not required: layers may serve any/all build kinds
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
+  .required = (.required - ["kind"]) |
   .properties.metadata.description = "Project metadata with required build traceability fields." |
   .properties.metadata.required = ["labels", "annotations"] |
   .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
@@ -89,6 +92,7 @@ yq eval '
 # Layerset schema: like layerset-source but with artifactReferenceFixed (no ranges)
 # and required metadata.labels and metadata.annotations for build traceability.
 # Used to validate built/published layerset images where all versions are pinned.
+# kind is allowed but not required: layersets may serve any/all build kinds
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
@@ -96,6 +100,7 @@ yq eval '
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
   .properties.spec.required = ["layers"] |
   .properties.spec.properties.layers."$ref" = "#/$defs/artifactReferenceFixedList" |
+  .required = (.required - ["kind"]) |
   .properties.metadata.description = "Project metadata with required build traceability fields." |
   .properties.metadata.required = ["labels", "annotations"] |
   .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
@@ -105,12 +110,12 @@ yq eval '
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-${Version}.json"
 ' "${source_schema}" | strip_source_header "layerset" > "${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml"
 
-# Final schema: same as base but kind is required and build traceability
-# metadata is disallowed (stripped by kaptain-init, injected later by build steps)
+# Final schema: same as base (kind is already required at the source level) and
+# build traceability metadata is disallowed (stripped by kaptain-init, injected
+# later by build steps)
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-final-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
-  .required = (.required + ["kind"] | unique) |
   .properties.metadata.properties.labels.properties["kaptain.org/version"] = false |
   .properties.metadata.properties.labels.properties["kaptain.org/project-name"] = false |
   .properties.metadata.properties.labels.properties["kaptain.org/owner"] = false |
@@ -125,13 +130,14 @@ yq eval '
 
 # Layerset-source schema: source/pre-build layerset with ranges allowed
 # A layerset only composes - no config content, no user-data, no layer-payload
-# kind is allowed: a layerset typically declares the build type for its consumers
+# kind is allowed but not required: layersets may serve any/all build kinds
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-source-${VERSION}.yaml"
 yq eval '
   del(.properties["layer-payload"]) |
   del(.properties["user-data"]) |
   .properties.spec.properties = {"layers": .properties.spec.properties.layers} |
   .properties.spec.required = ["layers"] |
+  .required = (.required - ["kind"]) |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layerset-source-${Version}.json"

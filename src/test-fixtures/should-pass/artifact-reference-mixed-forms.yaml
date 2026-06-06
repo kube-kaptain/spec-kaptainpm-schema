@@ -6,6 +6,7 @@
 # ([1.0,2.0)). All three must pass.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   contents:
     - bundle-exact:1.0.1

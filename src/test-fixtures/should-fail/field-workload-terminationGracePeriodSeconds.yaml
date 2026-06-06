@@ -4,6 +4,7 @@
 # Per-field bucket 1 check: workload terminationGracePeriodSeconds must reject negatives.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   main:
     generators:

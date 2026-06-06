@@ -6,6 +6,7 @@
 # Post-section-2-migration: accepted (integer minimum:1) - GREEN.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   global:
     tokens:

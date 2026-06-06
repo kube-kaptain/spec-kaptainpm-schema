@@ -6,6 +6,7 @@
 # reject it. Both oneOf branches must fail for validation to fail overall.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   global:
     tokens:

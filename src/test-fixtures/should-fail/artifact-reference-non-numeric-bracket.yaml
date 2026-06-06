@@ -6,6 +6,7 @@
 # dot-separated integers.
 
 apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
 spec:
   contents:
     - bundle-foo:[abc]
