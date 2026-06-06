@@ -344,8 +344,10 @@ spec:
 
     manifests:
       subPath: src/kubernetes
+      allowLocalOverride: true
       defaults:
         subPath: src/defaults
+        allowLocalOverride: true
       repoProvider:
         type: docker
         packagingBaseImage: scratch

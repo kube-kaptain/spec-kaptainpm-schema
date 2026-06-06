@@ -1389,6 +1389,22 @@ $defs:
           subPath:
             type: string
             description: 'Directory containing manifests (default: src/kubernetes)'
+          allowLocalOverride:
+            oneOf:
+              - type: boolean
+              - type: string
+                pattern: "^(true|false)$"
+            description: >
+              When true, manifests from the local src/kubernetes directory may
+              override manifests contributed by foreign sources (referenced
+              bundles in a product build, vendor renderers, pre-package-prepare
+              hooks) staged under
+              ${OUTPUT_SUB_PATH}/manifests/additional-manifests/, with a WARN
+              log per override. When false (default), any path collision
+              between local and foreign manifests fails the build. The reserved
+              kaptain-{product,app,bundle,environment}-lineage-data.yaml
+              filenames are checked separately and always fail on collision
+              regardless of this flag.
           defaults:
             type: object
             additionalProperties: false
@@ -1396,6 +1412,18 @@ $defs:
               subPath:
                 type: string
                 description: 'Directory containing default token values (default: src/defaults)'
+              allowLocalOverride:
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
+                description: >
+                  When true, defaults from the local src/defaults directory may
+                  override defaults contributed by foreign sources staged under
+                  ${OUTPUT_SUB_PATH}/manifests/additional-defaults/, with a
+                  WARN log per override. When false (default), local defaults
+                  must be byte-identical to any foreign default of the same
+                  name or the build fails.
           repoProvider:
             type: object
             additionalProperties: false
@@ -1407,38 +1435,6 @@ $defs:
               packagingBaseImage:
                 type: string
                 description: 'Base image for manifest packaging (default: scratch)'
-
-      product:
-        type: object
-        additionalProperties: false
-        description: >
-          Product build configuration. Applies only to kubernetes-product builds
-          which aggregate manifest bundles listed in spec.contents.
-        properties:
-          allowLocalDefaultsOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
-            description: >
-              When true, defaults from the local src/defaults directory may
-              override defaults contributed by referenced bundles, with a WARN
-              log per override. When false (default), local defaults must be
-              byte-identical to any bundle-contributed default of the same name
-              or the build fails.
-          allowLocalManifestsOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
-            description: >
-              When true, manifests from the local src/kubernetes directory may
-              override manifests contributed by referenced bundles, with a WARN
-              log per override. When false (default), local manifests must not
-              collide with any bundle-contributed manifest of the same path or
-              the build fails. The reserved filename
-              kaptain-product-lineage-data.yaml is checked separately and
-              always fails on collision regardless of this flag.
 
       changeSource:
         type: object
