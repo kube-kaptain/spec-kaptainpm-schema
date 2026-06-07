@@ -1435,6 +1435,19 @@ $defs:
               packagingBaseImage:
                 type: string
                 description: 'Base image for manifest packaging (default: scratch)'
+          templatesLayout:
+            type: string
+            enum: [flat, foldered]
+            description: >
+              How spec.templates entries land in the manifest tree of an
+              app or bundle build. flat (default) merges every template's
+              manifests into the shared foreign-contributor drop dirs with
+              file-level collision detection, and each template's lineage
+              CM is folded into this project's lineage CM as a data key.
+              foldered keeps each template in its own per-bundle subdir,
+              like spec.contents in a product or environment build. Has
+              no effect on product or environment builds, where contents
+              always land per-bundle and templates do not apply.
 
       changeSource:
         type: object

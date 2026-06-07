@@ -351,6 +351,7 @@ spec:
       repoProvider:
         type: docker
         packagingBaseImage: scratch
+      templatesLayout: flat
 
     changeSource:
       noteEnabled: true
