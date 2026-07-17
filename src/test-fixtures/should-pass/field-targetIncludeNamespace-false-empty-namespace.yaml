@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2026 Kaptain contributors (Fred Cooke)
+#
+# targetIncludeNamespace=false with explicitly empty targetNamespace: valid -
+# empty string is treated as not configured, no contradiction.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    docker:
+      targetIncludeNamespace: false
+      targetNamespace: ""

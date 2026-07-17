@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2026 Kaptain contributors (Fred Cooke)
+#
+# targetIncludeNamespace=true alongside a configured targetNamespace: valid -
+# explicit form of the default behaviour. targetAllowNoRegistry alongside a
+# configured registry is moot but permitted.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    docker:
+      targetRegistry: ghcr.io
+      targetAllowNoRegistry: true
+      targetNamespace: kube-kaptain
+      targetIncludeNamespace: true
