@@ -572,6 +572,21 @@ $defs:
         type: object
         additionalProperties: false
         description: Container image build and retag configuration
+        # targetIncludeNamespace=false contradicts a non-empty targetNamespace;
+        # rejected in every variant, including the layer-merged final - a
+        # project consuming a namespace-setting layer with the flag off must
+        # resolve the conflict explicitly by setting targetNamespace: "" in
+        # the project file (which overrides the layer's value in the merge).
+        allOf:
+          - if:
+              properties:
+                targetIncludeNamespace:
+                  const: false
+              required: [targetIncludeNamespace]
+            then:
+              properties:
+                targetNamespace:
+                  const: ""
         properties:
           runtime:
             type: string
@@ -597,11 +612,36 @@ $defs:
           targetRegistry:
             $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
+          targetAllowNoRegistry:
+            type: boolean
+            description: >
+              Exempt this project from the load-time target registry check on
+              platforms that provide no registry default. Default false.
+              basic-quality-checks builds never require a registry; every
+              other build kind fails at load when no registry is configured
+              or platform-provided, unless this is true. Docker operations
+              (including in hooks) will still fail without a registry -
+              setting this owns that risk.
           targetNamespace:
-            $ref: "#/$defs/registryNamespace"
+            anyOf:
+              - $ref: "#/$defs/registryNamespace"
+              - const: ""
             description: >
               Target namespace/organisation for built images. Supports nested
-              paths, but no leading/trailing slashes.
+              paths, but no leading/trailing slashes. Empty string is treated
+              as not configured.
+          targetIncludeNamespace:
+            type: boolean
+            description: >
+              Include the namespace segment in built image URIs and
+              short-form reference expansion. Default true. Set false for
+              flat registry layouts: platform-injected namespace defaults are
+              disregarded, and a non-empty targetNamespace alongside false is
+              rejected by schema - in every variant, so a layer-contributed
+              namespace must be overridden with an explicit targetNamespace ""
+              in the project file. Layer resolution reads this from the
+              project file only - layers cannot influence the namespace used
+              to fetch the layers themselves.
           pushTargets:
             type: array
             description: Additional registries to push the built image to

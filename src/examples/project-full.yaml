@@ -94,7 +94,9 @@ spec:
           usernameSecret: DOCKERHUB_USER
           passwordSecret: DOCKERHUB_TOKEN
       targetRegistry: ghcr.io
+      targetAllowNoRegistry: false
       targetNamespace: kube-kaptain
+      targetIncludeNamespace: true
       pushTargets:
         - registry: docker.io
           namespace: kube-kaptain
