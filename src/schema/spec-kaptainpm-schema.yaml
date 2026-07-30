@@ -812,7 +812,7 @@ $defs:
                         description: CPU limit (omitted by default)
                       ephemeralStorage:
                         type: string
-                        description: 'Ephemeral storage request and limit (default: 10Mi)'
+                        description: 'Ephemeral storage request and limit (default: 60Mi)'
                   mounts:
                     type: object
                     additionalProperties: false
