@@ -9,8 +9,9 @@ apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
 spec:
   global:
-    tokens:
-      allowBuiltinOverride: 'true'
+    release:
+      versioning:
+        useSourceVersionExact: 'true'
   main:
     docker:
       dockerfile:

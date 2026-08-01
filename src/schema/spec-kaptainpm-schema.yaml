@@ -359,12 +359,6 @@ $defs:
               - ALL
             description: >
               MATCH enforces the nameStyle, ALL accepts any casing (default: MATCH)
-          allowBuiltinOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
-            description: 'Allow user tokens to override built-in tokens (default: false)'
           substitutionPasses:
             oneOf:
               - type: integer
