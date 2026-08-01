@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# builtinMode set on a kind that builds a deployable rather than something for
+# another build to consume. The root allOf guard must reject it, even though
+# the value itself is a valid enum member.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  global:
+    tokens:
+      builtinMode: template

@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# builtinMode stated as its default on a kind outside the permitted three. The
+# root allOf guard holds every other kind to standard rather than forbidding
+# the key, so writing the default out is allowed anywhere.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  global:
+    tokens:
+      builtinMode: standard

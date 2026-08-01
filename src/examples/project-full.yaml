@@ -48,6 +48,7 @@ spec:
       delimiterStyle: shell
       nameStyle: PascalCase
       nameValidation: MATCH
+      builtinMode: standard
       substitutionPasses: '1'
       valueTrailingNewline: strip-for-single-line
     release:
