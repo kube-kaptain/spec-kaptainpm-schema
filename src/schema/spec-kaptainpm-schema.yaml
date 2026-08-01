@@ -393,8 +393,8 @@ $defs:
             description: >
               standard substitutes built-in tokens with this build's own values.
               template leaves them unsubstituted for the consuming build and
-              emits this build's values under a Template prefix instead, so
-              ProjectName is the consumer's and TemplateProjectName is the
+              emits this build's values under an Original prefix instead, so
+              ProjectName is the consumer's and OriginalProjectName is the
               producer's. Only valid for the kinds that package manifests for
               another build to consume (default: standard)
           substitutionPasses:
