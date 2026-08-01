@@ -1,11 +1,11 @@
-apiVersion: kaptain.org/1.15
+apiVersion: kaptain.org/1.23
 kind: spec-check-filter-release
 metadata:
   description: "KaptainPM schema - JSON Schema for KaptainPM.yaml project manifests"
 
 spec:
   layers:
-    - layer-github-flow-strict:[1.2,2.0)
+    - layer-github-flow-strict:[1.3]
   global:
     release:
       versioning:
