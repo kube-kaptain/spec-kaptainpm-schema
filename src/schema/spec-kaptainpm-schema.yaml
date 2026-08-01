@@ -41,6 +41,32 @@ required:
   - apiVersion
   - kind
 additionalProperties: false
+# tokens.builtinMode only means anything in the flows that package manifests
+# for another build to consume, so every other kind is held to the default -
+# stating it is fine, turning it on is not. The guard is skipped when kind is
+# absent, which is how layers and layersets can carry the setting for a family
+# of template projects; the merged final has kind required, so misuse is
+# caught there.
+allOf:
+  - if:
+      required: [kind]
+      properties:
+        kind:
+          not:
+            enum:
+              - kubernetes-app-manifests-only
+              - kubernetes-bundle-resources
+              - kubernetes-bundle-vendor-helm-rendered
+    then:
+      properties:
+        spec:
+          properties:
+            global:
+              properties:
+                tokens:
+                  properties:
+                    builtinMode:
+                      const: standard
 properties:
 
   apiVersion:
@@ -359,6 +385,18 @@ $defs:
               - ALL
             description: >
               MATCH enforces the nameStyle, ALL accepts any casing (default: MATCH)
+          builtinMode:
+            type: string
+            enum:
+              - standard
+              - template
+            description: >
+              standard substitutes built-in tokens with this build's own values.
+              template leaves them unsubstituted for the consuming build and
+              emits this build's values under a Template prefix instead, so
+              ProjectName is the consumer's and TemplateProjectName is the
+              producer's. Only valid for the kinds that package manifests for
+              another build to consume (default: standard)
           substitutionPasses:
             oneOf:
               - type: integer

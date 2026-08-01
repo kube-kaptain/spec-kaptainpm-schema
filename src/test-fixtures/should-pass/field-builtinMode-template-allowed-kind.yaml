@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# builtinMode: template on one of the three kinds that package manifests for
+# another build to consume. The root allOf guard must let this through.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-resources
+spec:
+  global:
+    tokens:
+      builtinMode: template
