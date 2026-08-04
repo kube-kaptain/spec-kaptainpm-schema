@@ -17,6 +17,10 @@ src/
   examples/
     project-full.yaml                   # All fields populated - validates against project variant
     project-min.yaml                    # Only required fields - validates against project variant
+    env-full.yaml                       # All env fields populated - kind: kubernetes-run-environment
+    env-min.yaml                        # Only required env fields - kind: kubernetes-run-environment
+    runplatform-full.yaml               # All runPlatform fields populated - kind: kubernetes-run-platform-meta-environment
+    runplatform-min.yaml                # Only required runPlatform fields - kind: kubernetes-run-platform-meta-environment
     final-full.yaml                     # All fields populated - validates against final variant (kind required)
     final-min.yaml                      # Only required fields - validates against final variant (kind required)
     layer-source-full.yaml              # All fields populated - validates against layer-source variant (pre-build)

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# deployMode 'job' with no explicit imageAutoUpdateProvider is permitted
+# at the schema layer; the build's default-fill stage supplies 'keelson'.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      deployMode: job

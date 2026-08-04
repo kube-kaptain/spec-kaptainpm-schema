@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Minimal env KaptainPM.yaml - only required fields.
+# Validates against spec-kaptainpm-schema.yaml (project/base variant).
+#
+# kind: kubernetes-run-environment triggers the source-level mutex:
+# spec.main.environment is required; spec.main.runPlatform is forbidden.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment: {}
