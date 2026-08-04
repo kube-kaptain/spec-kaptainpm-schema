@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# deployMode 'job' with imageAutoUpdateProvider 'none' is valid - the
+# manually triggered special cronjob. Job-mode rejects only 'keel', which
+# does not support it; see should-fail/deploymode-job-keel.yaml.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      deployMode: job
+      imageAutoUpdateProvider: none

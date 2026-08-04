@@ -1,0 +1,109 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Full run-platform KaptainPM.yaml example - every spec.main.runPlatform
+# field populated, exercising the cleanup family, expectedUndeclaredResources,
+# additionalNamespaces oversight, and all per-class settings.
+#
+# Validates against spec-kaptainpm-schema.yaml (project/base variant).
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-platform-meta-environment
+metadata:
+  description: "example run-platform with all runPlatform fields populated"
+
+spec:
+  main:
+    runPlatform:
+      allowLocalManifestsOverride: false
+      failOnUnreferencedConfigOrSecrets: true
+      trustedContributorsOnly: false
+      imageAutoUpdateProvider: keel
+      imageAutoUpdatePolicy: all
+      imageAutoUpdateTrigger: default
+      imageAutoUpdatePollSchedule: 300s
+      # keelson-only knob, allowed but ignored under keel
+      imageAutoUpdateFieldManagerStrategy: claim
+      deployMode: deployment
+      checksumSecretsTiming: build
+      checksumLength: 5
+      checksumOrderFile: default-1.1.txt
+      signoffsSubPath: src/signoffs
+      signoffsKindsFile: default-1.1.txt
+      environmentDeploySourceBasePath: src/environment
+      generateIdealEnvironmentDeployManifests: true
+      environmentDeployBaseImage:
+        registry: ghcr.io
+        includeNamespace: true
+        namespace: kube-kaptain
+        family: trixie-slim
+        version: 1.0.12.1.35.1
+
+      cleanUp:
+        policy: dryrun
+
+        additionalResources:
+          - kind: ClusterRole
+            name: 'envoy-gateway-*'
+          - kind: ValidatingWebhookConfiguration
+            name: cert-manager-webhook
+
+        # Per-class retention - three types exercised, one per kind.
+        accumulatingResources:
+          jobs:
+            type: count
+            count: 10
+          configmaps:
+            type: age
+            age: 30d
+          secrets:
+            type: all
+
+        # Namespaces nobody declared at all. Reported, never touched, so a
+        # namespace appearing from elsewhere cannot be deleted by surprise.
+        undeclaredNamespacePolicy: dryrun
+
+        additionalNamespaces:
+          # Default for the entries below; each can override in either
+          # direction.
+          defaultPolicy: dryrun
+
+          namespaces:
+            # Strict allow-list posture with nothing permitted - anything
+            # found in this ns is unauthorized. Spelled out rather than
+            # implied, so the destructive reading is always deliberate.
+            - name: default
+              allowedResources: []
+
+            # kube-system - whitelist of well-known infra. Policy stays at
+            # the block default (dryrun) since this ns is the highest-risk
+            # one to act on.
+            - name: kube-system
+              allowedResources:
+                - kind: Pod
+                  labelSelector:
+                    matchLabels:
+                      k8s-app: kube-dns
+                - kind: Service
+                  name: kube-dns
+                - kind: Deployment
+                  labelSelector:
+                    matchLabels:
+                      k8s-app: coredns
+                - kind: ConfigMap
+                  name: 'coredns*'
+
+            # kube-public - ready to enforce. Per-entry override pushes
+            # this one ns to enabled while the block default stays dryrun.
+            - name: kube-public
+              policy: enabled
+              allowedResources:
+                - kind: ConfigMap
+                  name: cluster-info
+
+            # Deny-list posture: this ns belongs to someone else, so
+            # everything is tolerated except the things named here.
+            - name: kube-node-lease
+              deniedResources:
+                - kind: Job
+                  name: 'legacy-migration-*'

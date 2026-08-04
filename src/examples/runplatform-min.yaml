@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Minimal run-platform KaptainPM.yaml - only required fields.
+# Validates against spec-kaptainpm-schema.yaml (project/base variant).
+#
+# kind: kubernetes-run-platform-meta-environment triggers the source-level
+# mutex: spec.main.runPlatform is required; spec.main.environment is forbidden.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-platform-meta-environment
+spec:
+  main:
+    runPlatform: {}

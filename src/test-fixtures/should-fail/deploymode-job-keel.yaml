@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# deployMode 'job' with imageAutoUpdateProvider 'keel' must be rejected.
+# Keel does not support job-mode deploys; only Keelson does.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      deployMode: job
+      imageAutoUpdateProvider: keel

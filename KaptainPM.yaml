@@ -1,4 +1,4 @@
-apiVersion: kaptain.org/1.23
+apiVersion: kaptain.org/1.25
 kind: spec-check-filter-release
 metadata:
   description: "KaptainPM schema - JSON Schema for KaptainPM.yaml project manifests"

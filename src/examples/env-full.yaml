@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Full env KaptainPM.yaml example - every spec.main.environment field
+# populated, exercising the cleanup family, expectedUndeclaredResources,
+# and all per-class settings.
+#
+# Validates against spec-kaptainpm-schema.yaml (project/base variant).
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+metadata:
+  description: "example env with all environment fields populated"
+
+spec:
+  main:
+    environment:
+      allowLocalManifestsOverride: false
+      failOnUnreferencedConfigOrSecrets: true
+      trustedContributorsOnly: false
+      imageAutoUpdateProvider: keel
+      # force is Keel-only and requires the explicit keel provider above
+      imageAutoUpdatePolicy: force
+      imageAutoUpdateTrigger: poll
+      imageAutoUpdatePollSchedule: 5m
+      # keelson-only knob, allowed but ignored under keel
+      imageAutoUpdateFieldManagerStrategy: mimic
+      clusterScopedDelegation: parent
+      clusterScopedKindsFile: default-1.1.txt
+      deployMode: deployment
+      checksumSecretsTiming: build
+      checksumLength: 5
+      checksumOrderFile: default-1.1.txt
+      signoffsSubPath: src/signoffs
+      signoffsKindsFile: default-1.1.txt
+      environmentDeploySourceBasePath: src/environment
+      generateIdealEnvironmentDeployManifests: true
+      environmentDeployBaseImage:
+        registry: ghcr.io
+        includeNamespace: true
+        namespace: kube-kaptain
+        family: trixie-slim
+        version: 1.0.12.1.35.1
+
+      cleanUp:
+        # Policy for all non-accumulating resources
+        policy: dryrun
+
+        # Resources we did not declare but expect to exist; preserved from
+        # cleanup. Both matcher forms are exercised: name globs for stable
+        # names, and a label selector for controller-managed content whose
+        # names carry random suffixes.
+        additionalResources:
+          - kind: Deployment
+            name: '*envoy-gateway*'
+          - kind: StatefulSet
+            name: cert-manager
+          - kind: RoleBinding
+            name: webhook-server
+          - kind: Secret
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/managed-by: cert-manager
+
+        # Per-class retention - three types exercised, one per accumulating
+        # kind. Only these classes accumulate, which is why only these are
+        # individually controlled.
+        accumulatingResources:
+          # Jobs: count keeps the N most recent per cleanup-series.
+          jobs:
+            type: count
+            count: 10
+          # ConfigMaps: age deletes older than the duration.
+          configmaps:
+            type: age
+            age: 30d
+          # Secrets: all deletes any previously-declared, now-undeclared.
+          secrets:
+            type: all
