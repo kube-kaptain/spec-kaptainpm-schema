@@ -35,6 +35,10 @@ spec:
       signoffsKindsFile: default-1.1.txt
       environmentDeploySourceBasePath: src/environment
       generateIdealEnvironmentDeployManifests: true
+      # How a run-platform applies this environment's deploy-manifests set.
+      # Environment-only; the non-default value shown here since the
+      # default is seed-and-compare.
+      imageDeployManifestsApplyMode: enforce-state-normally
       environmentDeployBaseImage:
         registry: ghcr.io
         includeNamespace: true
