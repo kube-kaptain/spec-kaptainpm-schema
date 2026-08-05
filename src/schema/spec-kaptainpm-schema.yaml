@@ -1537,7 +1537,7 @@ $defs:
               override manifests contributed by foreign sources (referenced
               bundles in a product build, vendor renderers, pre-package-prepare
               hooks) staged under
-              ${OUTPUT_SUB_PATH}/manifests/additional-manifests/, with a WARN
+              <OUTPUT_SUB_PATH>/manifests/additional-manifests/, with a WARN
               log per override. When false (default), any path collision
               between local and foreign manifests fails the build. The reserved
               kaptain-{product,app,bundle,environment}-lineage-data.yaml
@@ -1558,7 +1558,7 @@ $defs:
                 description: >
                   When true, defaults from the local src/defaults directory may
                   override defaults contributed by foreign sources staged under
-                  ${OUTPUT_SUB_PATH}/manifests/additional-defaults/, with a
+                  <OUTPUT_SUB_PATH>/manifests/additional-defaults/, with a
                   WARN log per override. When false (default), local defaults
                   must be byte-identical to any foreign default of the same
                   name or the build fails.
