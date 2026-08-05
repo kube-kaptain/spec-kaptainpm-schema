@@ -1631,6 +1631,10 @@ $defs:
             $ref: "#/$defs/runEnvEnvironmentDeploySourceBasePath"
           generateIdealEnvironmentDeployManifests:
             $ref: "#/$defs/runEnvGenerateIdealEnvironmentDeployManifests"
+          # How a run-platform applies this environment's deploy-manifests
+          # set. Environment-only since run-platforms deploy themselves.
+          imageDeployManifestsApplyMode:
+            $ref: "#/$defs/runEnvImageDeployManifestsApplyMode"
           environmentDeployBaseImage:
             $ref: "#/$defs/runEnvEnvironmentDeployBaseImage"
           # Every cleanup setting lives in one block, so each name inside it
@@ -2268,6 +2272,33 @@ $defs:
       environmentDeployBaseImage is unaffected and may still be set
       independently - it drives the Dockerfile FROM line of the env
       deploy image build, not the manifests.
+
+  runEnvImageDeployManifestsApplyMode:
+    type: string
+    enum: [seed-and-compare, enforce-state-normally]
+    default: seed-and-compare
+    description: >
+      How a run-platform applies this environment's deploy-manifests set -
+      the manifests that install and run this environment's deploy image.
+
+      'seed-and-compare' (default) - the run-platform applies the set when
+      it is absent. Thereafter it compares the manifests against what is in
+      the cluster and changes things only when the config, secrets or other
+      structural values differ; when it does, the image version tag used is
+      the later of the manifests version and the in-cluster version, so an
+      environment already upgraded past what was seeded is never rolled
+      backwards. Suits an environment that will be upgraded directly after
+      seeding, whether by its own image auto-update provider or by a
+      deliberate out-of-band change.
+
+      'enforce-state-normally' - the run-platform applies the set every run
+      like any other resource, so the environment's deployer is
+      continuously reconciled to what was shipped.
+
+      Environment-only setting since run-platforms deploy themselves. When
+      set to seed-and-compare the environment deploy manifest set is marked
+      so the run-platform deployment can identify them for special
+      treatment.
 
   runEnvEnvironmentDeployBaseImage:
     type: object
