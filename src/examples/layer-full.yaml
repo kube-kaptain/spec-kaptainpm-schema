@@ -169,7 +169,7 @@ spec:
 
         scheduling:
           affinityStrategy: spread-nodes-and-zones-ha
-          tolerations: 'key=workload,value=standard,effect=NoSchedule'
+          tolerations: '[{"key":"workload","value":"standard","effect":"NoSchedule"}]'
           nodeSelector: 'tier=standard'
           dnsPolicy: ClusterFirst
           priorityClassName: default-priority
@@ -254,7 +254,7 @@ spec:
         runAsNonRoot: true
         privileged: 'false'
         dnsPolicy: ClusterFirst
-        tolerations: 'key=node-role.kubernetes.io/control-plane,effect=NoSchedule'
+        tolerations: '[{"key":"node-role.kubernetes.io/control-plane","effect":"NoSchedule"}]'
         nodeSelector: 'node-type=worker'
 
       cronjob:

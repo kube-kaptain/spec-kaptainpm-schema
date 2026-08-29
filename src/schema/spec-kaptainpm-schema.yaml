@@ -970,9 +970,11 @@ $defs:
                     description: 'Pod affinity strategy (default: spread-nodes-and-zones-ha)'
                   tolerations:
                     type: string
+                    pattern: "^\\[.*\\]$"
                     description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
                   nodeSelector:
                     type: string
+                    pattern: "^[^=,]+=[^,]*(,[^=,]+=[^,]*)*$"
                     description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
                   dnsPolicy:
                     type: string
@@ -1141,9 +1143,11 @@ $defs:
                 description: Pod DNS policy
               tolerations:
                 type: string
+                pattern: "^\\[.*\\]$"
                 description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
               nodeSelector:
                 type: string
+                pattern: "^[^=,]+=[^,]*(,[^=,]+=[^,]*)*$"
                 description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
 
           cronjob:

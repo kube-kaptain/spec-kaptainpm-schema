@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Pod placement formats, all four fields in one fixture. Tolerations are a JSON
+# array, nodeSelector is comma-separated key=value pairs, in both the workload
+# scheduling block and the daemonset block. Every value must validate for this
+# fixture to pass, so one file proves the accept path for all four.
+#
+# Multi-entry values deliberately: the examples only ever carry a single
+# toleration and a single key=value pair.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      workload:
+        scheduling:
+          tolerations: '[{"key":"workload","value":"standard","effect":"NoSchedule"},{"key":"spot","operator":"Exists"}]'
+          nodeSelector: 'disktype=ssd,zone=us-east-1a'
+      daemonset:
+        tolerations: '[{"key":"node-role.kubernetes.io/control-plane","effect":"NoSchedule"},{"operator":"Exists"}]'
+        nodeSelector: 'node-type=worker,tier=system'

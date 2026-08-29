@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# workload.scheduling.tolerations must be a JSON array. The comma-separated
+# key=value form passes through yq as a bare scalar and the generator emits it
+# unindented under `tolerations:`, producing YAML that cannot be parsed at all.
+# One bad value only, so the rejection can only be this field.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      workload:
+        scheduling:
+          tolerations: 'key=workload,value=standard,effect=NoSchedule'

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# daemonset.nodeSelector must be comma-separated key=value pairs, same as the
+# workload scheduling field. Covered separately because the two are independent
+# schema nodes. One bad value only, so the rejection can only be this field.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      daemonset:
+        nodeSelector: 'tier'
