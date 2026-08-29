@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# consumerReferenceForms is a closed enum of short-only, short-first,
+# full-first and full-only. 'both' is the obvious wrong guess for wanting two
+# references and says nothing about their order, so it must be rejected rather
+# than silently ignored. One bad value only, so the rejection can only be this
+# field.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  platform:
+    githubActions:
+      release:
+        consumerReferenceForms: both

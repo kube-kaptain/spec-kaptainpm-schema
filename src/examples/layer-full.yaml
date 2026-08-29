@@ -382,3 +382,4 @@ spec:
         notesFile: RELEASE_NOTES.md
         substitutedFiles: 'README.md'
         verbatimFiles: 'LICENSE.md'
+        consumerReferenceForms: full-first
