@@ -970,10 +970,10 @@ $defs:
                     description: 'Pod affinity strategy (default: spread-nodes-and-zones-ha)'
                   tolerations:
                     type: string
-                    description: Pod tolerations (scripts read KaptainPM.yaml directly for complex values)
+                    description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
                   nodeSelector:
                     type: string
-                    description: Node selector (scripts read KaptainPM.yaml directly for complex values)
+                    description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
                   dnsPolicy:
                     type: string
                     description: Pod DNS policy
@@ -1141,10 +1141,10 @@ $defs:
                 description: Pod DNS policy
               tolerations:
                 type: string
-                description: Pod tolerations
+                description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
               nodeSelector:
                 type: string
-                description: Node selector
+                description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
 
           cronjob:
             type: object
