@@ -605,6 +605,26 @@ $defs:
               verbatimFiles:
                 type: string
                 description: Comma-separated files to attach to the release as-is
+              consumerReferenceForms:
+                type: string
+                enum:
+                  - short-only
+                  - short-first
+                  - full-first
+                  - full-only
+                description: >
+                  Which references the "How to Consume" section of the release
+                  notes shows, and in which order. Four values:
+                    short-only   org-local reference alone (default)
+                    short-first  both, org-local reference first
+                    full-first   both, fully qualified reference first
+                    full-only    fully qualified reference alone
+                  The short form resolves against the consumer's own registry
+                  and namespace defaults, so it only reaches this org. The full
+                  form carries registry, namespace, prefix and name, and works
+                  from any org, registry or platform. Private in-house projects
+                  want the default; open source projects want full-first;
+                  vendor packages consumed only from other orgs want full-only.
 
   # ---------------------------------------------------------------------------
   # spec.main
@@ -970,10 +990,12 @@ $defs:
                     description: 'Pod affinity strategy (default: spread-nodes-and-zones-ha)'
                   tolerations:
                     type: string
-                    description: Pod tolerations (scripts read KaptainPM.yaml directly for complex values)
+                    pattern: "^\\[.*\\]$"
+                    description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
                   nodeSelector:
                     type: string
-                    description: Node selector (scripts read KaptainPM.yaml directly for complex values)
+                    pattern: "^[^=,]+=[^,]*(,[^=,]+=[^,]*)*$"
+                    description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
                   dnsPolicy:
                     type: string
                     description: Pod DNS policy
@@ -1141,10 +1163,12 @@ $defs:
                 description: Pod DNS policy
               tolerations:
                 type: string
-                description: Pod tolerations
+                pattern: "^\\[.*\\]$"
+                description: 'Pod tolerations as a JSON array, e.g. [{"operator":"Exists"}]'
               nodeSelector:
                 type: string
-                description: Node selector
+                pattern: "^[^=,]+=[^,]*(,[^=,]+=[^,]*)*$"
+                description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
 
           cronjob:
             type: object
