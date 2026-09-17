@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The optional resolution-provider prefix names the plugin that resolves the
+# reference. It is legal on all three name forms and alongside every version
+# form. artifact-resolve strips it and dispatches on it; without it the
+# default provider (docker) applies.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - docker|bundle-short:1.0.1
+    - docker|bundle-bracket:[1.0.1]
+    - docker|bundle-range:[1.0,2.0)
+    - docker|bundle-prerelease:1.0-PRERELEASE
+    - docker|prefix/prefix-name:1.0.1
+    - docker|sub.domain/namespace/my/my-name:[1.2.3]
+    - docker|registry.io:5000/namespace/pre/pre-name:1.0
+    - two-word|bundle-hyphenated-provider:1.0
