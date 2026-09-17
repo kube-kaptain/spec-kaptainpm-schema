@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Digest pinning on every name form, with and without a provider prefix. The
+# full form with a registry port is the interesting one: the reference then
+# carries three colons, two of which are not the version separator.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-short:1.2@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - prefix/prefix-name:1.2@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - sub.domain/namespace/my/my-name:1.2@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+    - ghcr.io/kube-kaptain/bundle/bundle-foo:[1.2]@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - registry.io:5000/namespace/pre/pre-name:1.2@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+    - docker|bundle-with-provider:1.2@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - docker|registry.io:5000/namespace/pre/pre-name:[1.2]@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789

@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# sha256 is the only accepted digest algorithm.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-foo:1.2@sha1:0123456789abcdef0123456789abcdef01234567
