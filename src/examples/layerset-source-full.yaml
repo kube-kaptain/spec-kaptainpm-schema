@@ -4,6 +4,7 @@
 # Full layerset-source KaptainPM.yaml example with all allowed fields populated.
 # Validates against spec-kaptainpm-schema-layerset-source.yaml (source variant).
 # Source layersets may use version ranges - resolved to exact versions at build time.
+# An entry may still pin a digest, and may name its resolution provider.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
@@ -13,6 +14,6 @@ metadata:
 spec:
   layers:
     - layer-quality-defaults:[1.0,2.0)
-    - layer-docker-config:2.1
+    - docker|layer-docker-config:2.1
     - layer-k8s-generators:[1.5,2.0)
-    - layer-monitoring:1.2
+    - layer-monitoring:1.2@sha256:8b5b9db0c13db24256c829aa364aa90c6d2eba318b9232a4ab9313b954d3555f

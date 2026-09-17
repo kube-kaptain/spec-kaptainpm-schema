@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Ranges are the whole point of artifactReferenceFixed: a built layerset is locked, so a half-open range must be rejected.
+
+apiVersion: kaptain.org/1.2
+metadata:
+  labels:
+    kaptain.org/version: "1.0"
+    kaptain.org/project-name: "layerset-fixture"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layerset-fixture"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layerset-fixture:1.0"
+spec:
+  layers:
+    - layer-foo:[1.0,2.0)

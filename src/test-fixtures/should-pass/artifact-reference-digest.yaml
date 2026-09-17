@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# An exact version may be pinned further by an OCI digest, in either the bare
+# spelling (name:1.2@sha256:...) or after the fixed bracket
+# (name:[1.2]@sha256:...). The bare spelling is the OCI canonical form, so it
+# pastes straight out of a push log or a registry inspect.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-bare:1.2@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - bundle-bracket:[1.2]@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+    - bundle-one-part:1@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - bundle-four-part:1.7.1.5@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+    - bundle-prerelease:1.0-PRERELEASE@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    - bundle-bracket-prerelease:[1.0-PRERELEASE]@sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789

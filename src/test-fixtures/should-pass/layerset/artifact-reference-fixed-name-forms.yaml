@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# artifactReferenceFixed supports the same three name forms as
+# artifactReference, including a full form whose registry carries a port.
+
+apiVersion: kaptain.org/1.2
+metadata:
+  labels:
+    kaptain.org/version: "1.0"
+    kaptain.org/project-name: "layerset-fixture"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layerset-fixture"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layerset-fixture:1.0"
+spec:
+  layers:
+    - layer-short:1.0.1
+    - prefix/prefix-name:1.0.1
+    - sub.domain/namespace/my/my-name:1.2.3
+    - ghcr.io/single-segment:1.0
+    - registry.io:5000/namespace/pre/pre-name:1.0
+    - registry.io:5000/namespace/pre/pre-name:[1.0.1]

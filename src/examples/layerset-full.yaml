@@ -4,6 +4,8 @@
 # Full layerset KaptainPM.yaml example with all allowed fields populated.
 # Validates against spec-kaptainpm-schema-layerset.yaml (layerset variant).
 # Built layersets have pinned versions and required build traceability metadata.
+# A pinned version may carry a digest, locking the member to exact bytes rather
+# than to a tag that could later be moved. The digest is optional.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
@@ -20,7 +22,7 @@ metadata:
 
 spec:
   layers:
-    - layer-quality-defaults:1.0.5
-    - layer-docker-config:2.1
+    - layer-quality-defaults:1.0.5@sha256:8b5b9db0c13db24256c829aa364aa90c6d2eba318b9232a4ab9313b954d3555f
+    - layer-docker-config:2.1@sha256:04efaf080f5a3e74e1c29d1ca6a48569382cbbcd324e8d59d2b83ef21c039f00
     - layer-k8s-generators:1.5.2
     - layer-monitoring:1.2

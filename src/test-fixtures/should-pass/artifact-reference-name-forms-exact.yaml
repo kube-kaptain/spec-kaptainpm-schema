@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bare exact versions on all three name forms. Only the bracketed form was
+# previously covered for the prefixed and full name forms.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-short:1.0.1
+    - prefix/prefix-name:1.0.1
+    - sub.domain/namespace/my/my-name:1.2.3

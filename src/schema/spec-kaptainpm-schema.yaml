@@ -307,20 +307,30 @@ $defs:
         Short    name:version              (default registry and namespace)
         Prefixed prefix/name:version       (default registry, explicit namespace)
         Full     domain/path/name:version  (explicit registry - first segment contains a dot)
+      Any form may carry an optional resolution-provider prefix, "provider|",
+      naming the plugin that resolves it (e.g. docker|name:version). Omitted,
+      the default provider (docker) applies.
       Version is one of: an exact version (one or more dot-separated integers,
       optional -PRERELEASE suffix); a Maven-style fixed bracket form pinning
       that exact version (e.g. [1.0.1]); or a Maven-style range
-      (e.g. [1.0,2.0), (1.0,), (,2.0]).
+      (e.g. [1.0,2.0), (1.0,), (,2.0]). A range may omit one bound but not
+      both, and each bound it carries starts with a digit. Range bounds take
+      no -PRERELEASE suffix.
+      An exact version may be pinned further by an OCI digest, written after
+      the version in either spelling: name:1.2@sha256:<64 hex> or
+      name:[1.2]@sha256:<64 hex>. The digest never goes inside the bracket,
+      and a range takes no digest: a digest identifies one artifact, so there
+      is nothing left to resolve.
     oneOf:
       - description: "Short form: name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z][a-z0-9-]*:(([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
       - description: "Prefixed form: prefix/prefix-name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:(([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
       - description: "Full form: sub.domain/namespace/my/my-name:version-or-range (first segment contains a dot)"
         type: string
-        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:(([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
 
   artifactReferenceFixedList:
     type: array
@@ -331,18 +341,20 @@ $defs:
     description: >
       Artifact reference with a pinned exact version (no ranges allowed).
       Used in resolved/built artifacts where all versions must be concrete.
-      Same three forms as artifactReference. Version must be exact, written
-      either bare (1.0.1) or in Maven-style fixed bracket form ([1.0.1]).
+      Same three forms as artifactReference, and the same optional
+      resolution-provider prefix. Version must be exact, written either bare
+      (1.0.1) or in Maven-style fixed bracket form ([1.0.1]), and may carry
+      the same optional OCI digest suffix.
     oneOf:
       - description: "Short form: name:version"
         type: string
-        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?$"
       - description: "Prefixed form: prefix/prefix-name:version"
         type: string
-        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?$"
       - description: "Full form: sub.domain/namespace/my/my-name:version (first segment contains a dot)"
         type: string
-        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])$"
+        pattern: "^([a-z][a-z0-9-]*\\|)?[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\])(@sha256:[0-9a-f]{64})?$"
 
   # ---------------------------------------------------------------------------
   # spec.data

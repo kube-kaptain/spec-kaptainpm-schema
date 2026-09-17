@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Full-form shapes beyond the usual four-segment path. The registry-with-port
+# case is the only legal reference that already contains a second colon, so it
+# is load-bearing for anything that splits a reference on the colon.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - ghcr.io/single-segment:1.0
+    - ghcr.io/kube-kaptain/bundle/bundle-foo:1.0
+    - registry.io:5000/namespace/pre/pre-name:1.0
+    - registry.io:5000/namespace/pre/pre-name:[1.0,2.0)
+    - registry.io:5000/namespace/pre/pre-name:[1.0.1]

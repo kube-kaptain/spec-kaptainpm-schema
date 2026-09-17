@@ -77,7 +77,38 @@ Two reference types are defined in the schema:
 - **`artifactReference`** — accepts exact versions (`1.2.3`, `1.0-PRERELEASE`) AND Maven-style range syntax (`[1.0,2.0)`, `(1.0,)`, etc). Used by default in all schemas.
 - **`artifactReferenceFixed`** — exact versions only, no ranges. Used only in the layerset schema (built artifacts).
 
-These are generic artifact references, not OCI-specific — the artifact system has pluggable providers.
+Both accept the same three name forms (short, prefixed, full), and both accept
+two optional additions:
+
+- **Provider prefix** (`docker|name:1.0`): names the resolution plugin. Omitted,
+  the default provider (docker) applies. Legal on every name and version form.
+- **Digest pin** (`name:1.2@sha256:<64 hex>` or `name:[1.2]@sha256:<64 hex>`):
+  locks an exact version to exact bytes. The digest goes after the version,
+  never inside the bracket, and never on a range: a digest identifies one
+  artifact, so there is nothing left to resolve.
+
+Range bounds are plain numeric versions with no `-PRERELEASE` suffix. A range
+may omit one bound but not both, and each bound it carries starts with a digit.
+
+A range with a lower bound above its upper bound, or with equal bounds excluded
+by the brackets, matches nothing. The schema cannot reject those: patterns are
+regexes and a regex cannot compare one captured number against another. They are
+rejected at resolution time instead, by `version_resolve_range` in
+buildon-github-actions.
+
+These are generic artifact references rather than OCI-specific ones, since the
+artifact system has pluggable providers. The digest suffix is the one exception:
+`sha256` is an OCI concept, and a provider with no equivalent simply rejects a
+reference carrying one.
+
+### Fixture coverage
+
+`src/test-fixtures/should-pass/` and `should-fail/` validate against the project
+schema. A fixture in a subdirectory validates against the schema variant the
+subdirectory is named after, so `should-fail/layerset/x.yaml` runs against
+`spec-kaptainpm-schema-layerset-${VERSION}.yaml`. That routing is what gives
+`artifactReferenceFixed` any coverage at all, since the project schema never
+uses it.
 
 A **layerset** is a pure composition unit — an ordered list of layers (and/or
 other layersets) that expands in-place during layer resolution. It has no config

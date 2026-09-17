@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Built layersets pin exact versions via artifactReferenceFixed. Both the bare
+# and the Maven fixed-bracket spellings are accepted, with or without the
+# -PRERELEASE suffix, at any segment count.
+
+apiVersion: kaptain.org/1.2
+metadata:
+  labels:
+    kaptain.org/version: "1.0"
+    kaptain.org/project-name: "layerset-fixture"
+    kaptain.org/owner: "kube-kaptain"
+  annotations:
+    kaptain.org/built-by: "github-actions"
+    kaptain.org/source-repository: "kube-kaptain/layerset-fixture"
+    kaptain.org/image-uri: "ghcr.io/kube-kaptain/layerset-fixture:1.0"
+spec:
+  layers:
+    - layer-one-part:1
+    - layer-two-part:1.0
+    - layer-four-part:1.7.1.5
+    - layer-bracket:[1.0.1]
+    - layer-bracket-one-part:[1]
+    - layer-prerelease:1.0-PRERELEASE
+    - layer-bracket-prerelease:[1.0-PRERELEASE]

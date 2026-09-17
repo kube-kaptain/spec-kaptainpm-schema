@@ -3,6 +3,8 @@
 #
 # Full project KaptainPM.yaml example with all fields populated.
 # Validates against spec-kaptainpm-schema.yaml (project/base variant).
+# The reference lists show the syntax available at source level: an exact
+# version, a range, an optional provider prefix, and an optional digest pin.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
@@ -19,12 +21,13 @@ spec:
 
   layers:
     - kaptain-base-layer:1.2.3
+    - docker|kaptain-quality-layer:[1.0,2.0)
 
   templates:
     - web-service-template:1.0
 
   contents:
-    - my-app-manifests:3.0.1
+    - my-app-manifests:3.0.1@sha256:7692c3ad3540bb803c020b3aee66cd8887123234ea0c6e7143c0add73ff431ed
 
   credentials:
     - GHCR_TOKEN

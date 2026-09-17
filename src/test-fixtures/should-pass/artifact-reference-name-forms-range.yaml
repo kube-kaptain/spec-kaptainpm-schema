@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Ranges on all three name forms. Previously only the short form was covered
+# with range syntax.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-short:[1.0,2.0)
+    - prefix/prefix-name:[1.0,2.0)
+    - sub.domain/namespace/my/my-name:[1.0,2.0)
