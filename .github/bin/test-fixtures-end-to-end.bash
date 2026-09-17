@@ -2,11 +2,24 @@
 # SPDX-License-Identifier: CC0-1.0
 # This file is released to the public domain. Use freely without attribution.
 #
-# Layer 2: end-to-end fixture tests against the real (substituted) project
-# schema. Walks two directories:
+# Layer 2: end-to-end fixture tests against the real (substituted) schemas.
+# Walks two expectation directories:
 #
-#   src/test-fixtures/should-pass/*.yaml  - must validate clean
-#   src/test-fixtures/should-fail/*.yaml  - must FAIL validation
+#   src/test-fixtures/should-pass/  - must validate clean
+#   src/test-fixtures/should-fail/  - must FAIL validation
+#
+# Fixtures sitting directly in an expectation directory are validated against
+# the project schema. Fixtures in a subdirectory are validated against the
+# schema variant the subdirectory is named after, so the subdirectory name is
+# the variant infix in the generated filename:
+#
+#   should-pass/foo.yaml            -> spec-kaptainpm-schema-${VERSION}.yaml
+#   should-pass/layerset/foo.yaml   -> spec-kaptainpm-schema-layerset-${VERSION}.yaml
+#   should-fail/layer-source/x.yaml -> spec-kaptainpm-schema-layer-source-${VERSION}.yaml
+#
+# Variants that only exist in a non-project schema (artifactReferenceFixed is
+# the motivating case - it is used by the layerset schema and nowhere else)
+# have no coverage at all without this routing.
 #
 # Accumulates all failures and exits non-zero at the end.
 #
@@ -28,50 +41,94 @@ else
   yaml_dir="${OUTPUT_SUB_PATH}/docker/substituted/yaml"
 fi
 
-SCHEMA="${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml"
-
 FAILED=()
 ERR_TMP="$(mktemp)"
 trap 'rm -f "${ERR_TMP}"' EXIT
 
-PASS_DIR="src/test-fixtures/should-pass"
-FAIL_DIR="src/test-fixtures/should-fail"
+FIXTURES_ROOT="src/test-fixtures"
 
-echo "Validating should-pass fixtures (must validate clean)..."
-if [[ -d "${PASS_DIR}" ]]; then
+# Generated schema file for a variant. Empty variant means the project schema,
+# which carries no infix.
+schema_for_variant() {
+  local variant="$1"
+  if [[ -z "${variant}" ]]; then
+    echo "${yaml_dir}/spec-kaptainpm-schema-${VERSION}.yaml"
+  else
+    echo "${yaml_dir}/spec-kaptainpm-schema-${variant}-${VERSION}.yaml"
+  fi
+}
+
+# Validate every *.yaml directly inside <dir> against <schema>, asserting the
+# outcome named by <expectation>. Nested directories are handled by the caller,
+# not recursed into here.
+#
+# Usage: validate_dir <dir> <schema> <should-pass|should-fail> <label>
+validate_dir() {
+  local dir="$1"
+  local schema="$2"
+  local expectation="$3"
+  local label="$4"
+
+  if [[ ! -f "${schema}" ]]; then
+    echo "  ${label}: FAIL (schema not found: ${schema})"
+    FAILED+=("${label} (missing schema $(basename "${schema}"))")
+    return 0
+  fi
+
+  local found=0
+  local fixture name
   shopt -s nullglob
-  for fixture in "${PASS_DIR}"/*.yaml; do
+  for fixture in "${dir}"/*.yaml; do
+    found=1
     name="$(basename "${fixture}")"
-    if check-jsonschema --schemafile "${SCHEMA}" "${fixture}" >"${ERR_TMP}" 2>&1; then
-      echo "  ${name}: ok"
+    if check-jsonschema --schemafile "${schema}" "${fixture}" >"${ERR_TMP}" 2>&1; then
+      if [[ "${expectation}" == "should-pass" ]]; then
+        echo "  ${label}/${name}: ok"
+      else
+        echo "  ${label}/${name}: FAIL (expected fail, got pass)"
+        FAILED+=("${label}/${name}")
+      fi
     else
-      echo "  ${name}: FAIL (expected pass, got fail)"
-      sed 's/^/      /' "${ERR_TMP}"
-      FAILED+=("should-pass/${name}")
+      if [[ "${expectation}" == "should-fail" ]]; then
+        echo "  ${label}/${name}: ok (correctly rejected)"
+      else
+        echo "  ${label}/${name}: FAIL (expected pass, got fail)"
+        sed 's/^/      /' "${ERR_TMP}"
+        FAILED+=("${label}/${name}")
+      fi
     fi
   done
   shopt -u nullglob
-else
-  echo "  (no should-pass directory)"
-fi
 
-echo ""
-echo "Validating should-fail fixtures (must FAIL validation)..."
-if [[ -d "${FAIL_DIR}" ]]; then
+  if [[ ${found} -eq 0 ]]; then
+    echo "  ${label}: (no fixtures)"
+  fi
+}
+
+for expectation in should-pass should-fail; do
+  base="${FIXTURES_ROOT}/${expectation}"
+  echo ""
+  if [[ "${expectation}" == "should-pass" ]]; then
+    echo "Validating should-pass fixtures (must validate clean)..."
+  else
+    echo "Validating should-fail fixtures (must FAIL validation)..."
+  fi
+
+  if [[ ! -d "${base}" ]]; then
+    echo "  (no ${expectation} directory)"
+    continue
+  fi
+
+  validate_dir "${base}" "$(schema_for_variant "")" "${expectation}" "${expectation}"
+
   shopt -s nullglob
-  for fixture in "${FAIL_DIR}"/*.yaml; do
-    name="$(basename "${fixture}")"
-    if check-jsonschema --schemafile "${SCHEMA}" "${fixture}" >"${ERR_TMP}" 2>&1; then
-      echo "  ${name}: FAIL (expected fail, got pass)"
-      FAILED+=("should-fail/${name}")
-    else
-      echo "  ${name}: ok (correctly rejected)"
-    fi
+  for variant_dir in "${base}"/*/; do
+    variant="$(basename "${variant_dir}")"
+    validate_dir "${variant_dir%/}" "$(schema_for_variant "${variant}")" \
+      "${expectation}" "${expectation}/${variant}"
   done
   shopt -u nullglob
-else
-  echo "  (no should-fail directory)"
-fi
+done
 
 echo ""
 if [[ ${#FAILED[@]} -gt 0 ]]; then

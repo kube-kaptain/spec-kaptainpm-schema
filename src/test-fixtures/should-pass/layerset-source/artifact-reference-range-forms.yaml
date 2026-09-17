@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Source layersets resolve at build time, so they accept the full range syntax.
+# This is the counterpart to the should-fail/layerset fixtures: the same
+# references are legal here and illegal once built.
+
+apiVersion: kaptain.org/1.2
+spec:
+  layers:
+    - layer-inc-exc:[1.0,2.0)
+    - layer-inc-inc:[1.0,2.0]
+    - layer-exc-exc:(1.0,2.0)
+    - layer-open-upper:[1.0,)
+    - layer-open-lower:(,2.0]
+    - layer-exact:1.0.1
+    - layer-bracket:[1.0.1]

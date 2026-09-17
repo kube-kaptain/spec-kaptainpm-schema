@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The -PRERELEASE suffix on exact versions, bare and inside the fixed bracket.
+# Prerelease versions are local-only by convention but are valid spec syntax.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-bare:1.0-PRERELEASE
+    - bundle-three-part:1.0.1-PRERELEASE
+    - bundle-bracket:[1.0-PRERELEASE]

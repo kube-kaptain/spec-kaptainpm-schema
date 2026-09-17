@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Every Maven range bracket combination. Square is inclusive, round is
+# exclusive, and either bound may be omitted.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-inc-exc:[1.0,2.0)
+    - bundle-inc-inc:[1.0,2.0]
+    - bundle-exc-exc:(1.0,2.0)
+    - bundle-exc-inc:(1.0,2.0]
+    - bundle-inc-open-upper:[1.0,)
+    - bundle-exc-open-upper:(1.0,)
+    - bundle-open-lower-inc:[,2.0]
+    - bundle-open-lower-exc:(,2.0)

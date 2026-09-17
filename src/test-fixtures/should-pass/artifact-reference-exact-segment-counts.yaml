@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Bare and bracketed exact versions across every supported segment count. The
+# version is one or more dot-separated integers, so a single segment is legal
+# and there is no upper bound on parts.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  contents:
+    - bundle-one-part:1
+    - bundle-two-part:1.0
+    - bundle-three-part:1.0.1
+    - bundle-four-part:1.7.1.5
+    - bundle-bracket-one-part:[1]
+    - bundle-bracket-four-part:[1.7.1.5]
