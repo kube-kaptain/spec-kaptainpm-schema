@@ -4,6 +4,7 @@
 # Full layer KaptainPM.yaml example with all fields populated.
 # Validates against spec-kaptainpm-schema-layer.yaml (built layer variant).
 # Built layers have injected metadata. Layers have layer-payload but cannot have spec.layers.
+# References may carry an optional provider prefix and an optional digest pin.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-app-docker-dockerfile
@@ -34,10 +35,10 @@ layer-payload:
 spec:
 
   templates:
-    - web-service-template:1.0
+    - docker|web-service-template:1.0
 
   contents:
-    - my-app-manifests:3.0.1
+    - my-app-manifests:3.0.1@sha256:3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3
 
   credentials:
     - GHCR_TOKEN
