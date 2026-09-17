@@ -310,17 +310,19 @@ $defs:
       Version is one of: an exact version (one or more dot-separated integers,
       optional -PRERELEASE suffix); a Maven-style fixed bracket form pinning
       that exact version (e.g. [1.0.1]); or a Maven-style range
-      (e.g. [1.0,2.0), (1.0,), (,2.0]).
+      (e.g. [1.0,2.0), (1.0,), (,2.0]). A range may omit one bound but not
+      both, and each bound it carries starts with a digit. Range bounds take
+      no -PRERELEASE suffix.
     oneOf:
       - description: "Short form: name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
       - description: "Prefixed form: prefix/prefix-name:version-or-range"
         type: string
-        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
       - description: "Full form: sub.domain/namespace/my/my-name:version-or-range (first segment contains a dot)"
         type: string
-        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(][0-9]*(\\.[0-9]+)*,[0-9]*(\\.[0-9]+)*[\\]\\)])$"
+        pattern: "^[a-z0-9][a-z0-9.-]*\\.[a-z]{2,}(:[0-9]+)?(/[a-z0-9][a-z0-9._-]*)+:([0-9]+(\\.[0-9]+)*(-PRERELEASE)?|\\[[0-9]+(\\.[0-9]+)*(-PRERELEASE)?\\]|[\\[\\(]([0-9]+(\\.[0-9]+)*,([0-9]+(\\.[0-9]+)*)?|,[0-9]+(\\.[0-9]+)*)[\\]\\)])$"
 
   artifactReferenceFixedList:
     type: array
