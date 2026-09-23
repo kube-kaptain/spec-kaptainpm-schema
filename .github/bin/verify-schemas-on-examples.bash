@@ -14,6 +14,9 @@
 
 set -euo pipefail
 
+# Schema validation plugin, exported by the build (validate-tooling selects it).
+SCHEMA_VALIDATION_COMMAND="${SCHEMA_VALIDATION_COMMAND:?SCHEMA_VALIDATION_COMMAND is required - provided by the build}"
+
 OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:?OUTPUT_SUB_PATH is required}"
 VERSION="${VERSION:?VERSION is required}"
 DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
@@ -34,7 +37,7 @@ trap 'rm -f "${ERR_TMP}"' EXIT
 check_example() {
   local schema="$1"
   local example="$2"
-  if check-jsonschema --schemafile "${yaml_dir}/${schema}" "src/examples/${example}" >"${ERR_TMP}" 2>&1; then
+  if "${SCHEMA_VALIDATION_COMMAND}" "${yaml_dir}/${schema}" "src/examples/${example}" >"${ERR_TMP}" 2>&1; then
     echo "  ${example}: ok"
   else
     echo "  ${example}: FAIL (schema=${schema})"
