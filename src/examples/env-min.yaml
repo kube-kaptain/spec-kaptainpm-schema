@@ -4,11 +4,8 @@
 # Minimal env KaptainPM.yaml - only required fields.
 # Validates against spec-kaptainpm-schema.yaml (project/base variant).
 #
-# kind: kubernetes-run-environment triggers the source-level mutex:
-# spec.main.environment is required; spec.main.runPlatform is forbidden.
+# spec.main.environment is optional for kind: kubernetes-run-environment:
+# every setting has a default, or comes from a layer.
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-run-environment
-spec:
-  main:
-    environment: {}

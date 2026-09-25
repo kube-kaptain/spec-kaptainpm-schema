@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# A run-environment build may configure other spec.main sections without an
+# environment block: the block is optional, every setting has a default.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    quality:
+      branches:
+        blockSlashes: true

@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Both run kinds configure spec.main.environment. A run-platform may set the
+# fields shared by both kinds, and its own namespace oversight in cleanUp.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-platform-meta-environment
+spec:
+  main:
+    environment:
+      deployMode: deployment
+      cleanUp:
+        policy: dryrun
+        undeclaredNamespacePolicy: dryrun

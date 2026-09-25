@@ -135,22 +135,34 @@ properties:
   layer-payload:
     $ref: "#/$defs/layerPayload"
 
-# Kind-driven section gating for spec.main.
+# Kind-driven gating for spec.main.environment.
 #
-# Source-level rules - apply to Base (in-repo) and Final (which inherit them):
-#   - kind == kubernetes-run-environment              -> spec.main.environment is required;
-#                                                         spec.main.runPlatform is forbidden.
-#   - kind == kubernetes-run-platform-meta-environment -> spec.main.runPlatform is required;
-#                                                         spec.main.environment is forbidden.
-#   - any other kind                                  -> both blocks are forbidden.
+# Both run kinds configure the same spec.main.environment block. Most of its
+# fields apply to both; a few apply to only one kind and are excluded from the
+# other field by field:
+#   - kind == kubernetes-run-environment              -> environment is optional;
+#       cleanUp.undeclaredNamespacePolicy and cleanUp.additionalNamespaces are
+#       forbidden (only a run-platform creates and cleans namespaces).
+#   - kind == kubernetes-run-platform-meta-environment -> environment is optional;
+#       clusterScopedDelegation, clusterScopedKindsFile and
+#       imageDeployManifestsApplyMode are forbidden (they describe how a
+#       run-platform treats an environment, and run-platforms deploy themselves).
+#   - any other kind                                  -> environment is forbidden.
 #
-# Layer / Layer Source: the hook strips these rules and replaces them with a
-#   simple mutex (environment XOR runPlatform - either or neither, never both),
-#   because layers may serve any/all build kinds and the kind discriminator
-#   does not apply at the layer level.
+# The block is optional so a run build can have zero config when the defaults
+# suit, or take its settings from a layer. When present it must be a mapping:
+# an empty key (null) is rejected, as it configures nothing.
 #
-# Layerset / Layerset Source: the hook strips these rules entirely; layersets
-#   only have spec.layers, so spec.main does not exist.
+# Exclusions are `propertyNames: {not: {enum: [...]}}` so a validation error
+# leads with the name of the field that is not allowed: jv reports "invalid
+# propertyName '<field>'", check-jsonschema "'<field>' should not be valid
+# under {'enum': [...]}". A `false` subschema per field reads well in jv but
+# check-jsonschema reports only the rejected value, never the field name.
+#
+# Layer / Layer Source / Layerset / Layerset Source: the hook strips these
+# rules. Layers may serve any/all build kinds, so every field is allowed there;
+# a kind-specific field reaching the wrong kind is caught when the merged
+# Final is validated, where kind is known. Layersets have no spec.main.
 #
 # There is exactly ONE top-level allOf - JSON Schema allows no more, and a
 # second key silently produces an unparseable duplicate-key document. Rules
@@ -193,9 +205,15 @@ allOf:
         spec:
           properties:
             main:
-              required: [environment]
-              not:
-                required: [runPlatform]
+              properties:
+                environment:
+                  properties:
+                    cleanUp:
+                      propertyNames:
+                        not:
+                          enum:
+                            - undeclaredNamespacePolicy
+                            - additionalNamespaces
   - if:
       required: [kind]
       properties:
@@ -206,9 +224,14 @@ allOf:
         spec:
           properties:
             main:
-              required: [runPlatform]
-              not:
-                required: [environment]
+              properties:
+                environment:
+                  propertyNames:
+                    not:
+                      enum:
+                        - clusterScopedDelegation
+                        - clusterScopedKindsFile
+                        - imageDeployManifestsApplyMode
   - if:
       required: [kind]
       not:
@@ -222,10 +245,9 @@ allOf:
         spec:
           properties:
             main:
-              not:
-                anyOf:
-                  - required: [environment]
-                  - required: [runPlatform]
+              propertyNames:
+                not:
+                  enum: [environment]
 
 $defs:
 
@@ -1621,10 +1643,15 @@ $defs:
         type: object
         additionalProperties: false
         description: >
-          Environment build configuration. Applies only to
-          kubernetes-run-environment builds which aggregate apps, bundles,
-          and products listed in spec.contents.
+          Run build configuration, for both kubernetes-run-environment and
+          kubernetes-run-platform-meta-environment builds, which aggregate
+          apps, bundles, and products listed in spec.contents (a run-platform
+          also seeds managed run-* child projects). Optional: every setting
+          has a default. A few settings apply to only one of the two kinds;
+          each says which.
         properties:
+          # Cluster-scoped delegation and its kinds list: environment-only,
+          # rejected on run-platform builds.
           clusterScopedDelegation:
             $ref: "#/$defs/runEnvClusterScopedDelegation"
           clusterScopedKindsFile:
@@ -1668,103 +1695,12 @@ $defs:
           environmentDeployBaseImage:
             $ref: "#/$defs/runEnvEnvironmentDeployBaseImage"
           # Every cleanup setting lives in one block, so each name inside it
-          # sheds the cleanUp prefix the block already supplies. Envs get the
-          # master policy, the exemption list and the accumulating classes;
-          # namespace oversight is run-platform only, since only the RP
-          # creates and cleans namespaces, and appears in that block instead.
+          # sheds the cleanUp prefix the block already supplies. Both kinds get
+          # the master policy, the exemption list and the accumulating
+          # classes; the namespace oversight keys are run-platform only, since
+          # only the RP creates and cleans namespaces.
           cleanUp:
             $ref: "#/$defs/runEnvCleanUp"
-        allOf:
-          # deployMode 'job' rejects an explicit provider of 'keel'
-          # (Keel does not support job-mode). 'keelson' and 'none'
-          # (manually triggered special cronjob) are both valid.
-          # Absent provider is allowed - the build's default-fill stage
-          # supplies 'keelson'.
-          - if:
-              required: [deployMode]
-              properties: { deployMode: { const: job } }
-            then:
-              properties:
-                imageAutoUpdateProvider: { enum: [keelson, none] }
-          # Policy 'force' is Keel-only (Keelson rejects it), so it
-          # requires an explicitly selected provider of 'keel'. The
-          # build re-checks this at generation time, belt and braces.
-          - if:
-              required: [imageAutoUpdatePolicy]
-              properties: { imageAutoUpdatePolicy: { const: force } }
-            then:
-              required: [imageAutoUpdateProvider]
-              properties:
-                imageAutoUpdateProvider: { const: keel }
-          # When generateIdealEnvironmentDeployManifests is false the user
-          # supplies their own env deploy manifest set, so the fields that
-          # only drive generation (deployMode and the imageAutoUpdate*
-          # family) must not be set. environmentDeployBaseImage is
-          # unaffected and may still be configured - it drives the
-          # Dockerfile FROM, not the manifests.
-          - if:
-              required: [generateIdealEnvironmentDeployManifests]
-              properties:
-                generateIdealEnvironmentDeployManifests:
-                  enum: [false, "false"]
-            then:
-              not:
-                anyOf:
-                  - required: [deployMode]
-                  - required: [imageAutoUpdateProvider]
-                  - required: [imageAutoUpdatePolicy]
-                  - required: [imageAutoUpdateTrigger]
-                  - required: [imageAutoUpdatePollSchedule]
-                  - required: [imageAutoUpdateFieldManagerStrategy]
-
-      runPlatform:
-        type: object
-        additionalProperties: false
-        description: >
-          Run-platform build configuration. Applies only to
-          kubernetes-run-platform-meta-environment builds which aggregate
-          apps, bundles, and products listed in spec.contents and seed
-          managed run-* child projects.
-        properties:
-          allowLocalManifestsOverride:
-            $ref: "#/$defs/runEnvAllowLocalManifestsOverride"
-          failOnUnreferencedConfigOrSecrets:
-            $ref: "#/$defs/runEnvFailOnUnreferencedConfigOrSecrets"
-          trustedContributorsOnly:
-            $ref: "#/$defs/runEnvTrustedContributorsOnly"
-          imageAutoUpdateProvider:
-            $ref: "#/$defs/runEnvImageAutoUpdateProvider"
-          imageAutoUpdatePolicy:
-            $ref: "#/$defs/runEnvImageAutoUpdatePolicy"
-          imageAutoUpdateTrigger:
-            $ref: "#/$defs/runEnvImageAutoUpdateTrigger"
-          imageAutoUpdatePollSchedule:
-            $ref: "#/$defs/runEnvImageAutoUpdatePollSchedule"
-          imageAutoUpdateFieldManagerStrategy:
-            $ref: "#/$defs/runEnvImageAutoUpdateFieldManagerStrategy"
-          deployMode:
-            $ref: "#/$defs/runEnvDeployMode"
-          checksumSecretsTiming:
-            $ref: "#/$defs/runEnvChecksumSecretsTiming"
-          checksumLength:
-            $ref: "#/$defs/runEnvChecksumLength"
-          checksumOrderFile:
-            $ref: "#/$defs/runEnvChecksumOrderFile"
-          signoffsSubPath:
-            $ref: "#/$defs/runEnvSignoffsSubPath"
-          signoffsKindsFile:
-            $ref: "#/$defs/runEnvSignoffsKindsFile"
-          environmentDeploySourceBasePath:
-            $ref: "#/$defs/runEnvEnvironmentDeploySourceBasePath"
-          generateIdealEnvironmentDeployManifests:
-            $ref: "#/$defs/runEnvGenerateIdealEnvironmentDeployManifests"
-          environmentDeployBaseImage:
-            $ref: "#/$defs/runEnvEnvironmentDeployBaseImage"
-          # Same block as under environment, plus the namespace oversight
-          # keys: only the RP creates and cleans namespaces, so only the RP
-          # can say what happens to namespaces it did not declare.
-          cleanUp:
-            $ref: "#/$defs/runPlatformCleanUp"
         allOf:
           # deployMode 'job' rejects an explicit provider of 'keel'
           # (Keel does not support job-mode). 'keelson' and 'none'
@@ -2008,8 +1944,8 @@ $defs:
               via the values file instead.
 
   # ---------------------------------------------------------------------------
-  # Run-environment family shared settings (used by spec.main.environment and
-  # spec.main.runPlatform; defined once and referenced from both)
+  # Run-environment family settings (spec.main.environment, shared by both run
+  # kinds)
   # ---------------------------------------------------------------------------
 
   runEnvAllowLocalManifestsOverride:
@@ -2590,8 +2526,11 @@ $defs:
     type: object
     additionalProperties: false
     description: >
-      Cleanup configuration for an environment build. One block so every
-      setting inside sheds the prefix the block supplies.
+      Cleanup configuration for a run build. One block so every setting
+      inside sheds the prefix the block supplies. undeclaredNamespacePolicy
+      and additionalNamespaces are namespace oversight, which is
+      run-platform only because only the RP creates and cleans namespaces;
+      they are rejected on a kubernetes-run-environment build.
     properties:
       policy:
         $ref: "#/$defs/runEnvCleanUpPolicy"
@@ -2608,26 +2547,6 @@ $defs:
           deep-merge with the project's own list. One layer per upstream
           tool is a sensible organisation pattern (e.g.
           layer-envoy-cleanup-exempts).
-        items:
-          $ref: "#/$defs/runEnvResourceMatcher"
-      accumulatingResources:
-        $ref: "#/$defs/runEnvAccumulatingResources"
-
-  runPlatformCleanUp:
-    type: object
-    additionalProperties: false
-    description: >
-      Cleanup configuration for a run-platform build: the environment
-      block plus namespace oversight, which is RP-only because only the
-      RP creates and cleans namespaces.
-    properties:
-      policy:
-        $ref: "#/$defs/runEnvCleanUpPolicy"
-      additionalResources:
-        type: array
-        description: >
-          As per the environment block - resources in our managed
-          namespace(s) we did not declare but expect to exist.
         items:
           $ref: "#/$defs/runEnvResourceMatcher"
       accumulatingResources:

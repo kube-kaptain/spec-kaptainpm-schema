@@ -67,14 +67,15 @@ yq eval '
 # Layer-source schema: pre-build layer with no metadata requirements
 # A layer has content; only a layerset composes other layers
 # kind is allowed but not required: layers may serve any/all build kinds
-# allOf: replace source's kind-driven gating with a simple mutex - environment
-# and runPlatform may not both be present (either or neither is fine). The
-# $comment-tagged builtin-mode guard is carried over; only the gating goes.
+# allOf: the source's kind-driven gating of spec.main.environment fields is
+# dropped - with no kind, every field is allowed, and the merged Final catches
+# a field reaching the wrong kind. The $comment-tagged builtin-mode guard is
+# carried over; only the gating goes.
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-source-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
   .required = (.required - ["kind"]) |
-  .allOf = ([.allOf[] | select(.["$comment"] == "builtin-mode-guard")] + [{"properties": {"spec": {"properties": {"main": {"not": {"required": ["environment", "runPlatform"]}}}}}}]) |
+  .allOf = ([.allOf[] | select(.["$comment"] == "builtin-mode-guard")]) |
   ."$id" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   .release = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.yaml" |
   ."validate-using" = "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-source-${Version}.json"
@@ -83,12 +84,12 @@ yq eval '
 # Layer schema: built/published layer with required metadata for build traceability
 # Like layer-source but metadata.labels and metadata.annotations are required
 # kind is allowed but not required: layers may serve any/all build kinds
-# allOf: same simple mutex as layer-source.
+# allOf: same as layer-source - only the builtin-mode guard is kept.
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layer-${VERSION}.yaml"
 yq eval '
   del(.properties.spec.properties.layers) |
   .required = (.required - ["kind"]) |
-  .allOf = ([.allOf[] | select(.["$comment"] == "builtin-mode-guard")] + [{"properties": {"spec": {"properties": {"main": {"not": {"required": ["environment", "runPlatform"]}}}}}}]) |
+  .allOf = ([.allOf[] | select(.["$comment"] == "builtin-mode-guard")]) |
   .properties.metadata.description = "Project metadata with required build traceability fields." |
   .properties.metadata.required = ["labels", "annotations"] |
   .properties.metadata.properties.labels.required = ["kaptain.org/version", "kaptain.org/project-name", "kaptain.org/owner"] |
@@ -99,7 +100,7 @@ yq eval '
 # and required metadata.labels and metadata.annotations for build traceability.
 # Used to validate built/published layerset images where all versions are pinned.
 # kind is allowed but not required: layersets may serve any/all build kinds
-# allOf: stripped - layersets have no spec.main, so the env/runPlatform gating
+# allOf: stripped - layersets have no spec.main, so the environment gating
 # rules from the source are inert here. Drop them for cleanliness.
 echo "Generating: ${yaml_dir}/spec-kaptainpm-schema-layerset-${VERSION}.yaml"
 yq eval '

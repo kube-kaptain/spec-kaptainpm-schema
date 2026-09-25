@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Namespace oversight is run-platform only: a run-environment build may not
+# set cleanUp.additionalNamespaces.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      cleanUp:
+        additionalNamespaces:
+          namespaces:
+            - name: kube-public
+              allowedResources: []
