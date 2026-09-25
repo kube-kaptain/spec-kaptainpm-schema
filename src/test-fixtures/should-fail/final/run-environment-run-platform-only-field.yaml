@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The merged Final knows its kind, so a run-platform-only field that a shared
+# layer carried into a run-environment build is rejected here.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      cleanUp:
+        undeclaredNamespacePolicy: dryrun

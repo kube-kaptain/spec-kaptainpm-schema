@@ -30,6 +30,9 @@
 
 set -euo pipefail
 
+# Schema validation plugin, exported by the build (validate-tooling selects it).
+SCHEMA_VALIDATION_COMMAND="${SCHEMA_VALIDATION_COMMAND:?SCHEMA_VALIDATION_COMMAND is required - provided by the build}"
+
 OUTPUT_SUB_PATH="${OUTPUT_SUB_PATH:?OUTPUT_SUB_PATH is required}"
 VERSION="${VERSION:?VERSION is required}"
 DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
@@ -81,7 +84,7 @@ validate_dir() {
   for fixture in "${dir}"/*.yaml; do
     found=1
     name="$(basename "${fixture}")"
-    if check-jsonschema --schemafile "${schema}" "${fixture}" >"${ERR_TMP}" 2>&1; then
+    if "${SCHEMA_VALIDATION_COMMAND}" "${schema}" "${fixture}" >"${ERR_TMP}" 2>&1; then
       if [[ "${expectation}" == "should-pass" ]]; then
         echo "  ${label}/${name}: ok"
       else

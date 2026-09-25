@@ -1,20 +1,23 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
 #
-# Full run-platform KaptainPM.yaml example - every spec.main.runPlatform
-# field populated, exercising the cleanup family, expectedUndeclaredResources,
-# additionalNamespaces oversight, and all per-class settings.
+# Full run-platform KaptainPM.yaml example - every spec.main.environment
+# field a run-platform may set populated, exercising the cleanup family,
+# expectedUndeclaredResources, additionalNamespaces oversight, and all
+# per-class settings. The environment-only fields (clusterScopedDelegation,
+# clusterScopedKindsFile, imageDeployManifestsApplyMode) are rejected on this
+# kind, so they are absent here.
 #
 # Validates against spec-kaptainpm-schema.yaml (project/base variant).
 
 apiVersion: kaptain.org/1.2
 kind: kubernetes-run-platform-meta-environment
 metadata:
-  description: "example run-platform with all runPlatform fields populated"
+  description: "example run-platform with all its environment fields populated"
 
 spec:
   main:
-    runPlatform:
+    environment:
       allowLocalManifestsOverride: false
       failOnUnreferencedConfigOrSecrets: true
       trustedContributorsOnly: false

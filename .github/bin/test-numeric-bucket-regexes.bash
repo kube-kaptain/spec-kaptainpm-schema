@@ -13,6 +13,9 @@
 
 set -euo pipefail
 
+# Schema validation plugin, exported by the build (validate-tooling selects it).
+SCHEMA_VALIDATION_COMMAND="${SCHEMA_VALIDATION_COMMAND:?SCHEMA_VALIDATION_COMMAND is required - provided by the build}"
+
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "${TMPDIR}"' EXIT
 
@@ -40,7 +43,7 @@ run_case() {
   local body="$4"
   printf '%s\n' "${body}" > "${TMPDIR}/instance.json"
   local actual
-  if check-jsonschema --schemafile "${TMPDIR}/schema-${bucket}.json" "${TMPDIR}/instance.json" >/dev/null 2>&1; then
+  if "${SCHEMA_VALIDATION_COMMAND}" "${TMPDIR}/schema-${bucket}.json" "${TMPDIR}/instance.json" >/dev/null 2>&1; then
     actual=pass
   else
     actual=fail

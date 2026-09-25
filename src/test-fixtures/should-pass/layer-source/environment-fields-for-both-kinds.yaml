@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# A layer has no kind and may serve both run kinds, so every environment
+# field is allowed in one layer, kind-specific ones included. A field that
+# reaches the wrong kind is caught when the merged Final is validated.
+
+apiVersion: kaptain.org/1.2
+spec:
+  main:
+    environment:
+      deployMode: deployment
+      clusterScopedDelegation: self
+      imageDeployManifestsApplyMode: seed-and-compare
+      cleanUp:
+        policy: dryrun
+        undeclaredNamespacePolicy: dryrun
