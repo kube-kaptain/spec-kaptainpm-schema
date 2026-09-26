@@ -1674,6 +1674,8 @@ $defs:
             $ref: "#/$defs/runEnvImageAutoUpdateFieldManagerStrategy"
           deployMode:
             $ref: "#/$defs/runEnvDeployMode"
+          imagePullSecrets:
+            $ref: "#/$defs/runEnvImagePullSecrets"
           checksumSecretsTiming:
             $ref: "#/$defs/runEnvChecksumSecretsTiming"
           checksumLength:
@@ -1725,8 +1727,8 @@ $defs:
                 imageAutoUpdateProvider: { const: keel }
           # When generateIdealEnvironmentDeployManifests is false the user
           # supplies their own env deploy manifest set, so the fields that
-          # only drive generation (deployMode and the imageAutoUpdate*
-          # family) must not be set. environmentDeployBaseImage is
+          # only drive generation (deployMode, imagePullSecrets and the
+          # imageAutoUpdate* family) must not be set. environmentDeployBaseImage is
           # unaffected and may still be configured - it drives the
           # Dockerfile FROM, not the manifests.
           - if:
@@ -1738,6 +1740,7 @@ $defs:
               not:
                 anyOf:
                   - required: [deployMode]
+                  - required: [imagePullSecrets]
                   - required: [imageAutoUpdateProvider]
                   - required: [imageAutoUpdatePolicy]
                   - required: [imageAutoUpdateTrigger]
@@ -2085,6 +2088,19 @@ $defs:
       (cluster-admin present means 'parent' is pointless and rejected;
       namespace-only roles mean cluster-scoped content requires
       'parent').
+
+  runEnvImagePullSecrets:
+    type: string
+    enum: [ENABLED, DISABLED]
+    default: ENABLED
+    description: >
+      Whether the generated workloads that run the env deploy image (the
+      Deployment, and in job mode the CronJob and its zero-scale
+      Deployment) carry imagePullSecrets naming the environment's docker
+      registry secret. 'ENABLED' (default) or 'DISABLED', for registries
+      that need no pull credentials or nodes that supply them. Only drives
+      generation, so it may not be set when
+      generateIdealEnvironmentDeployManifests is false.
 
   runEnvDeployMode:
     type: string
