@@ -29,6 +29,7 @@ spec:
       imageAutoUpdateFieldManagerStrategy: claim
       deployMode: deployment
       imagePullSecrets: ENABLED
+      autoGenerateImagePullSecrets: true
       checksumSecretsTiming: build
       checksumLength: 5
       checksumOrderFile: default-1.1.txt

@@ -1676,6 +1676,8 @@ $defs:
             $ref: "#/$defs/runEnvDeployMode"
           imagePullSecrets:
             $ref: "#/$defs/runEnvImagePullSecrets"
+          autoGenerateImagePullSecrets:
+            $ref: "#/$defs/runEnvAutoGenerateImagePullSecrets"
           checksumSecretsTiming:
             $ref: "#/$defs/runEnvChecksumSecretsTiming"
           checksumLength:
@@ -2101,6 +2103,22 @@ $defs:
       that need no pull credentials or nodes that supply them. Only drives
       generation, so it may not be set when
       generateIdealEnvironmentDeployManifests is false.
+
+  runEnvAutoGenerateImagePullSecrets:
+    oneOf:
+      - type: boolean
+      - type: string
+        pattern: "^(true|false)$"
+    default: true
+    description: >
+      When true (default), the build generates one image pull Secret for
+      each distinct imagePullSecrets name referenced by the workloads this
+      build deploys. In Kaptain that name is always a registry. Each
+      Secret is a kubernetes.io/dockerconfigjson in the ${Environment}
+      namespace, named as referenced, with that registry's username and
+      password supplied as encrypted secret values. Unrelated to
+      imagePullSecrets, which decides whether the workloads running the
+      env deploy image reference a pull secret at all.
 
   runEnvDeployMode:
     type: string
