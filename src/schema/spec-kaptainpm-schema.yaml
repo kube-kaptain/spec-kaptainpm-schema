@@ -2037,21 +2037,21 @@ $defs:
     pattern: '^[0-9]+[smh]$'
     description: >
       Poll cadence for the auto-update annotations as a plain duration
-      (e.g. '1m', '300s', '1h'). Default '1m'. Stored normalized and
-      rendered per provider at generation time: Keel takes
-      '@every <duration>', Keelson takes a cron expression. Ignored
-      when the provider is 'none'.
+      (e.g. '1m', '300s', '1h'). Default '1m'. Rendered as
+      '@every <duration>' at generation time, which Keel and Keelson
+      both accept. Ignored when the provider is 'none'.
 
   runEnvImageAutoUpdateFieldManagerStrategy:
     type: string
     enum: [mimic, patch, claim]
     description: >
       Keelson field-manager strategy annotation
-      (keelson.pro/field-manager-strategy) stamped on the environment's
-      workload manifest when the provider is 'keelson'. Default 'mimic'
-      (SSA attributed to the detected Apply-op owner: no ownership
-      churn). 'patch' and 'claim' attribute the write to keelson
-      itself. Applies only to keelson; ignored for keel (no keel.sh
+      (keelson.pro/field-manager-strategy) on the environment's workload
+      manifest when the provider is 'keelson'. Default 'mimic' (SSA
+      attributed to the detected Apply-op owner: no ownership churn),
+      which is also Keelson's own default, so the annotation is only
+      stamped for 'patch' or 'claim', which attribute the write to
+      keelson itself. Applies only to keelson; ignored for keel (no keel.sh
       equivalent exists) and for 'none'.
 
   runEnvClusterScopedKindsFile:
