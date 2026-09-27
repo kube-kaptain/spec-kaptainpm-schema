@@ -1034,12 +1034,24 @@ $defs:
                 type: object
                 additionalProperties: false
                 properties:
+                  # Kubernetes requires successThreshold to be 1 on liveness and
+                  # startup probes, and allows a probe-level
+                  # terminationGracePeriodSeconds on those two only.
                   liveness:
                     $ref: "#/$defs/probeConfig"
+                    properties:
+                      successThreshold:
+                        enum: [1, "1"]
                   readiness:
                     $ref: "#/$defs/probeConfig"
+                    propertyNames:
+                      not:
+                        enum: [terminationGracePeriodSeconds]
                   startup:
                     $ref: "#/$defs/probeConfig"
+                    properties:
+                      successThreshold:
+                        enum: [1, "1"]
 
           deployment:
             type: object
@@ -1065,6 +1077,12 @@ $defs:
                   maxUnavailable:
                     type: string
                     description: 'Max unavailable pods during rolling update (default: 0)'
+              portsEnabled:
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
+                description: 'Enable port definitions (default: true)'
 
           statefulset:
             type: object
