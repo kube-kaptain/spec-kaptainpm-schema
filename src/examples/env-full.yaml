@@ -28,6 +28,8 @@ spec:
       clusterScopedDelegation: parent
       clusterScopedKindsFile: default-1.1.txt
       deployMode: deployment
+      imagePullSecrets: ENABLED
+      autoGenerateImagePullSecrets: true
       checksumSecretsTiming: build
       checksumLength: 5
       checksumOrderFile: default-1.1.txt

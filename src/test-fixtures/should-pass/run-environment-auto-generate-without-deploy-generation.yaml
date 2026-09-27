@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# autoGenerateImagePullSecrets is about the workloads the env deploys, not the
+# deploy manifests, so it stays allowed when the user supplies those.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      generateIdealEnvironmentDeployManifests: false
+      autoGenerateImagePullSecrets: false

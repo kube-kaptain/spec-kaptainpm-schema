@@ -28,6 +28,8 @@ spec:
       # keelson-only knob, allowed but ignored under keel
       imageAutoUpdateFieldManagerStrategy: claim
       deployMode: deployment
+      imagePullSecrets: ENABLED
+      autoGenerateImagePullSecrets: true
       checksumSecretsTiming: build
       checksumLength: 5
       checksumOrderFile: default-1.1.txt
