@@ -110,13 +110,16 @@ properties:
         description: >
           Manifest template sets pulled in and token-substituted to become
           this project's own manifest output. Replaces generators or
-          hand-written manifests.
+          hand-written manifests. Their manifests and contract zips may hold
+          only regular files and directories; a symlink fails the build.
 
       contents:
         $ref: "#/$defs/artifactReferenceList"
         description: >
           Finished manifest artifacts from other projects bundled into
           this deliverable. Front and centre in product/environment builds.
+          Their manifests and contract zips may hold only regular files and
+          directories; a symlink fails the build.
 
       data:
         $ref: "#/$defs/specData"
@@ -260,6 +263,10 @@ $defs:
     description: >
       Additional files the layer image carries alongside KaptainPM.yaml.
       Layer-only - the unknown-key validator rejects this in project root files.
+      The layer image may hold only regular files and directories; a symlink
+      fails both the layer build and any consuming build. A layer that needs a
+      symlink in a consuming repo ships a script that creates it, run from a
+      hook.
     items:
       $ref: "#/$defs/layerPayloadItem"
 
@@ -295,7 +302,9 @@ $defs:
           - xz
         description: >
           Archive format for unpacking. Absent means plain copy.
-          Invalid on directory sources.
+          Invalid on directory sources. Archives are unpacked into a staging
+          directory and checked before anything reaches the repo; one holding
+          a symlink fails the build.
 
   # ---------------------------------------------------------------------------
   # spec.credentials
@@ -1596,7 +1605,10 @@ $defs:
         properties:
           subPath:
             type: string
-            description: 'Directory containing manifests (default: src/kubernetes)'
+            description: >
+              Directory containing manifests (default: src/kubernetes). It may
+              hold only .yaml manifests and their modifier files; a symlink
+              fails the build, and dotfiles are ignored.
           allowLocalOverride:
             oneOf:
               - type: boolean
