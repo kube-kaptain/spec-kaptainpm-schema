@@ -1704,6 +1704,10 @@ $defs:
             $ref: "#/$defs/runEnvImageAutoUpdateFieldManagerStrategy"
           deployMode:
             $ref: "#/$defs/runEnvDeployMode"
+          jobPostDeploySleepAfterSuccess:
+            $ref: "#/$defs/runEnvJobPostDeploySleepAfterSuccess"
+          jobPostDeploySleepAfterFailure:
+            $ref: "#/$defs/runEnvJobPostDeploySleepAfterFailure"
           imagePullSecrets:
             $ref: "#/$defs/runEnvImagePullSecrets"
           autoGenerateImagePullSecrets:
@@ -1747,6 +1751,16 @@ $defs:
             then:
               properties:
                 imageAutoUpdateProvider: { enum: [keelson, none] }
+          # The post-deploy sleeps only exist in job mode; deployment mode
+          # (the default) never exits, so setting either needs an explicit
+          # deployMode 'job'.
+          - if:
+              anyOf:
+                - required: [jobPostDeploySleepAfterSuccess]
+                - required: [jobPostDeploySleepAfterFailure]
+            then:
+              required: [deployMode]
+              properties: { deployMode: { const: job } }
           # Policy 'force' is Keel-only (Keelson rejects it), so it
           # requires an explicitly selected provider of 'keel'. The
           # build re-checks this at generation time, belt and braces.
@@ -1772,6 +1786,8 @@ $defs:
               not:
                 anyOf:
                   - required: [deployMode]
+                  - required: [jobPostDeploySleepAfterSuccess]
+                  - required: [jobPostDeploySleepAfterFailure]
                   - required: [imagePullSecrets]
                   - required: [imageAutoUpdateProvider]
                   - required: [imageAutoUpdatePolicy]
@@ -2168,6 +2184,45 @@ $defs:
       'job' mode also generates a zero-scale Deployment of the same
       image alongside the suspended CronJob, so an operator can scale
       it to 1 to debug/explore/fix on the rare occasions that's needed.
+
+  runEnvJobPostDeploySleepAfterSuccess:
+    $ref: "#/$defs/durationUpToOneYear"
+    default: 10m
+    description: >
+      Job mode only: how long the deploy Job's pod stays up after a
+      successful deploy before it exits, so an operator can inspect its
+      working directory (/kd/work/: processed manifests, audit logs).
+      Default '10m'. Zero ('0', '0s', '0m' and so on) exits straight away.
+      Maps to the POST_DEPLOY_SLEEP_SUCCESS env var (in seconds) consumed
+      by the deploy image at runtime.
+
+      Constraint: requires deployMode 'job'.
+
+  runEnvJobPostDeploySleepAfterFailure:
+    $ref: "#/$defs/durationUpToOneYear"
+    default: 24h
+    description: >
+      Job mode only: how long the deploy Job's pod stays up after a
+      failed deploy before it exits with the failure, so an operator can
+      inspect what went wrong. Default '24h'. Zero ('0', '0s', '0h' and so
+      on) exits straight away. Maps to the POST_DEPLOY_SLEEP_FAILURE env
+      var (in seconds) consumed by the deploy image at runtime.
+
+      Constraint: requires deployMode 'job'.
+
+  durationUpToOneYear:
+    description: >
+      A duration from zero up to one year (365 days): a whole number of
+      seconds, as a bare integer or a string ('600'), or a string of an
+      integer and one unit, s m h d or w ('10m', '24h', '2d'). The limit
+      per unit is 31536000s, 525600m, 8760h, 365d and 52w. Leading zeros
+      and compound durations ('1h30m') are rejected.
+    oneOf:
+      - type: integer
+        minimum: 0
+        maximum: 31536000
+      - type: string
+        pattern: "^(([0-9]|[1-9][0-9]{1,6}|[12][0-9]{7}|30[0-9]{6}|31[0-4][0-9]{5}|315[0-2][0-9]{4}|3153[0-5][0-9]{3}|31536000)s?|([0-9]|[1-9][0-9]{1,4}|[1-4][0-9]{5}|5[01][0-9]{4}|52[0-4][0-9]{3}|525[0-5][0-9]{2}|525600)m|([0-9]|[1-9][0-9]{1,2}|[1-7][0-9]{3}|8[0-6][0-9]{2}|87[0-5][0-9]|8760)h|([0-9]|[1-9][0-9]|[12][0-9]{2}|3[0-5][0-9]|36[0-5])d|([0-9]|[1-4][0-9]|5[0-2])w)$"
 
   runEnvChecksumSecretsTiming:
     type: string
