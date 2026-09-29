@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC0-1.0
 # This file is released to the public domain. Use freely without attribution.
 #
-# Layer 1: standalone tests for the four numeric oneOf buckets used by the
+# Layer 1: standalone tests for the five numeric oneOf buckets used by the
 # KaptainPM schema. Each bucket has an integer branch with minimum/maximum and
 # a string branch with a bounded regex. This script proves both branches agree.
 #
@@ -131,6 +131,37 @@ run_case "str \"30000\" should pass"        b4 pass '{"value": "30000"}'
 run_case "str \"31000\" should pass"        b4 pass '{"value": "31000"}'
 run_case "str \"32767\" should pass"        b4 pass '{"value": "32767"}'
 run_case "str \"32768\" should fail"        b4 fail '{"value": "32768"}'
+
+# Bucket 5: durationUpToOneYear, read from the source schema so these cases
+# test the pattern that ships. Seconds as a bare integer or a digit string,
+# or an integer and one unit, up to 365 days in each unit.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+write_schema "b5" "$(yq -o json '."$defs".durationUpToOneYear' "${SCRIPT_DIR}/../../src/schema/spec-kaptainpm-schema.yaml")"
+
+echo "Bucket 5 (durationUpToOneYear, 0 to 365 days):"
+run_case "int 0 should pass"                 b5 pass '{"value": 0}'
+run_case "int 31536000 should pass"          b5 pass '{"value": 31536000}'
+run_case "int 31536001 should fail"          b5 fail '{"value": 31536001}'
+run_case "int -1 should fail"                b5 fail '{"value": -1}'
+run_case "str \"0\" should pass"             b5 pass '{"value": "0"}'
+run_case "str \"31536000\" should pass"      b5 pass '{"value": "31536000"}'
+run_case "str \"31536001\" should fail"      b5 fail '{"value": "31536001"}'
+run_case "str \"0600\" should fail (leading zero rejected)"  b5 fail '{"value": "0600"}'
+duration_unit_cases() {
+  local unit="$1" max="$2" over="$3"
+  run_case "str \"0${unit}\" should pass"                              b5 pass "{\"value\": \"0${unit}\"}"
+  run_case "str \"${max}${unit}\" should pass"                         b5 pass "{\"value\": \"${max}${unit}\"}"
+  run_case "str \"${over}${unit}\" should fail"                        b5 fail "{\"value\": \"${over}${unit}\"}"
+  run_case "str \"05${unit}\" should fail (leading zero rejected)"     b5 fail "{\"value\": \"05${unit}\"}"
+}
+duration_unit_cases s 31536000 31536001
+duration_unit_cases m 525600 525601
+duration_unit_cases h 8760 8761
+duration_unit_cases d 365 366
+duration_unit_cases w 52 53
+run_case "str \"1h30m\" should fail (compound)"  b5 fail '{"value": "1h30m"}'
+run_case "str \"1y\" should fail (unknown unit)"  b5 fail '{"value": "1y"}'
+run_case "str \"10M\" should fail (upper-case unit)"  b5 fail '{"value": "10M"}'
 
 echo ""
 if [[ ${#FAILED[@]} -gt 0 ]]; then
