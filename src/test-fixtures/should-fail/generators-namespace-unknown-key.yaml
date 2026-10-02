@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The Namespace generator takes only the common generator settings.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-manifests-only
+spec:
+  main:
+    generators:
+      namespace:
+        enabled: true
+        strategy: max-unavailable

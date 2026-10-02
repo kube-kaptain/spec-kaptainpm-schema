@@ -29,6 +29,9 @@ spec:
       imageAutoUpdateFieldManagerStrategy: claim
       deployMode: deployment
       imagePullSecrets: ENABLED
+      namespace:
+        additionalLabels: 'tier=platform'
+        additionalAnnotations: 'owner=platform-team'
       autoGenerateImagePullSecrets: true
       checksumSecretsTiming: build
       checksumLength: 5

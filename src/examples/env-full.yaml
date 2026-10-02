@@ -29,6 +29,9 @@ spec:
       clusterScopedKindsFile: default-1.1.txt
       deployMode: deployment
       imagePullSecrets: ENABLED
+      namespace:
+        additionalLabels: 'tier=platform'
+        additionalAnnotations: 'owner=platform-team'
       autoGenerateImagePullSecrets: true
       checksumSecretsTiming: build
       checksumLength: 5
