@@ -345,6 +345,12 @@ spec:
         value: '1'
         additionalLabels: 'reliability=ha'
         additionalAnnotations: 'budget=standard'
+      namespace:
+        enabled: 'true'
+        nameSuffix: '-tools'
+        combinedSubPath: src/namespace-combined
+        additionalLabels: 'tier=tools'
+        additionalAnnotations: 'owner=platform-team'
 
     manifests:
       subPath: src/kubernetes

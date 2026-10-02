@@ -1596,6 +1596,35 @@ $defs:
                 type: string
                 description: Additional annotations for PDB manifests
 
+          namespace:
+            type: object
+            additionalProperties: false
+            description: >
+              Namespace manifest generator configuration, for builds that
+              manage a namespace of their own beside their other resources.
+              Environment and run-platform builds always generate their own
+              Namespace into the deploy-manifests set and take its labels and
+              annotations from spec.main.environment.namespace instead.
+            properties:
+              enabled:
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
+                description: 'Whether to generate a Namespace manifest (default: false)'
+              nameSuffix:
+                type: string
+                description: Suffix appended to generated Namespace name
+              combinedSubPath:
+                type: string
+                description: Combined sub-path for Namespace manifests
+              additionalLabels:
+                type: string
+                description: Additional labels for Namespace manifests
+              additionalAnnotations:
+                type: string
+                description: Additional annotations for Namespace manifests
+
       manifests:
         type: object
         additionalProperties: false
