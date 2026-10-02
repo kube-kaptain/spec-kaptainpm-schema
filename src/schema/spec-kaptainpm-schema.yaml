@@ -1605,6 +1605,7 @@ $defs:
               Environment and run-platform builds always generate their own
               Namespace into the deploy-manifests set and take its labels and
               annotations from spec.main.environment.namespace instead.
+            required: [name]
             properties:
               enabled:
                 oneOf:
@@ -1612,12 +1613,16 @@ $defs:
                   - type: string
                     pattern: "^(true|false)$"
                 description: 'Whether to generate a Namespace manifest (default: false)'
-              nameSuffix:
+              name:
                 type: string
-                description: Suffix appended to generated Namespace name
+                minLength: 1
+                description: >
+                  The Namespace name, required and used exactly as given: any
+                  literal or token the build or its consumer resolves, such as
+                  '${Environment}' or 'shared-tools'.
               combinedSubPath:
                 type: string
-                description: Combined sub-path for Namespace manifests
+                description: Combined sub-path the Namespace manifest is written to; does not affect its name
               additionalLabels:
                 type: string
                 description: Additional labels for Namespace manifests
