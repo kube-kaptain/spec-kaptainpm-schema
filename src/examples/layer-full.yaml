@@ -347,7 +347,7 @@ spec:
         additionalAnnotations: 'budget=standard'
       namespace:
         enabled: 'true'
-        nameSuffix: '-tools'
+        name: '${ProjectName}'
         combinedSubPath: src/namespace-combined
         additionalLabels: 'tier=tools'
         additionalAnnotations: 'owner=platform-team'
