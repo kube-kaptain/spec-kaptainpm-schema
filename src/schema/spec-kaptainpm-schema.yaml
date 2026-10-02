@@ -1710,6 +1710,8 @@ $defs:
             $ref: "#/$defs/runEnvJobPostDeploySleepAfterFailure"
           imagePullSecrets:
             $ref: "#/$defs/runEnvImagePullSecrets"
+          namespace:
+            $ref: "#/$defs/runEnvNamespace"
           autoGenerateImagePullSecrets:
             $ref: "#/$defs/runEnvAutoGenerateImagePullSecrets"
           checksumSecretsTiming:
@@ -1773,8 +1775,8 @@ $defs:
                 imageAutoUpdateProvider: { const: keel }
           # When generateIdealEnvironmentDeployManifests is false the user
           # supplies their own env deploy manifest set, so the fields that
-          # only drive generation (deployMode, imagePullSecrets and the
-          # imageAutoUpdate* family) must not be set. environmentDeployBaseImage is
+          # only drive generation (deployMode, imagePullSecrets, namespace and
+          # the imageAutoUpdate* family) must not be set. environmentDeployBaseImage is
           # unaffected and may still be configured - it drives the
           # Dockerfile FROM, not the manifests.
           - if:
@@ -1789,6 +1791,7 @@ $defs:
                   - required: [jobPostDeploySleepAfterSuccess]
                   - required: [jobPostDeploySleepAfterFailure]
                   - required: [imagePullSecrets]
+                  - required: [namespace]
                   - required: [imageAutoUpdateProvider]
                   - required: [imageAutoUpdatePolicy]
                   - required: [imageAutoUpdateTrigger]
@@ -2149,6 +2152,24 @@ $defs:
       that need no pull credentials or nodes that supply them. Only drives
       generation, so it may not be set when
       generateIdealEnvironmentDeployManifests is false.
+
+  runEnvNamespace:
+    type: object
+    additionalProperties: false
+    description: >
+      The Namespace generated into the deploy-manifests set: the
+      environment's or run-platform's own namespace, named after it. Each
+      owns its own, and it is applied with the rest of that set, so it
+      exists before anything is deployed into it. Only drives generation,
+      so it may not be set when generateIdealEnvironmentDeployManifests is
+      false.
+    properties:
+      additionalLabels:
+        type: string
+        description: Additional labels for the generated Namespace
+      additionalAnnotations:
+        type: string
+        description: Additional annotations for the generated Namespace
 
   runEnvAutoGenerateImagePullSecrets:
     oneOf:

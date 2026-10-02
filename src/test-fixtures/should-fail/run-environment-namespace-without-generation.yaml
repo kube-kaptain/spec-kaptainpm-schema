@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# namespace only drives the generated deploy manifests, so it must not be
+# set when the project supplies its own (generateIdealEnvironmentDeployManifests false).
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      generateIdealEnvironmentDeployManifests: false
+      namespace:
+        additionalLabels: 'tier=platform'

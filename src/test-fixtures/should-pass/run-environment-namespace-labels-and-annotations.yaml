@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The generated Namespace takes additional labels and annotations.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      namespace:
+        additionalLabels: 'tier=platform'
+        additionalAnnotations: 'owner=platform-team'
