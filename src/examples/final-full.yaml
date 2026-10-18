@@ -369,6 +369,7 @@ spec:
       postDockerTests: bin/post-docker-tests.bash
       prePackagePrepare: bin/pre-package-prepare.bash
       postPackageTests: bin/post-package-tests.bash
+      prePublish: bin/pre-publish.bash
       postBuild: bin/post-build.bash
 
     specBuild:
