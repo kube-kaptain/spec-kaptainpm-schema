@@ -1874,6 +1874,9 @@ $defs:
           postPackageTests:
             $ref: "#/$defs/hookScriptPath"
             description: Runs after manifest packaging
+          prePublish:
+            $ref: "#/$defs/hookScriptPath"
+            description: Runs after all build and tagging steps, before any release preparation or publishing
           postBuild:
             $ref: "#/$defs/hookScriptPath"
             description: Runs at the end of the build
