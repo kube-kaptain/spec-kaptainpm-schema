@@ -115,6 +115,7 @@ spec:
         sourceNamespace: library
         sourceImageName: nginx
         sourceTag: '1.25'
+        sourceDigest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
 
     externalImage:
       name: my-org/my-app

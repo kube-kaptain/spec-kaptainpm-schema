@@ -847,6 +847,14 @@ $defs:
               sourceTag:
                 type: string
                 description: Source image tag
+              sourceDigest:
+                type: string
+                pattern: "^sha256:[0-9a-f]{64}$"
+                description: >
+                  Source image digest. The image pulled by sourceTag must be
+                  the same image this digest resolves to, or the build fails.
+                  May instead be written as an @sha256: suffix on sourceTag;
+                  if both are given they must match.
 
       externalImage:
         type: object
