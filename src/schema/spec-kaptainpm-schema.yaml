@@ -121,6 +121,15 @@ properties:
           Their manifests and contract zips may hold only regular files and
           directories; a symlink fails the build.
 
+      resolutions:
+        $ref: "#/$defs/artifactReferenceList"
+        description: >
+          Artifact references resolved to a single version and exposed only
+          as built-in tokens (Resolution<Name>Ref, Resolution<Name>VersionSpec,
+          Resolution<Name>Version), so manifests can track the latest match
+          for a range of, for example, a container image they run. Nothing
+          is fetched or bundled.
+
       data:
         $ref: "#/$defs/specData"
 
@@ -847,6 +856,14 @@ $defs:
               sourceTag:
                 type: string
                 description: Source image tag
+              sourceDigest:
+                type: string
+                pattern: "^sha256:[0-9a-f]{64}$"
+                description: >
+                  Source image digest. The image pulled by sourceTag must be
+                  the same image this digest resolves to, or the build fails.
+                  May instead be written as an @sha256: suffix on sourceTag;
+                  if both are given they must match.
 
       externalImage:
         type: object

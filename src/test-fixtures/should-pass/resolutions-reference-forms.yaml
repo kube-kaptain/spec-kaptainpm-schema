@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# spec.resolutions takes the same artifactReference forms as layers,
+# templates and contents: ranges, exact and fixed-bracket versions, digest
+# pins and provider prefixes.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  resolutions:
+    - nginx:[1.25,1.26)
+    - docker|redis:(7.0,)
+    - ghcr.io/org/group/sidecar:[2.5.0]
+    - envoy:1.31.2@sha256:3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3
