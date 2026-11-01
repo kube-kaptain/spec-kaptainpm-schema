@@ -77,6 +77,11 @@ Two reference types are defined in the schema:
 - **`artifactReference`** — accepts exact versions (`1.2.3`, `1.0-PRERELEASE`) AND Maven-style range syntax (`[1.0,2.0)`, `(1.0,)`, etc). Used by default in all schemas.
 - **`artifactReferenceFixed`** — exact versions only, no ranges. Used only in the layerset schema (built artifacts).
 
+Four `spec` lists take these references: `layers`, `templates`, `contents` and
+`resolutions`. A `resolutions` entry is resolved to one version and surfaces
+only as built-in tokens (`Resolution<Name>Ref`, `...VersionSpec`,
+`...Version`); nothing is fetched or bundled.
+
 Both accept the same three name forms (short, prefixed, full), and both accept
 two optional additions:
 

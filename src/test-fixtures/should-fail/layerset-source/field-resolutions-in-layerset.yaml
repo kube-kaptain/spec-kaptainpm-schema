@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# A layerset carries only spec.layers, so spec.resolutions is rejected.
+
+apiVersion: kaptain.org/1.2
+spec:
+  layers:
+    - layer-foo:[1.0,2.0)
+  resolutions:
+    - nginx:[1.25,1.26)

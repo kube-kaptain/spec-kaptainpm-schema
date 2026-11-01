@@ -121,6 +121,15 @@ properties:
           Their manifests and contract zips may hold only regular files and
           directories; a symlink fails the build.
 
+      resolutions:
+        $ref: "#/$defs/artifactReferenceList"
+        description: >
+          Artifact references resolved to a single version and exposed only
+          as built-in tokens (Resolution<Name>Ref, Resolution<Name>VersionSpec,
+          Resolution<Name>Version), so manifests can track the latest match
+          for a range of, for example, a container image they run. Nothing
+          is fetched or bundled.
+
       data:
         $ref: "#/$defs/specData"
 

@@ -40,6 +40,10 @@ spec:
   contents:
     - my-app-manifests:3.0.1@sha256:3fc4ccfe745870e2c0d99f71f30ff0656c8dedd41cc1d7d3d376b0dbe685e2f3
 
+  resolutions:
+    - docker|nginx:[1.25,1.26)
+    - redis:7.4.1
+
   credentials:
     - GHCR_TOKEN
 
