@@ -1105,10 +1105,10 @@ $defs:
                 additionalProperties: false
                 properties:
                   maxSurge:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max pods over desired during rolling update (default: 1)'
                   maxUnavailable:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max unavailable pods during rolling update (default: 0)'
               portsEnabled:
                 $ref: "#/$defs/booleanOrString"
@@ -1203,7 +1203,7 @@ $defs:
                     enum: [RollingUpdate, OnDelete]
                     description: 'Update strategy type (default: RollingUpdate)'
                   maxUnavailable:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max unavailable pods during rolling update (default: 1)'
               hostNetwork:
                 $ref: "#/$defs/booleanOrString"
@@ -1575,7 +1575,7 @@ $defs:
                 enum: [max-unavailable, min-available]
                 description: 'PDB strategy (default: max-unavailable)'
               value:
-                type: string
+                $ref: "#/$defs/countOrPercentage"
                 description: 'PDB value (default: 1)'
               additionalLabels:
                 type: string
@@ -2935,6 +2935,19 @@ $defs:
       - const: ""
       - type: string
         pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+
+  countOrPercentage:
+    description: >
+      A pod count or a percentage of replicas, as Kubernetes takes for
+      rolling update and disruption budget limits: an integer, the same as a
+      string, a string ending in % (e.g. 25%), or a token left for later
+      substitution.
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+        pattern: "^(0|[1-9][0-9]*)%?$"
+      - $ref: "#/$defs/tokenReference"
 
   booleanOrString:
     description: A boolean, or the string 'true' or 'false'.
