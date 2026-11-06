@@ -761,11 +761,12 @@ $defs:
               docker. validate-tooling checks availability and creates a
               docker->podman symlink when podman is the runtime.
           platform:
-            type: string
+            $ref: "#/$defs/linuxPlatformList"
             description: >
               Docker build platform(s). Single value or comma-separated for
               multi-platform manifest list (e.g. linux/amd64,linux/arm64).
-              Default: linux/amd64
+              Default: linux/amd64. The schema checks the form only; the build
+              rejects platforms it does not yet support.
           qemu:
             type: object
             additionalProperties: false
@@ -779,8 +780,7 @@ $defs:
                   Image used to register the QEMU binfmt handlers
                   (default: the kube-kaptain image-binfmt image)
               additionalPlatforms:
-                type: string
-                pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+                $ref: "#/$defs/linuxPlatformList"
                 description: >
                   Comma-separated platforms to register emulation for on top of
                   those platform needs, whether or not the build itself needs
@@ -3040,6 +3040,13 @@ $defs:
       - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'
       - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'
   # END GENERATED: tokenReference
+
+  linuxPlatformList:
+    type: string
+    pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+    description: >
+      One or more linux platforms, comma-separated with no spaces, each
+      linux/<arch> with an optional /v<n> variant (e.g. linux/amd64,linux/arm/v7).
 
   imageDigest:
     type: string
