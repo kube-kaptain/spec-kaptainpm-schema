@@ -1272,7 +1272,10 @@ $defs:
                     pattern: "^(true|false)$"
                 description: 'Run as non-root user (default: true)'
               privileged:
-                type: string
+                oneOf:
+                  - type: boolean
+                  - type: string
+                    pattern: "^(true|false)$"
                 description: 'Run in privileged mode (default: false)'
               dnsPolicy:
                 type: string
