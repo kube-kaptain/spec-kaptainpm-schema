@@ -407,7 +407,6 @@ spec:
       release:
         enabled: 'true'
         addVersionToFilenames: 'true'
-        notes: 'Layer release'
         notesFile: RELEASE_NOTES.md
         substitutedFiles: 'README.md'
         verbatimFiles: 'LICENSE.md'

@@ -623,6 +623,8 @@ $defs:
             type: object
             additionalProperties: false
             description: GitHub Releases configuration
+            not:
+              required: [notes, notesFile]
             properties:
               enabled:
                 $ref: "#/$defs/booleanOrString"

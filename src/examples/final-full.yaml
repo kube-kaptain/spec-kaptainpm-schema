@@ -402,7 +402,6 @@ spec:
       release:
         enabled: 'true'
         addVersionToFilenames: 'true'
-        notes: 'Automated release'
         notesFile: RELEASE_NOTES.md
         substitutedFiles: 'README.md'
         verbatimFiles: 'LICENSE.md'
