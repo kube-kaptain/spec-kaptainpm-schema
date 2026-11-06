@@ -957,11 +957,7 @@ $defs:
                 properties:
                   port:
                     oneOf:
-                      - type: integer
-                        minimum: 1
-                        maximum: 65535
-                      - type: string
-                        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                      - $ref: "#/$defs/portNumber"
                       - $ref: "#/$defs/tokenReference"
                     description: 'Primary container port (default: 1024)'
                   command:
@@ -1443,20 +1439,12 @@ $defs:
                   endpoints can be supplied separately.
               port:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                    maximum: 65535
-                  - type: string
-                    pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                  - $ref: "#/$defs/portNumber"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Service port (default: 80)'
               targetPort:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                    maximum: 65535
-                  - type: string
-                    pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                  - $ref: "#/$defs/portNumber"
                   - type: string
                     maxLength: 15
                     allOf:
@@ -2969,6 +2957,15 @@ $defs:
       - type: string
         pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
 
+  portNumber:
+    description: A port number from 1 to 65535, as an integer or the same as a string.
+    oneOf:
+      - type: integer
+        minimum: 1
+        maximum: 65535
+      - type: string
+        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+
   countOrPercentage:
     description: >
       A pod count or a percentage of replicas, as Kubernetes takes for
@@ -3202,11 +3199,7 @@ $defs:
         description: 'HTTP scheme for http-get probes (default: HTTP)'
       tcpPort:
         oneOf:
-          - type: integer
-            minimum: 1
-            maximum: 65535
-          - type: string
-            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/portNumber"
           - $ref: "#/$defs/tokenReference"
         description: TCP port for tcp-socket probes
       execCommand:
@@ -3214,11 +3207,7 @@ $defs:
         description: Command for exec probes
       grpcPort:
         oneOf:
-          - type: integer
-            minimum: 1
-            maximum: 65535
-          - type: string
-            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/portNumber"
           - $ref: "#/$defs/tokenReference"
         description: gRPC port for grpc probes
       grpcService:
