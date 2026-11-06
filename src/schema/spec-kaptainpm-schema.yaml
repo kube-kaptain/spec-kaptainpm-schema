@@ -968,7 +968,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated workload name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for workload manifests
               envSubPath:
                 type: string
@@ -1295,7 +1295,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated CronJob name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for CronJob manifests
               concurrencyPolicy:
                 type: string
@@ -1416,7 +1416,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated Job name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for Job manifests
               backoffLimit:
                 oneOf:
@@ -1554,7 +1554,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated service name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for service manifests
               additionalLabels:
                 type: string
@@ -1575,7 +1575,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated ConfigMap name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for ConfigMap manifests
               nameChecksumInjection:
                 oneOf:
@@ -1602,7 +1602,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated Secret template name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for Secret template manifests
               nameChecksumInjection:
                 oneOf:
@@ -1632,7 +1632,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated ServiceAccount name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for ServiceAccount manifests
               additionalLabels:
                 type: string
@@ -1656,7 +1656,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated PDB name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for PDB manifests
               strategy:
                 type: string
@@ -1697,7 +1697,7 @@ $defs:
                   literal or token the build or its consumer resolves, such as
                   '${Environment}' or 'shared-tools'.
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path the Namespace manifest is written to; does not affect its name
               additionalLabels:
                 type: string
@@ -3047,6 +3047,18 @@ $defs:
     description: >
       One or more linux platforms, comma-separated with no spaces, each
       linux/<arch> with an optional /v<n> variant (e.g. linux/amd64,linux/arm/v7).
+
+  combinedSubPath:
+    description: >
+      Sub-path within combined/ for a generator's output, also used with /
+      turned into - in the generated resource names (e.g. tools/cron gives
+      <project>-tools-cron). Lowercase letters, digits and -, with / between
+      segments; each segment starts and ends with a letter or digit so the
+      resulting names are valid. Empty means not set.
+    anyOf:
+      - const: ""
+      - type: string
+        pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
 
   imageDigest:
     type: string
