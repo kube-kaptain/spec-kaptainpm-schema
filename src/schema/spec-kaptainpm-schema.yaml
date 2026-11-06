@@ -560,10 +560,7 @@ $defs:
                   - custom
                 description: 'Pattern type for file-pattern-match strategies'
               useSourceVersionExact:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use the source version exactly without incrementing (default: false)'
               source:
                 type: object
@@ -628,16 +625,10 @@ $defs:
             description: GitHub Releases configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Create a GitHub Release on version tags (default: true)'
               addVersionToFilenames:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Add version suffix to release artifact filenames (default: true)'
               notes:
                 type: string
@@ -692,44 +683,26 @@ $defs:
             additionalProperties: false
             properties:
               blockSlashes:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Reject branch names containing forward slashes
               blockDoubleHyphens:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Reject branch names containing double hyphens
               requireConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Require conventional branch naming convention
           commits:
             type: object
             additionalProperties: false
             properties:
               requireConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Require conventional commit message format
               blockConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Block conventional commit message format
               blockDuplicateMessages:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Block duplicate commit messages in a PR
 
       docker:
@@ -856,10 +829,7 @@ $defs:
                 enum: [squash, squash-all, "no"]
                 description: 'Squash image layers (podman only, default: squash)'
               noCache:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Disable docker build cache (default: true)'
           retag:
             type: object
@@ -1003,10 +973,7 @@ $defs:
                     enum: [combined, separate, project-name-prefixed-combined, project-name-prefixed-separate]
                     description: 'Image reference style (default: combined)'
                   readonlyRootFilesystem:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Mount root filesystem read-only (default: true)'
                   resources:
                     type: object
@@ -1057,10 +1024,7 @@ $defs:
                     enum: [DISABLED, RuntimeDefault, Localhost, Unconfined]
                     description: 'Seccomp profile (default: DISABLED)'
                   automountServiceAccountToken:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Automount service account token (default: false)'
                   imagePullSecrets:
                     type: string
@@ -1147,10 +1111,7 @@ $defs:
                     type: string
                     description: 'Max unavailable pods during rolling update (default: 0)'
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: true)'
 
           statefulset:
@@ -1200,10 +1161,7 @@ $defs:
                 description: PersistentVolumeClaim configuration
                 properties:
                   enabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable PVC generation (default: true)'
                   storageClassName:
                     type: string
@@ -1248,34 +1206,19 @@ $defs:
                     type: string
                     description: 'Max unavailable pods during rolling update (default: 1)'
               hostNetwork:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host network (default: false)'
               hostPid:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host PID namespace (default: false)'
               hostIpc:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host IPC namespace (default: false)'
               runAsNonRoot:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Run as non-root user (default: true)'
               privileged:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Run in privileged mode (default: false)'
               dnsPolicy:
                 type: string
@@ -1383,32 +1326,20 @@ $defs:
                 type: string
                 description: Additional annotations for CronJob manifests
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable startup probe (default: false)'
 
           job:
@@ -1476,32 +1407,20 @@ $defs:
                 type: string
                 description: Additional annotations for Job manifests
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable startup probe (default: false)'
 
           service:
@@ -1510,10 +1429,7 @@ $defs:
             description: Service manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Enable service generation
               type:
                 type: string
@@ -1582,10 +1498,7 @@ $defs:
                 $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for ConfigMap manifests
               nameChecksumInjection:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Inject ConfigMap checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1609,10 +1522,7 @@ $defs:
                 $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for Secret template manifests
               nameChecksumInjection:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Inject Secret checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1627,10 +1537,7 @@ $defs:
             description: ServiceAccount manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Whether to generate a ServiceAccount manifest (default: false)'
               nameSuffix:
                 type: string
@@ -1651,10 +1558,7 @@ $defs:
             description: PodDisruptionBudget manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Enable PDB generation
               nameSuffix:
                 type: string
@@ -1688,10 +1592,7 @@ $defs:
             required: [name]
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Whether to generate a Namespace manifest (default: false)'
               name:
                 type: string
@@ -1724,10 +1625,7 @@ $defs:
               hold only .yaml manifests and their modifier files; a symlink
               fails the build, and dotfiles are ignored.
           allowLocalOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: >
               When true, manifests from the local src/kubernetes directory may
               override manifests contributed by foreign sources (referenced
@@ -1747,10 +1645,7 @@ $defs:
                 type: string
                 description: 'Directory containing default token values (default: src/defaults)'
               allowLocalOverride:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: >
                   When true, defaults from the local src/defaults directory may
                   override defaults contributed by foreign sources staged under
@@ -1915,10 +1810,7 @@ $defs:
         description: Change source tracking configuration
         properties:
           noteEnabled:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: >
               Write git notes recording the source branch and PR author during
               PR builds, read back during release builds (default: true)
@@ -1977,10 +1869,7 @@ $defs:
         description: Layer and layerset build configuration
         properties:
           tokenSubstitution:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
 
       vendorHelmRendered:
@@ -2129,10 +2018,7 @@ $defs:
                   not:
                     required: [sourceImageUri]
           useProjectNameAsFullnameOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             default: true
             description: >
               Pass --set fullnameOverride=<project-name> to helm template so
@@ -2147,10 +2033,7 @@ $defs:
   # ---------------------------------------------------------------------------
 
   runEnvAllowLocalManifestsOverride:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       When true, manifests from the local src/kubernetes directory may
       override manifests contributed by referenced children (matched by
@@ -2162,10 +2045,7 @@ $defs:
       collision regardless of this flag.
 
   runEnvFailOnUnreferencedConfigOrSecrets:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       When true (default), a value file under src/config or src/secrets
       that is not referenced by any token in the assembled manifest tree
@@ -2174,10 +2054,7 @@ $defs:
       permitted fallback.
 
   runEnvTrustedContributorsOnly:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       Master disable for the sensitive-resource sign-off check. When false
       (default) every sensitive resource (Ingress, RBAC, webhooks, routes,
@@ -2316,10 +2193,7 @@ $defs:
         description: Additional annotations for the generated Namespace
 
   runEnvAutoGenerateImagePullSecrets:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     default: true
     description: >
       When true (default), the build generates one image pull Secret for
@@ -2505,10 +2379,7 @@ $defs:
       No leading or trailing slash. Repo-root-relative only.
 
   runEnvGenerateIdealEnvironmentDeployManifests:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     default: true
     description: >
       When true (default), the build generates the env deploy manifest
@@ -2593,10 +2464,7 @@ $defs:
           OCI registry host (and optional port). Default ships with
           the Kaptain release.
       includeNamespace:
-        oneOf:
-          - type: boolean
-          - type: string
-            pattern: "^(true|false)$"
+        $ref: "#/$defs/booleanOrString"
         description: >
           Include the namespace segment in the composed base image
           reference. Default true. Set false for flat registry
@@ -3063,6 +2931,13 @@ $defs:
       - const: ""
       - type: string
         pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+
+  booleanOrString:
+    description: A boolean, or the string 'true' or 'false'.
+    oneOf:
+      - type: boolean
+      - type: string
+        pattern: "^(true|false)$"
 
   imageDigest:
     type: string
