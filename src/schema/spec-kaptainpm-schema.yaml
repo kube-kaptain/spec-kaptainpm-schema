@@ -944,7 +944,8 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
-                description: 'Desired replica count'
+                  - const: "NO"
+                description: 'Desired replica count, or "NO" to omit replicas entirely (e.g. when a HorizontalPodAutoscaler manages them)'
               revisionHistoryLimit:
                 oneOf:
                   - type: integer
