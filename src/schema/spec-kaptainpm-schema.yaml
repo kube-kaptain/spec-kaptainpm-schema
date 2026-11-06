@@ -718,7 +718,7 @@ $defs:
           - if:
               properties:
                 targetIncludeNamespace:
-                  const: false
+                  enum: [false, "false"]
               required: [targetIncludeNamespace]
             then:
               properties:
@@ -773,7 +773,7 @@ $defs:
             $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
           targetAllowNoRegistry:
-            type: boolean
+            $ref: "#/$defs/booleanOrString"
             description: >
               Exempt this project from the load-time target registry check on
               platforms that provide no registry default. Default false.
@@ -791,7 +791,7 @@ $defs:
               paths, but no leading/trailing slashes. Empty string is treated
               as not configured.
           targetIncludeNamespace:
-            type: boolean
+            $ref: "#/$defs/booleanOrString"
             description: >
               Include the namespace segment in built image URIs and
               short-form reference expansion. Default true. Set false for
