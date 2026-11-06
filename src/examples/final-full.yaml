@@ -91,6 +91,9 @@ spec:
     docker:
       runtime: docker
       platform: linux/amd64
+      qemu:
+        binfmtImageUri: 'ghcr.io/kube-kaptain/image/image-binfmt:10.2.3.1@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        additionalPlatforms: linux/arm64,linux/arm/v7
       logins:
         ghcr.io:
           type: github-token
@@ -124,6 +127,20 @@ spec:
     externalImage:
       name: my-org/my-app
       tag: '1.2.3'
+      digest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - sourceImageUri: 'docker.io/envoyproxy/gateway:v1.3.0'
+          sourceDigest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          tagSuffix: gateway
+        - sourceRegistry: docker.io
+          sourceNamespace: envoyproxy
+          sourceImageName: ratelimit
+          sourceTag: 'f2fb1577'
+          sourceDigest: 'sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210'
+          tagSuffix: ratelimit
 
     generators:
       common:
@@ -360,7 +377,6 @@ spec:
         allowLocalOverride: true
       repoProvider:
         type: docker
-        packagingBaseImage: scratch
       templatesLayout: flat
 
     changeSource:
@@ -380,7 +396,6 @@ spec:
     specBuild:
       type: schema
       jsonSchemaUrl: src/schemas/json-schema-draft-2020-12.json
-      packagingBaseImage: scratch
 
   platform:
     githubActions:

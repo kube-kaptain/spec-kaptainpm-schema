@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Image retags accept either a full sourceImageUri or the separate source
+# fields, each optionally pinned by digest as a field or an @sha256: suffix.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - sourceImageUri: 'docker.io/envoyproxy/gateway:v1.3.0'
+          tagSuffix: gateway
+        - sourceImageUri: 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.2@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          tagSuffix: autoscaler
+        - sourceImageUri: 'public.ecr.aws/eks/aws-load-balancer-controller:v2.10.1'
+          sourceDigest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          tagSuffix: lbc
+        - sourceImageUri: 'localhost:5000/team/app:Release_1.2-rc.1'
+          tagSuffix: local
+        - sourceRegistry: docker.io
+          sourceNamespace: envoyproxy
+          sourceImageName: ratelimit
+          sourceTag: 'f2fb1577'
+          sourceDigest: 'sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210'
+          tagSuffix: ratelimit
+        - sourceRegistry: registry.example.com:5000
+          sourceImageName: app
+          sourceTag: 'v1.2.3@sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210'
+          tagSuffix: app

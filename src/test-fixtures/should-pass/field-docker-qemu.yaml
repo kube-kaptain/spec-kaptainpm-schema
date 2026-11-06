@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The QEMU binfmt image may be pinned by digest, and additional platforms may
+# include ones platform itself does not accept, with or without a variant.
+
+apiVersion: kaptain.org/1.2
+kind: docker-build-dockerfile
+spec:
+  main:
+    docker:
+      platform: linux/amd64
+      qemu:
+        binfmtImageUri: 'registry.example.com:5000/mirror/image-binfmt:10.2.3.1@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        additionalPlatforms: linux/arm64,linux/riscv64,linux/arm/v7

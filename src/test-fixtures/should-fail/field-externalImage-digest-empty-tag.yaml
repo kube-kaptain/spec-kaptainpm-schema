@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# externalImage.digest requires a non-empty tag: an empty tag leaves the token
+# for later substitution, which a pinned digest cannot be verified against.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-manifests-only
+spec:
+  main:
+    externalImage:
+      name: my-org/my-app
+      tag: ''
+      digest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'

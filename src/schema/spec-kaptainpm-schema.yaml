@@ -766,6 +766,29 @@ $defs:
               Docker build platform(s). Single value or comma-separated for
               multi-platform manifest list (e.g. linux/amd64,linux/arm64).
               Default: linux/amd64
+          qemu:
+            type: object
+            additionalProperties: false
+            description: >
+              QEMU binfmt emulation setup on Linux build servers. By default it
+              is only set up when a target platform is not native to the host.
+            properties:
+              binfmtImageUri:
+                $ref: "#/$defs/imageUri"
+                description: >
+                  Image used to register the QEMU binfmt handlers
+                  (default: the kube-kaptain image-binfmt image)
+              additionalPlatforms:
+                type: string
+                pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+                description: >
+                  Comma-separated platforms to register emulation for on top of
+                  those platform needs, whether or not the build itself needs
+                  them - e.g. for hooks that run foreign-arch containers
+                  (e.g. linux/arm64,linux/s390x). Platforms native to the
+                  runner are skipped. Not limited to the platforms platform
+                  accepts: anything the binfmt image supports, such as
+                  linux/riscv64 or linux/arm/v7.
           logins:
             type: object
             description: Registry login configuration keyed by domain
@@ -857,8 +880,7 @@ $defs:
                 type: string
                 description: Source image tag
               sourceDigest:
-                type: string
-                pattern: "^sha256:[0-9a-f]{64}$"
+                $ref: "#/$defs/imageDigest"
                 description: >
                   Source image digest. The image pulled by sourceTag must be
                   the same image this digest resolves to, or the build fails.
@@ -876,6 +898,17 @@ $defs:
           tag:
             type: string
             description: Docker image tag (if provided, substitutes into manifests; if empty, token remains for later substitution)
+          digest:
+            $ref: "#/$defs/imageDigest"
+            description: >
+              Digest pinning the external image. Manifests then reference it as
+              name:tag@digest; the tag is still required alongside it.
+        dependentSchemas:
+          digest:
+            required: [tag]
+            properties:
+              tag:
+                minLength: 1
 
       generators:
         type: object
@@ -1703,9 +1736,6 @@ $defs:
                 type: string
                 enum: [docker]
                 description: 'Manifest storage provider type (default: docker)'
-              packagingBaseImage:
-                type: string
-                description: 'Base image for manifest packaging (default: scratch)'
           templatesLayout:
             type: string
             enum: [flat, hierarchy]
@@ -1910,18 +1940,12 @@ $defs:
           jsonSchemaUrl:
             type: string
             description: 'JSON Schema meta-schema file path or URL (default: src/schemas/json-schema-draft-2020-12.json)'
-          packagingBaseImage:
-            type: string
-            description: 'Base image for spec packaging (default: scratch)'
 
       layer:
         type: object
         additionalProperties: false
         description: Layer and layerset build configuration
         properties:
-          packagingBaseImage:
-            type: string
-            description: 'Base image for layer packaging (default: scratch)'
           tokenSubstitution:
             oneOf:
               - type: boolean
@@ -2020,24 +2044,60 @@ $defs:
                         type: string
           imageRetags:
             type: array
-            description: Docker images to pull and retag as part of this build
+            description: >
+              Docker images to pull and retag as part of this build. Each
+              source is given either as a single sourceImageUri, or as the
+              separate sourceRegistry/sourceNamespace/sourceImageName/sourceTag
+              fields used by docker.retag, never a mix of the two.
             items:
               type: object
               additionalProperties: false
               required:
-                - sourceImageUri
                 - tagSuffix
               properties:
                 sourceImageUri:
-                  type: string
+                  $ref: "#/$defs/imageUri"
                   description: >
-                    Full source image URI including tag
+                    Full source image URI: explicit registry, path and tag,
+                    optionally followed by an @sha256: digest
                     (e.g., docker.io/envoyproxy/gateway:v1.3.0)
+                sourceRegistry:
+                  $ref: "#/$defs/registryDomain"
+                  description: Source registry domain (e.g., docker.io)
+                sourceNamespace:
+                  $ref: "#/$defs/registryNamespace"
+                  description: >
+                    Source namespace/organisation. Supports nested paths, but
+                    no leading/trailing slashes.
+                sourceImageName:
+                  type: string
+                  description: Source image name
+                sourceTag:
+                  type: string
+                  description: Source image tag, optionally followed by an @sha256 digest
+                sourceDigest:
+                  $ref: "#/$defs/imageDigest"
+                  description: >
+                    Source image digest. The image pulled by tag must be the
+                    same image this digest resolves to, or the build fails.
+                    May instead be written as an @sha256: suffix on the tag;
+                    if both are given they must match.
                 tagSuffix:
                   type: string
                   description: >
                     Suffix appended to the build version for the target tag
                     (e.g., gateway -> 1.2.3-gateway)
+              oneOf:
+                - required: [sourceImageUri]
+                  not:
+                    anyOf:
+                      - required: [sourceRegistry]
+                      - required: [sourceNamespace]
+                      - required: [sourceImageName]
+                      - required: [sourceTag]
+                - required: [sourceRegistry, sourceImageName, sourceTag]
+                  not:
+                    required: [sourceImageUri]
           useProjectNameAsFullnameOverride:
             oneOf:
               - type: boolean
@@ -2535,6 +2595,14 @@ $defs:
           Tag of the base image. Default ships with the Kaptain
           release and is pinned to a known-good combination with
           this Kaptain version.
+      digest:
+        $ref: "#/$defs/imageDigest"
+        description: >
+          Digest pinning the base image, composed as
+          '<registry>/[<namespace>/]image/image-environment-deploy-<family>:<version>@<digest>'.
+          The version tag must still resolve to this digest or the build
+          fails, so set version alongside it rather than relying on the
+          release default, which moves when Kaptain is upgraded.
 
   runEnvCleanUpPolicy:
     type: string
@@ -2832,6 +2900,20 @@ $defs:
   # ---------------------------------------------------------------------------
   # Shared building blocks
   # ---------------------------------------------------------------------------
+
+  imageUri:
+    type: string
+    pattern: "^(localhost|[a-z0-9-]+(\\.[a-z0-9-]+)+)(:[0-9]+)?(/[a-z0-9._-]+)+:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}(@sha256:[0-9a-f]{64})?$"
+    description: >
+      Full image reference: explicit registry (a host with a dot, or
+      localhost, optionally with a port), lowercase path and tag, optionally
+      followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
+      is not accepted - write docker.io/library/nginx:1.25.
+
+  imageDigest:
+    type: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: 'OCI image digest: sha256: followed by 64 lowercase hex characters'
 
   registryDomain:
     type: string

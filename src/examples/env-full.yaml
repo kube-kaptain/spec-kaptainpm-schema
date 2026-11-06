@@ -50,6 +50,7 @@ spec:
         namespace: kube-kaptain
         family: trixie-slim
         version: 1.0.12.1.35.1
+        digest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
 
       cleanUp:
         # Policy for all non-accumulating resources
