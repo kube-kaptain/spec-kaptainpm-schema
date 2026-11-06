@@ -1433,8 +1433,12 @@ $defs:
                 description: Enable service generation
               type:
                 type: string
-                enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
-                description: 'Service type (default: ClusterIP)'
+                enum: [ClusterIP, Headless, NoSelector, NodePort, LoadBalancer, ExternalName]
+                description: >
+                  Service type (default: ClusterIP). Headless and NoSelector are
+                  Kaptain shorthands that both generate a ClusterIP Service:
+                  Headless sets clusterIP None, NoSelector omits the selector so
+                  endpoints can be supplied separately.
               port:
                 oneOf:
                   - type: integer
