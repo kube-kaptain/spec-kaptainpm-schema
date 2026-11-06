@@ -91,6 +91,9 @@ spec:
     docker:
       runtime: docker
       platform: linux/amd64
+      qemu:
+        binfmtImageUri: 'ghcr.io/kube-kaptain/image/image-binfmt:10.2.3.1@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+        additionalPlatforms: linux/arm64,linux/arm/v7
       logins:
         ghcr.io:
           type: github-token

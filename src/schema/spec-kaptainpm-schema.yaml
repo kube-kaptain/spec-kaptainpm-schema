@@ -766,6 +766,29 @@ $defs:
               Docker build platform(s). Single value or comma-separated for
               multi-platform manifest list (e.g. linux/amd64,linux/arm64).
               Default: linux/amd64
+          qemu:
+            type: object
+            additionalProperties: false
+            description: >
+              QEMU binfmt emulation setup on Linux build servers. By default it
+              is only set up when a target platform is not native to the host.
+            properties:
+              binfmtImageUri:
+                $ref: "#/$defs/imageUri"
+                description: >
+                  Image used to register the QEMU binfmt handlers
+                  (default: the kube-kaptain image-binfmt image)
+              additionalPlatforms:
+                type: string
+                pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+                description: >
+                  Comma-separated platforms to register emulation for on top of
+                  those platform needs, whether or not the build itself needs
+                  them - e.g. for hooks that run foreign-arch containers
+                  (e.g. linux/arm64,linux/s390x). Platforms native to the
+                  runner are skipped. Not limited to the platforms platform
+                  accepts: anything the binfmt image supports, such as
+                  linux/riscv64 or linux/arm/v7.
           logins:
             type: object
             description: Registry login configuration keyed by domain
@@ -2032,8 +2055,7 @@ $defs:
                 - tagSuffix
               properties:
                 sourceImageUri:
-                  type: string
-                  pattern: "^(localhost|[a-z0-9-]+(\\.[a-z0-9-]+)+)(:[0-9]+)?(/[a-z0-9._-]+)+:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}(@sha256:[0-9a-f]{64})?$"
+                  $ref: "#/$defs/imageUri"
                   description: >
                     Full source image URI: explicit registry, path and tag,
                     optionally followed by an @sha256: digest
@@ -2870,6 +2892,15 @@ $defs:
   # ---------------------------------------------------------------------------
   # Shared building blocks
   # ---------------------------------------------------------------------------
+
+  imageUri:
+    type: string
+    pattern: "^(localhost|[a-z0-9-]+(\\.[a-z0-9-]+)+)(:[0-9]+)?(/[a-z0-9._-]+)+:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}(@sha256:[0-9a-f]{64})?$"
+    description: >
+      Full image reference: explicit registry (a host with a dot, or
+      localhost, optionally with a port), lowercase path and tag, optionally
+      followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
+      is not accepted - write docker.io/library/nginx:1.25.
 
   registryDomain:
     type: string
