@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# externalImage.digest must be sha256: followed by 64 lowercase hex characters.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-manifests-only
+spec:
+  main:
+    externalImage:
+      name: my-org/my-app
+      tag: '1.2.3'
+      digest: 'sha256:ABC123'

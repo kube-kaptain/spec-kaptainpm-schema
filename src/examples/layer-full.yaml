@@ -132,6 +132,7 @@ spec:
     externalImage:
       name: my-org/my-app
       tag: '1.2.3'
+      digest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
 
     vendorHelmRendered:
       ociChart: oci://ghcr.io/example/charts/my-chart

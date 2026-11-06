@@ -880,8 +880,7 @@ $defs:
                 type: string
                 description: Source image tag
               sourceDigest:
-                type: string
-                pattern: "^sha256:[0-9a-f]{64}$"
+                $ref: "#/$defs/imageDigest"
                 description: >
                   Source image digest. The image pulled by sourceTag must be
                   the same image this digest resolves to, or the build fails.
@@ -899,6 +898,17 @@ $defs:
           tag:
             type: string
             description: Docker image tag (if provided, substitutes into manifests; if empty, token remains for later substitution)
+          digest:
+            $ref: "#/$defs/imageDigest"
+            description: >
+              Digest pinning the external image. Manifests then reference it as
+              name:tag@digest; the tag is still required alongside it.
+        dependentSchemas:
+          digest:
+            required: [tag]
+            properties:
+              tag:
+                minLength: 1
 
       generators:
         type: object
@@ -2066,8 +2076,7 @@ $defs:
                   type: string
                   description: Source image tag, optionally followed by an @sha256 digest
                 sourceDigest:
-                  type: string
-                  pattern: "^sha256:[0-9a-f]{64}$"
+                  $ref: "#/$defs/imageDigest"
                   description: >
                     Source image digest. The image pulled by tag must be the
                     same image this digest resolves to, or the build fails.
@@ -2586,6 +2595,14 @@ $defs:
           Tag of the base image. Default ships with the Kaptain
           release and is pinned to a known-good combination with
           this Kaptain version.
+      digest:
+        $ref: "#/$defs/imageDigest"
+        description: >
+          Digest pinning the base image, composed as
+          '<registry>/[<namespace>/]image/image-environment-deploy-<family>:<version>@<digest>'.
+          The version tag must still resolve to this digest or the build
+          fails, so set version alongside it rather than relying on the
+          release default, which moves when Kaptain is upgraded.
 
   runEnvCleanUpPolicy:
     type: string
@@ -2892,6 +2909,11 @@ $defs:
       localhost, optionally with a port), lowercase path and tag, optionally
       followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
       is not accepted - write docker.io/library/nginx:1.25.
+
+  imageDigest:
+    type: string
+    pattern: "^sha256:[0-9a-f]{64}$"
+    description: 'OCI image digest: sha256: followed by 64 lowercase hex characters'
 
   registryDomain:
     type: string

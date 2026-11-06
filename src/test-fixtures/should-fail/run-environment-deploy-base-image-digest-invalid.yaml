@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# environmentDeployBaseImage.digest must be sha256: followed by 64 lowercase
+# hex characters.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      environmentDeployBaseImage:
+        version: 1.0.12.1.35.1
+        digest: 'sha256:0123'
