@@ -510,11 +510,7 @@ $defs:
               producer's. Only valid for the kinds that package manifests for
               another build to consume (default: standard)
           substitutionPasses:
-            oneOf:
-              - type: integer
-                minimum: 1
-              - type: string
-                pattern: "^[1-9][0-9]*$"
+            $ref: "#/$defs/positiveIntegerOrString"
             description: 'Number of token substitution passes (default: 1)'
           valueTrailingNewline:
             type: string
@@ -539,11 +535,7 @@ $defs:
             additionalProperties: false
             properties:
               maxParts:
-                oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                $ref: "#/$defs/positiveIntegerOrString"
                 description: 'Maximum version parts allowed before failure (default: 3)'
               strategy:
                 type: string
@@ -577,11 +569,7 @@ $defs:
                     type: string
                     description: 'Regex with capture group for custom pattern type'
                   prefixParts:
-                    oneOf:
-                      - type: integer
-                        minimum: 1
-                      - type: string
-                        pattern: "^[1-9][0-9]*$"
+                    $ref: "#/$defs/positiveIntegerOrString"
                     description: 'Parts from source as prefix (output = prefix + 1)'
               sourceTwo:
                 type: object
@@ -598,11 +586,7 @@ $defs:
                     type: string
                     description: 'Regex with capture group for secondary source'
                   prefixParts:
-                    oneOf:
-                      - type: integer
-                        minimum: 1
-                      - type: string
-                        pattern: "^[1-9][0-9]*$"
+                    $ref: "#/$defs/positiveIntegerOrString"
                     description: 'Parts from secondary source as prefix'
 
   # ---------------------------------------------------------------------------
@@ -913,27 +897,18 @@ $defs:
                 description: 'Workload type (default: deployment)'
               replicas:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - const: "NO"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Desired replica count, or "NO" to omit replicas entirely (e.g. when a HorizontalPodAutoscaler manages them)'
               revisionHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Number of old ReplicaSets to retain (default: 10)'
               minReadySeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Minimum seconds a pod must be ready (default: 0)'
               nameSuffix:
@@ -1030,10 +1005,7 @@ $defs:
                     description: 'Image pull secrets (default: ENABLED)'
               terminationGracePeriodSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Pod termination grace period (default: 10)'
               prestopCommand:
@@ -1147,10 +1119,7 @@ $defs:
                     description: 'Update strategy type (default: RollingUpdate)'
                   partition:
                     oneOf:
-                      - type: integer
-                        minimum: 0
-                      - type: string
-                        pattern: "^[0-9]+$"
+                      - $ref: "#/$defs/nonNegativeIntegerOrString"
                       - $ref: "#/$defs/tokenReference"
                     description: Partition ordinal for canary updates
               pvc:
@@ -1248,66 +1217,42 @@ $defs:
                 description: 'How concurrent executions are handled (default: Forbid)'
               startingDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: Deadline in seconds for starting the job
               successfulJobsHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Successful jobs to retain (default: 1)'
               failedJobsHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Failed jobs to retain (default: 5)'
               backoffLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/positiveIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: TTL seconds after job finished
               restartPolicy:
@@ -1353,42 +1298,27 @@ $defs:
                 description: Combined sub-path for Job manifests
               backoffLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/positiveIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
                   - $ref: "#/$defs/tokenReference"
                 description: 'TTL seconds after job finished (default: 86400)'
               restartPolicy:
@@ -2659,11 +2589,7 @@ $defs:
           Examples: '30d', '6h', '90s'. Compound durations like '1h30m'
           are not supported - pick the largest meaningful unit.
       count:
-        oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+        $ref: "#/$defs/positiveIntegerOrString"
         description: >
           Per-series retention count, required when type is 'count'.
           Keep the N most recent by creationTimestamp within each
@@ -2957,6 +2883,22 @@ $defs:
       - type: string
         pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
 
+  nonNegativeIntegerOrString:
+    description: A whole number of 0 or more, as an integer or the same as a string.
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+        pattern: "^[0-9]+$"
+
+  positiveIntegerOrString:
+    description: A whole number of 1 or more, as an integer or the same as a string.
+    oneOf:
+      - type: integer
+        minimum: 1
+      - type: string
+        pattern: "^[1-9][0-9]*$"
+
   portNumber:
     description: A port number from 1 to 65535, as an integer or the same as a string.
     oneOf:
@@ -3215,49 +3157,31 @@ $defs:
         description: gRPC service name for grpc probes
       initialDelaySeconds:
         oneOf:
-          - type: integer
-            minimum: 0
-          - type: string
-            pattern: "^[0-9]+$"
+          - $ref: "#/$defs/nonNegativeIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: Seconds after container start before first probe
       periodSeconds:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: How often to perform the probe in seconds
       timeoutSeconds:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: Seconds after which the probe times out
       failureThreshold:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: Consecutive failures before the probe is considered failed
       successThreshold:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: Consecutive successes before the probe is considered successful
       terminationGracePeriodSeconds:
         oneOf:
-          - type: integer
-            minimum: 0
-          - type: string
-            pattern: "^[0-9]+$"
+          - $ref: "#/$defs/nonNegativeIntegerOrString"
           - $ref: "#/$defs/tokenReference"
         description: Grace period override for pod termination on probe failure
