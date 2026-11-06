@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# cleanUp count is at least 1 in either form; to delete every resource use type all.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      cleanUp:
+        accumulatingResources:
+          jobs:
+            type: count
+            count: '0'

@@ -2659,8 +2659,11 @@ $defs:
           Examples: '30d', '6h', '90s'. Compound durations like '1h30m'
           are not supported - pick the largest meaningful unit.
       count:
-        type: integer
-        minimum: 1
+        oneOf:
+          - type: integer
+            minimum: 1
+          - type: string
+            pattern: "^[1-9][0-9]*$"
         description: >
           Per-series retention count, required when type is 'count'.
           Keep the N most recent by creationTimestamp within each
