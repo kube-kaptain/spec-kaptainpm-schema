@@ -1053,6 +1053,7 @@ $defs:
                 properties:
                   seccompProfile:
                     type: string
+                    enum: [DISABLED, RuntimeDefault, Localhost, Unconfined]
                     description: 'Seccomp profile (default: DISABLED)'
                   automountServiceAccountToken:
                     oneOf:
@@ -1091,6 +1092,7 @@ $defs:
                     description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
                   dnsPolicy:
                     type: string
+                    enum: [ClusterFirst, ClusterFirstWithHostNet, Default, None]
                     description: Pod DNS policy
                   priorityClassName:
                     type: string
@@ -1272,6 +1274,7 @@ $defs:
                 description: 'Run in privileged mode (default: false)'
               dnsPolicy:
                 type: string
+                enum: [ClusterFirst, ClusterFirstWithHostNet, Default, None]
                 description: Pod DNS policy
               tolerations:
                 type: string
