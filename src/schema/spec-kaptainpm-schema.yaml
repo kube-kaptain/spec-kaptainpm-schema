@@ -2322,9 +2322,12 @@ $defs:
       that the timing choice defers past.
 
   runEnvChecksumLength:
-    type: integer
-    minimum: 1
-    maximum: 52
+    oneOf:
+      - type: integer
+        minimum: 1
+        maximum: 52
+      - type: string
+        pattern: "^([1-9]|[1-4][0-9]|5[0-2])$"
     default: 5
     description: >
       Length in Base32 characters of the checksum suffix that replaces
