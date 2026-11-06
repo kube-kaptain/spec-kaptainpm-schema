@@ -1895,6 +1895,16 @@ $defs:
         type: object
         additionalProperties: false
         description: Vendor helm chart rendered to plain kubernetes manifests at build time
+        # Chart source: repoUrl and chartName go together, and that pair excludes
+        # ociChart. Having one of them at all is left to the build, as a layer may
+        # carry the other vendorHelmRendered settings without a chart.
+        dependentRequired:
+          repoUrl: [chartName]
+          chartName: [repoUrl]
+        not:
+          anyOf:
+            - required: [ociChart, repoUrl]
+            - required: [ociChart, chartName]
         properties:
           repoUrl:
             type: string

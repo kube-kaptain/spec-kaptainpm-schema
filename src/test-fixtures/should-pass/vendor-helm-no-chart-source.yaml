@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# vendorHelmRendered settings without a chart source are valid on their own,
+# as a layer may carry them while the project supplies the chart. The build
+# requires a source once everything is merged.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      useProjectNameAsFullnameOverride: true
