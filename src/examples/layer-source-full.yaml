@@ -374,7 +374,6 @@ spec:
         allowLocalOverride: true
       repoProvider:
         type: docker
-        packagingBaseImage: scratch
       templatesLayout: flat
 
     changeSource:
@@ -394,7 +393,6 @@ spec:
     specBuild:
       type: schema
       jsonSchemaUrl: src/schemas/json-schema-draft-2020-12.json
-      packagingBaseImage: scratch
 
   platform:
     githubActions:

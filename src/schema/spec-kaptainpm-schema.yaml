@@ -1726,9 +1726,6 @@ $defs:
                 type: string
                 enum: [docker]
                 description: 'Manifest storage provider type (default: docker)'
-              packagingBaseImage:
-                type: string
-                description: 'Base image for manifest packaging (default: scratch)'
           templatesLayout:
             type: string
             enum: [flat, hierarchy]
@@ -1933,18 +1930,12 @@ $defs:
           jsonSchemaUrl:
             type: string
             description: 'JSON Schema meta-schema file path or URL (default: src/schemas/json-schema-draft-2020-12.json)'
-          packagingBaseImage:
-            type: string
-            description: 'Base image for spec packaging (default: scratch)'
 
       layer:
         type: object
         additionalProperties: false
         description: Layer and layerset build configuration
         properties:
-          packagingBaseImage:
-            type: string
-            description: 'Base image for layer packaging (default: scratch)'
           tokenSubstitution:
             oneOf:
               - type: boolean
