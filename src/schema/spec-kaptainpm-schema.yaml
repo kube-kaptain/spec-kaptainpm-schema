@@ -2884,12 +2884,14 @@ $defs:
         pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
 
   nonNegativeIntegerOrString:
-    description: A whole number of 0 or more, as an integer or the same as a string.
+    description: >
+      A whole number of 0 or more, as an integer or the same as a string,
+      with no leading zeros.
     oneOf:
       - type: integer
         minimum: 0
       - type: string
-        pattern: "^[0-9]+$"
+        pattern: "^(0|[1-9][0-9]*)$"
 
   positiveIntegerOrString:
     description: A whole number of 1 or more, as an integer or the same as a string.

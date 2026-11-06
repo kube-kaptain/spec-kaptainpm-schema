@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Whole numbers given as strings have no leading zeros: '01' could be read as
+# octal or break arithmetic once it reaches a manifest or the build.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      workload:
+        revisionHistoryLimit: '01'
