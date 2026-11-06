@@ -853,6 +853,7 @@ $defs:
                 description: 'Platform-specific Dockerfile directory for linux/arm64 (default: src/docker-linux-arm64)'
               squash:
                 type: string
+                enum: [squash, squash-all, "no"]
                 description: 'Squash image layers (podman only, default: squash)'
               noCache:
                 oneOf:
