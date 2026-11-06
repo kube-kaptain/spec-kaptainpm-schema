@@ -123,6 +123,12 @@ spec:
       name: my-org/my-app
       tag: '1.2.3'
 
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - sourceImageUri: 'docker.io/envoyproxy/gateway:v1.3.0'
+          tagSuffix: gateway
+
     generators:
       common:
         additionalLabels: 'team=platform'
