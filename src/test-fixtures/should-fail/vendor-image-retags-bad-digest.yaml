@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# sourceDigest must be sha256: followed by 64 lowercase hex characters.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - sourceImageUri: 'docker.io/envoyproxy/gateway:v1.3.0'
+          sourceDigest: 'sha256:abc123'
+          tagSuffix: gateway

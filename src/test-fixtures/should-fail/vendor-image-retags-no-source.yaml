@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Every image retag needs a source, in one form or the other.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - tagSuffix: gateway

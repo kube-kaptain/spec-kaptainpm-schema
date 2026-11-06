@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# A digest alone is not enough: the tag is required so the digest can be
+# verified against it.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      ociChart: oci://ghcr.io/example/charts/my-chart
+      imageRetags:
+        - sourceImageUri: 'registry.k8s.io/pause@sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          tagSuffix: pause

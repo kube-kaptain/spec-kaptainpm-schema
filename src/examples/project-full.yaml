@@ -129,7 +129,14 @@ spec:
       ociChart: oci://ghcr.io/example/charts/my-chart
       imageRetags:
         - sourceImageUri: 'docker.io/envoyproxy/gateway:v1.3.0'
+          sourceDigest: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
           tagSuffix: gateway
+        - sourceRegistry: docker.io
+          sourceNamespace: envoyproxy
+          sourceImageName: ratelimit
+          sourceTag: 'f2fb1577'
+          sourceDigest: 'sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210'
+          tagSuffix: ratelimit
 
     generators:
       common:

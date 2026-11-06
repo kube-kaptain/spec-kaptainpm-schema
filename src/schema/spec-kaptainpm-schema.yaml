@@ -2020,24 +2020,62 @@ $defs:
                         type: string
           imageRetags:
             type: array
-            description: Docker images to pull and retag as part of this build
+            description: >
+              Docker images to pull and retag as part of this build. Each
+              source is given either as a single sourceImageUri, or as the
+              separate sourceRegistry/sourceNamespace/sourceImageName/sourceTag
+              fields used by docker.retag, never a mix of the two.
             items:
               type: object
               additionalProperties: false
               required:
-                - sourceImageUri
                 - tagSuffix
               properties:
                 sourceImageUri:
                   type: string
+                  pattern: "^(localhost|[a-z0-9-]+(\\.[a-z0-9-]+)+)(:[0-9]+)?(/[a-z0-9._-]+)+:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}(@sha256:[0-9a-f]{64})?$"
                   description: >
-                    Full source image URI including tag
+                    Full source image URI: explicit registry, path and tag,
+                    optionally followed by an @sha256: digest
                     (e.g., docker.io/envoyproxy/gateway:v1.3.0)
+                sourceRegistry:
+                  $ref: "#/$defs/registryDomain"
+                  description: Source registry domain (e.g., docker.io)
+                sourceNamespace:
+                  $ref: "#/$defs/registryNamespace"
+                  description: >
+                    Source namespace/organisation. Supports nested paths, but
+                    no leading/trailing slashes.
+                sourceImageName:
+                  type: string
+                  description: Source image name
+                sourceTag:
+                  type: string
+                  description: Source image tag, optionally followed by an @sha256 digest
+                sourceDigest:
+                  type: string
+                  pattern: "^sha256:[0-9a-f]{64}$"
+                  description: >
+                    Source image digest. The image pulled by tag must be the
+                    same image this digest resolves to, or the build fails.
+                    May instead be written as an @sha256: suffix on the tag;
+                    if both are given they must match.
                 tagSuffix:
                   type: string
                   description: >
                     Suffix appended to the build version for the target tag
                     (e.g., gateway -> 1.2.3-gateway)
+              oneOf:
+                - required: [sourceImageUri]
+                  not:
+                    anyOf:
+                      - required: [sourceRegistry]
+                      - required: [sourceNamespace]
+                      - required: [sourceImageName]
+                      - required: [sourceTag]
+                - required: [sourceRegistry, sourceImageName, sourceTag]
+                  not:
+                    required: [sourceImageUri]
           useProjectNameAsFullnameOverride:
             oneOf:
               - type: boolean
