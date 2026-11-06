@@ -945,6 +945,7 @@ $defs:
                   - type: string
                     pattern: "^[0-9]+$"
                   - const: "NO"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Desired replica count, or "NO" to omit replicas entirely (e.g. when a HorizontalPodAutoscaler manages them)'
               revisionHistoryLimit:
                 oneOf:
@@ -952,6 +953,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Number of old ReplicaSets to retain (default: 10)'
               minReadySeconds:
                 oneOf:
@@ -959,6 +961,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Minimum seconds a pod must be ready (default: 0)'
               nameSuffix:
                 type: string
@@ -986,6 +989,7 @@ $defs:
                         maximum: 65535
                       - type: string
                         pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                      - $ref: "#/$defs/tokenReference"
                     description: 'Primary container port (default: 1024)'
                   command:
                     type: string
@@ -1065,6 +1069,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Pod termination grace period (default: 10)'
               prestopCommand:
                 type: string
@@ -1183,6 +1188,7 @@ $defs:
                         minimum: 0
                       - type: string
                         pattern: "^[0-9]+$"
+                      - $ref: "#/$defs/tokenReference"
                     description: Partition ordinal for canary updates
               pvc:
                 type: object
@@ -1297,6 +1303,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: Deadline in seconds for starting the job
               successfulJobsHistoryLimit:
                 oneOf:
@@ -1304,6 +1311,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Successful jobs to retain (default: 1)'
               failedJobsHistoryLimit:
                 oneOf:
@@ -1311,6 +1319,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Failed jobs to retain (default: 5)'
               backoffLimit:
                 oneOf:
@@ -1318,6 +1327,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
@@ -1325,6 +1335,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
@@ -1332,6 +1343,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
@@ -1339,6 +1351,7 @@ $defs:
                     minimum: 1
                   - type: string
                     pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
@@ -1346,6 +1359,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: TTL seconds after job finished
               restartPolicy:
                 type: string
@@ -1406,6 +1420,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
@@ -1413,6 +1428,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
@@ -1420,6 +1436,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
@@ -1427,6 +1444,7 @@ $defs:
                     minimum: 1
                   - type: string
                     pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
@@ -1434,6 +1452,7 @@ $defs:
                     minimum: 0
                   - type: string
                     pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'TTL seconds after job finished (default: 86400)'
               restartPolicy:
                 type: string
@@ -1499,6 +1518,7 @@ $defs:
                     maximum: 65535
                   - type: string
                     pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Service port (default: 80)'
               targetPort:
                 type: string
@@ -1517,6 +1537,7 @@ $defs:
                     maximum: 32767
                   - type: string
                     pattern: "^(30[0-9]{3}|31[0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7])$"
+                  - $ref: "#/$defs/tokenReference"
                 description: Node port (NodePort type only)
               externalName:
                 type: string
@@ -2911,6 +2932,111 @@ $defs:
       followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
       is not accepted - write docker.io/library/nginx:1.25.
 
+  # BEGIN GENERATED: tokenReference - do not edit, run bin/generate-token-reference.bash
+  tokenReference:
+    type: string
+    description: >
+      A whole-value token left for later substitution, in any supported
+      delimiter style and token name style, e.g. ${ReplicaCount},
+      {{ replica-count }} or {{ .Values.REPLICA_COUNT }}. Names follow one
+      name style throughout, path segments joined by /. Values the build
+      itself reads must be resolved before it does, e.g. by layer token
+      substitution.
+    # Grouped by delimiter style. Each group lists the name styles in order:
+    # PascalCase camelCase UPPER_SNAKE lower_snake lower-kebab UPPER-KEBAB lower.dot UPPER.DOT
+    anyOf:
+      # shell: ${Name}
+      - pattern: '^\$\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'
+      - pattern: '^\$\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'
+      - pattern: '^\$\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'
+      - pattern: '^\$\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'
+      - pattern: '^\$\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'
+      # mustache: {{ Name }}
+      - pattern: '^\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
+      - pattern: '^\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      # helm: {{ .Values.Name }}
+      - pattern: '^\{\{ \.Values\.[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
+      - pattern: '^\{\{ \.Values\.([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      # erb: <%= Name %>
+      - pattern: '^<%= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* %>$'
+      - pattern: '^<%= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* %>$'
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* %>$'
+      - pattern: '^<%= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* %>$'
+      - pattern: '^<%= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* %>$'
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* %>$'
+      - pattern: '^<%= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* %>$'
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* %>$'
+      # github-actions: ${{ Name }}
+      - pattern: '^\$\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
+      - pattern: '^\$\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      # blade: {{ $Name }}
+      - pattern: '^\{\{ \$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
+      - pattern: '^\{\{ \$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      # stringtemplate: $Name$
+      - pattern: '^\$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\$$'
+      - pattern: '^\$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\$$'
+      - pattern: '^\$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\$$'
+      - pattern: '^\$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\$$'
+      - pattern: '^\$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\$$'
+      - pattern: '^\$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\$$'
+      - pattern: '^\$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\$$'
+      - pattern: '^\$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\$$'
+      # ognl: %{Name}
+      - pattern: '^%\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'
+      - pattern: '^%\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'
+      - pattern: '^%\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'
+      - pattern: '^%\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'
+      - pattern: '^%\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'
+      # t4: <#= Name #>
+      - pattern: '^<#= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* #>$'
+      - pattern: '^<#= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* #>$'
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* #>$'
+      - pattern: '^<#= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* #>$'
+      - pattern: '^<#= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* #>$'
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* #>$'
+      - pattern: '^<#= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* #>$'
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* #>$'
+      # swift: \(Name)
+      - pattern: '^\\\([A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\)$'
+      - pattern: '^\\\(([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\)$'
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\)$'
+      - pattern: '^\\\([a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\)$'
+      - pattern: '^\\\([a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\)$'
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\)$'
+      - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'
+  # END GENERATED: tokenReference
+
   imageDigest:
     type: string
     pattern: "^sha256:[0-9a-f]{64}$"
@@ -3129,6 +3255,7 @@ $defs:
             maximum: 65535
           - type: string
             pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/tokenReference"
         description: TCP port for tcp-socket probes
       execCommand:
         type: string
@@ -3140,6 +3267,7 @@ $defs:
             maximum: 65535
           - type: string
             pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/tokenReference"
         description: gRPC port for grpc probes
       grpcService:
         type: string
@@ -3150,6 +3278,7 @@ $defs:
             minimum: 0
           - type: string
             pattern: "^[0-9]+$"
+          - $ref: "#/$defs/tokenReference"
         description: Seconds after container start before first probe
       periodSeconds:
         oneOf:
@@ -3157,6 +3286,7 @@ $defs:
             minimum: 1
           - type: string
             pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/tokenReference"
         description: How often to perform the probe in seconds
       timeoutSeconds:
         oneOf:
@@ -3164,6 +3294,7 @@ $defs:
             minimum: 1
           - type: string
             pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/tokenReference"
         description: Seconds after which the probe times out
       failureThreshold:
         oneOf:
@@ -3171,6 +3302,7 @@ $defs:
             minimum: 1
           - type: string
             pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/tokenReference"
         description: Consecutive failures before the probe is considered failed
       successThreshold:
         oneOf:
@@ -3178,6 +3310,7 @@ $defs:
             minimum: 1
           - type: string
             pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/tokenReference"
         description: Consecutive successes before the probe is considered successful
       terminationGracePeriodSeconds:
         oneOf:
@@ -3185,4 +3318,5 @@ $defs:
             minimum: 0
           - type: string
             pattern: "^[0-9]+$"
+          - $ref: "#/$defs/tokenReference"
         description: Grace period override for pod termination on probe failure
