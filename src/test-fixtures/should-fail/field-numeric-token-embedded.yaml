@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# A numeric field takes a whole-value token, not one embedded in other text.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      workload:
+        container:
+          port: '80${PortSuffix}'

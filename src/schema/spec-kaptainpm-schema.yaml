@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: CC-BY-SA-4.0
 # Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
 #
-# KaptainPM schema source - superset of all five output schemas.
+# KaptainPM schema source - superset of all six output schemas.
 #
 # This file is NOT published directly. The generate-kind-schemas.bash hook
-# transforms it into five output schemas during build:
+# transforms it into six output schemas during build:
 #
 #   spec-kaptainpm-schema.yaml                    Base            - project root KaptainPM.yaml
 #   spec-kaptainpm-schema-final.yaml              Final           - kaptainpm/final/KaptainPM.yaml after layer merge
+#   spec-kaptainpm-schema-layer-source.yaml       Layer Source    - source layer before build (metadata optional)
 #   spec-kaptainpm-schema-layer.yaml              Layer           - layer image KaptainPM.yaml files
 #   spec-kaptainpm-schema-layerset.yaml           Layerset        - built/published layerset (pinned versions, metadata required)
 #   spec-kaptainpm-schema-layerset-source.yaml    Layerset Source - source layerset before build (ranges allowed, metadata optional)
@@ -28,8 +29,8 @@ $id: "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version
 name: ${ProjectName}
 version: "${Version}"
 source: https://github.com/kube-kaptain/${ProjectName}
-latest: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/main/${ProjectName}.yaml
-tagged: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/${Version}/${ProjectName}.yaml
+latest: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/main/src/schema/${ProjectName}.yaml
+tagged: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/${Version}/src/schema/${ProjectName}.yaml
 release: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.yaml
 validate-using: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.json
 
@@ -48,8 +49,8 @@ properties:
     pattern: "^kaptain\\.org/[0-9]+(\\.[0-9]+)*$"
     description: >
       API version - must be kaptain.org/ followed by the schema version
-      (e.g. kaptain.org/1.2). Set via ${Version} token substitution at
-      build time.
+      (e.g. kaptain.org/1.42). Set via ${VersionTokenStart}${VersionTokenEnd}
+      token substitution at build time.
 
   kind:
     type: string
@@ -244,6 +245,10 @@ allOf:
                         - clusterScopedDelegation
                         - clusterScopedKindsFile
                         - imageDeployManifestsApplyMode
+  # Only the run kinds take environment settings and inline encrypted secrets.
+  # Like the other kind gates this is stripped from the layer and layerset
+  # schemas, so layers may carry both for the run builds; the merged final
+  # catches either reaching the wrong kind.
   - if:
       required: [kind]
       not:
@@ -260,6 +265,10 @@ allOf:
               propertyNames:
                 not:
                   enum: [environment]
+            data:
+              propertyNames:
+                not:
+                  enum: [secrets]
 
 $defs:
 
@@ -294,10 +303,15 @@ $defs:
           container root (e.g. /scripts/build.bash)
       destination:
         type: string
+        minLength: 1
+        pattern: "^[^/]"
+        not:
+          pattern: "(^|/)\\.\\.(/|$)"
         description: >
           Relative directory path from repo root where contents land.
           mkdir -p is run before any copy or unpack operation.
-          (e.g. .kaptain/scripts/)
+          (e.g. .kaptain/scripts/). No leading / and no .. component, so a
+          layer cannot write outside the consuming repo.
       unpack:
         type: string
         enum:
@@ -411,15 +425,37 @@ $defs:
           Token values for all manifests. Field names are token names, field
           values are token values. Must not duplicate names declared in
           global.configSubPath files.
+        propertyNames:
+          $ref: "#/$defs/tokenName"
         additionalProperties:
           type: string
       secrets:
         type: object
+        additionalProperties: false
+        required: [encryptionType, encryptedValues]
         description: >
-          Token values for k8s Secret manifest contents only. Applied last,
-          after config substitution.
-        additionalProperties:
-          type: string
+          Encrypted token values for k8s Secret manifest contents only, applied last,
+          after config substitution. The inline counterpart of the encrypted files under
+          global.secretsSubPath: every value uses the one encryptionType, which must be
+          the type the environment's secret files use. Environment and run-platform builds
+          only; layers may carry it for them.
+        properties:
+          encryptionType:
+            type: string
+            # The decryption providers shipped in kaptain-deploy-scripts
+            # (src/scripts/plugins/decryption-providers/decrypt-<type>).
+            enum: [age, sha256.aes256, sha256.aes256.10k, sha256.aes256.100k, sha256.aes256.600k]
+            description: >
+              The encryption every encryptedValues entry uses - one of the types the
+              environment deploy image can decrypt.
+          encryptedValues:
+            type: object
+            description: Encrypted values keyed by token name.
+            propertyNames:
+              $ref: "#/$defs/tokenName"
+            additionalProperties:
+              type: string
+              minLength: 1
 
   # ---------------------------------------------------------------------------
   # spec.global
@@ -510,11 +546,7 @@ $defs:
               producer's. Only valid for the kinds that package manifests for
               another build to consume (default: standard)
           substitutionPasses:
-            oneOf:
-              - type: integer
-                minimum: 1
-              - type: string
-                pattern: "^[1-9][0-9]*$"
+            $ref: "#/$defs/positiveIntegerOrString"
             description: 'Number of token substitution passes (default: 1)'
           valueTrailingNewline:
             type: string
@@ -537,13 +569,20 @@ $defs:
           versioning:
             type: object
             additionalProperties: false
+            # useSourceVersionExact works only with the file-based strategies.
+            # Rejected here only when both are set in the same file: the
+            # strategy is often supplied by a layer, so an unset strategy is
+            # left to the build.
+            not:
+              properties:
+                useSourceVersionExact:
+                  enum: [true, "true"]
+                strategy:
+                  const: git-auto-closest-highest
+              required: [useSourceVersionExact, strategy]
             properties:
               maxParts:
-                oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                $ref: "#/$defs/positiveIntegerOrString"
                 description: 'Maximum version parts allowed before failure (default: 3)'
               strategy:
                 type: string
@@ -560,11 +599,11 @@ $defs:
                   - custom
                 description: 'Pattern type for file-pattern-match strategies'
               useSourceVersionExact:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
-                description: 'Use the source version exactly without incrementing (default: false)'
+                $ref: "#/$defs/booleanOrString"
+                description: >
+                  Use the source version exactly without incrementing (default:
+                  false). Only with the file-pattern-match and
+                  compound-file-pattern-match strategies.
               source:
                 type: object
                 additionalProperties: false
@@ -580,11 +619,7 @@ $defs:
                     type: string
                     description: 'Regex with capture group for custom pattern type'
                   prefixParts:
-                    oneOf:
-                      - type: integer
-                        minimum: 1
-                      - type: string
-                        pattern: "^[1-9][0-9]*$"
+                    $ref: "#/$defs/positiveIntegerOrString"
                     description: 'Parts from source as prefix (output = prefix + 1)'
               sourceTwo:
                 type: object
@@ -601,11 +636,7 @@ $defs:
                     type: string
                     description: 'Regex with capture group for secondary source'
                   prefixParts:
-                    oneOf:
-                      - type: integer
-                        minimum: 1
-                      - type: string
-                        pattern: "^[1-9][0-9]*$"
+                    $ref: "#/$defs/positiveIntegerOrString"
                     description: 'Parts from secondary source as prefix'
 
   # ---------------------------------------------------------------------------
@@ -626,18 +657,14 @@ $defs:
             type: object
             additionalProperties: false
             description: GitHub Releases configuration
+            not:
+              required: [notes, notesFile]
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Create a GitHub Release on version tags (default: true)'
               addVersionToFilenames:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Add version suffix to release artifact filenames (default: true)'
               notes:
                 type: string
@@ -690,46 +717,46 @@ $defs:
           branches:
             type: object
             additionalProperties: false
+            # Conventional branch names start with a prefix such as feature/,
+            # so they always contain a slash: no branch can pass both checks.
+            not:
+              properties:
+                blockSlashes:
+                  enum: [true, "true"]
+                requireConventional:
+                  enum: [true, "true"]
+              required: [blockSlashes, requireConventional]
             properties:
               blockSlashes:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Reject branch names containing forward slashes
               blockDoubleHyphens:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Reject branch names containing double hyphens
               requireConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Require conventional branch naming convention
           commits:
             type: object
             additionalProperties: false
+            # A commit message cannot be both required and blocked from using
+            # the conventional format.
+            not:
+              properties:
+                requireConventional:
+                  enum: [true, "true"]
+                blockConventional:
+                  enum: [true, "true"]
+              required: [requireConventional, blockConventional]
             properties:
               requireConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Require conventional commit message format
               blockConventional:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Block conventional commit message format
               blockDuplicateMessages:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Block duplicate commit messages in a PR
 
       docker:
@@ -745,7 +772,7 @@ $defs:
           - if:
               properties:
                 targetIncludeNamespace:
-                  const: false
+                  enum: [false, "false"]
               required: [targetIncludeNamespace]
             then:
               properties:
@@ -756,16 +783,16 @@ $defs:
             type: string
             enum: [podman, docker]
             description: >
-              Container runtime override. When omitted, auto-detected:
-              build_server requires podman, local prefers podman but accepts
-              docker. validate-tooling checks availability and creates a
-              docker->podman symlink when podman is the runtime.
+              Local builds only: overrides the auto-detected container runtime (local builds
+              prefer podman but accept docker), and the build fails if it is not installed.
+              Build servers always use podman and ignore this setting.
           platform:
-            type: string
+            $ref: "#/$defs/linuxPlatformList"
             description: >
               Docker build platform(s). Single value or comma-separated for
               multi-platform manifest list (e.g. linux/amd64,linux/arm64).
-              Default: linux/amd64
+              Default: linux/amd64. The schema checks the form only; the build
+              rejects platforms it does not yet support.
           qemu:
             type: object
             additionalProperties: false
@@ -779,8 +806,7 @@ $defs:
                   Image used to register the QEMU binfmt handlers
                   (default: the kube-kaptain image-binfmt image)
               additionalPlatforms:
-                type: string
-                pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+                $ref: "#/$defs/linuxPlatformList"
                 description: >
                   Comma-separated platforms to register emulation for on top of
                   those platform needs, whether or not the build itself needs
@@ -800,7 +826,7 @@ $defs:
             $ref: "#/$defs/registryDomain"
             description: Target registry domain for built images
           targetAllowNoRegistry:
-            type: boolean
+            $ref: "#/$defs/booleanOrString"
             description: >
               Exempt this project from the load-time target registry check on
               platforms that provide no registry default. Default false.
@@ -818,7 +844,7 @@ $defs:
               paths, but no leading/trailing slashes. Empty string is treated
               as not configured.
           targetIncludeNamespace:
-            type: boolean
+            $ref: "#/$defs/booleanOrString"
             description: >
               Include the namespace segment in built image URIs and
               short-form reference expansion. Default true. Set false for
@@ -853,12 +879,10 @@ $defs:
                 description: 'Platform-specific Dockerfile directory for linux/arm64 (default: src/docker-linux-arm64)'
               squash:
                 type: string
+                enum: [squash, squash-all, "no"]
                 description: 'Squash image layers (podman only, default: squash)'
               noCache:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Disable docker build cache (default: true)'
           retag:
             type: object
@@ -867,7 +891,7 @@ $defs:
             properties:
               sourceRegistry:
                 $ref: "#/$defs/registryDomain"
-                description: 'Source registry domain (default: docker.io)'
+                description: 'Source registry domain (e.g. docker.io). Required, no default.'
               sourceNamespace:
                 $ref: "#/$defs/registryNamespace"
                 description: >
@@ -940,30 +964,25 @@ $defs:
                 description: 'Workload type (default: deployment)'
               replicas:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
-                description: 'Desired replica count'
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - const: "NO"
+                  - $ref: "#/$defs/tokenReference"
+                description: 'Desired replica count, or "NO" to omit replicas entirely (e.g. when a HorizontalPodAutoscaler manages them)'
               revisionHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Number of old ReplicaSets to retain (default: 10)'
               minReadySeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Minimum seconds a pod must be ready (default: 0)'
               nameSuffix:
                 type: string
                 description: Suffix appended to generated workload name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for workload manifests
               envSubPath:
                 type: string
@@ -980,11 +999,8 @@ $defs:
                 properties:
                   port:
                     oneOf:
-                      - type: integer
-                        minimum: 1
-                        maximum: 65535
-                      - type: string
-                        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                      - $ref: "#/$defs/portNumber"
+                      - $ref: "#/$defs/tokenReference"
                     description: 'Primary container port (default: 1024)'
                   command:
                     type: string
@@ -997,10 +1013,7 @@ $defs:
                     enum: [combined, separate, project-name-prefixed-combined, project-name-prefixed-separate]
                     description: 'Image reference style (default: combined)'
                   readonlyRootFilesystem:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Mount root filesystem read-only (default: true)'
                   resources:
                     type: object
@@ -1048,22 +1061,19 @@ $defs:
                 properties:
                   seccompProfile:
                     type: string
+                    enum: [DISABLED, RuntimeDefault, Localhost, Unconfined]
                     description: 'Seccomp profile (default: DISABLED)'
                   automountServiceAccountToken:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Automount service account token (default: false)'
                   imagePullSecrets:
                     type: string
+                    enum: [ENABLED, DISABLED]
                     description: 'Image pull secrets (default: ENABLED)'
               terminationGracePeriodSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Pod termination grace period (default: 10)'
               prestopCommand:
                 type: string
@@ -1085,6 +1095,7 @@ $defs:
                     description: 'Node selector as comma-separated key=value pairs, e.g. disktype=ssd,zone=us-east-1a'
                   dnsPolicy:
                     type: string
+                    enum: [ClusterFirst, ClusterFirstWithHostNet, Default, None]
                     description: Pod DNS policy
                   priorityClassName:
                     type: string
@@ -1131,16 +1142,13 @@ $defs:
                 additionalProperties: false
                 properties:
                   maxSurge:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max pods over desired during rolling update (default: 1)'
                   maxUnavailable:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max unavailable pods during rolling update (default: 0)'
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: true)'
 
           statefulset:
@@ -1178,10 +1186,8 @@ $defs:
                     description: 'Update strategy type (default: RollingUpdate)'
                   partition:
                     oneOf:
-                      - type: integer
-                        minimum: 0
-                      - type: string
-                        pattern: "^[0-9]+$"
+                      - $ref: "#/$defs/nonNegativeIntegerOrString"
+                      - $ref: "#/$defs/tokenReference"
                     description: Partition ordinal for canary updates
               pvc:
                 type: object
@@ -1189,10 +1195,7 @@ $defs:
                 description: PersistentVolumeClaim configuration
                 properties:
                   enabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable PVC generation (default: true)'
                   storageClassName:
                     type: string
@@ -1234,37 +1237,26 @@ $defs:
                     enum: [RollingUpdate, OnDelete]
                     description: 'Update strategy type (default: RollingUpdate)'
                   maxUnavailable:
-                    type: string
+                    $ref: "#/$defs/countOrPercentage"
                     description: 'Max unavailable pods during rolling update (default: 1)'
               hostNetwork:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host network (default: false)'
               hostPid:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host PID namespace (default: false)'
               hostIpc:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Use host IPC namespace (default: false)'
               runAsNonRoot:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Run as non-root user (default: true)'
               privileged:
-                type: string
+                $ref: "#/$defs/booleanOrString"
                 description: 'Run in privileged mode (default: false)'
               dnsPolicy:
                 type: string
+                enum: [ClusterFirst, ClusterFirstWithHostNet, Default, None]
                 description: Pod DNS policy
               tolerations:
                 type: string
@@ -1284,7 +1276,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated CronJob name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for CronJob manifests
               concurrencyPolicy:
                 type: string
@@ -1292,59 +1284,43 @@ $defs:
                 description: 'How concurrent executions are handled (default: Forbid)'
               startingDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: Deadline in seconds for starting the job
               successfulJobsHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Successful jobs to retain (default: 1)'
               failedJobsHistoryLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Failed jobs to retain (default: 5)'
               backoffLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/positiveIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: TTL seconds after job finished
               restartPolicy:
                 type: string
@@ -1360,32 +1336,20 @@ $defs:
                 type: string
                 description: Additional annotations for CronJob manifests
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable startup probe (default: false)'
 
           job:
@@ -1397,42 +1361,32 @@ $defs:
                 type: string
                 description: Suffix appended to generated Job name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for Job manifests
               backoffLimit:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Retries before marking job failed (default: 0)'
               completions:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Desired completions (default: 1)'
               parallelism:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Max parallel pods (default: 1)'
               activeDeadlineSeconds:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                  - type: string
-                    pattern: "^[1-9][0-9]*$"
+                  - $ref: "#/$defs/positiveIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: Active deadline in seconds
               ttlSecondsAfterFinished:
                 oneOf:
-                  - type: integer
-                    minimum: 0
-                  - type: string
-                    pattern: "^[0-9]+$"
+                  - $ref: "#/$defs/nonNegativeIntegerOrString"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'TTL seconds after job finished (default: 86400)'
               restartPolicy:
                 type: string
@@ -1448,32 +1402,20 @@ $defs:
                 type: string
                 description: Additional annotations for Job manifests
               portsEnabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Enable port definitions (default: false)'
               probes:
                 type: object
                 additionalProperties: false
                 properties:
                   livenessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable liveness probe (default: false)'
                   readinessEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable readiness probe (default: false)'
                   startupEnabled:
-                    oneOf:
-                      - type: boolean
-                      - type: string
-                        pattern: "^(true|false)$"
+                    $ref: "#/$defs/booleanOrString"
                     description: 'Enable startup probe (default: false)'
 
           service:
@@ -1482,26 +1424,35 @@ $defs:
             description: Service manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Enable service generation
               type:
                 type: string
-                enum: [ClusterIP, NodePort, LoadBalancer, ExternalName]
-                description: 'Service type (default: ClusterIP)'
+                enum: [ClusterIP, Headless, NoSelector, NodePort, LoadBalancer, ExternalName]
+                description: >
+                  Service type (default: ClusterIP). Headless and NoSelector are
+                  Kaptain shorthands that both generate a ClusterIP Service:
+                  Headless sets clusterIP None, NoSelector omits the selector so
+                  endpoints can be supplied separately.
               port:
                 oneOf:
-                  - type: integer
-                    minimum: 1
-                    maximum: 65535
-                  - type: string
-                    pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+                  - $ref: "#/$defs/portNumber"
+                  - $ref: "#/$defs/tokenReference"
                 description: 'Service port (default: 80)'
               targetPort:
-                type: string
-                description: Target port (defaults to container port)
+                oneOf:
+                  - $ref: "#/$defs/portNumber"
+                  - type: string
+                    maxLength: 15
+                    allOf:
+                      - pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+                      - pattern: "[a-z]"
+                  - $ref: "#/$defs/tokenReference"
+                description: >
+                  Target port (defaults to container port): a port number, or
+                  the name of a container port (Kubernetes IANA_SVC_NAME:
+                  lowercase letters, digits and -, at most 15 characters, at
+                  least one letter, no leading, trailing or doubled -).
               protocol:
                 type: string
                 enum: [TCP, UDP, SCTP]
@@ -1516,6 +1467,7 @@ $defs:
                     maximum: 32767
                   - type: string
                     pattern: "^(30[0-9]{3}|31[0-9]{3}|32[0-6][0-9]{2}|327[0-5][0-9]|3276[0-7])$"
+                  - $ref: "#/$defs/tokenReference"
                 description: Node port (NodePort type only)
               externalName:
                 type: string
@@ -1528,7 +1480,7 @@ $defs:
                 type: string
                 description: Suffix appended to generated service name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for service manifests
               additionalLabels:
                 type: string
@@ -1549,13 +1501,10 @@ $defs:
                 type: string
                 description: Suffix appended to generated ConfigMap name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for ConfigMap manifests
               nameChecksumInjection:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Inject ConfigMap checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1576,13 +1525,10 @@ $defs:
                 type: string
                 description: Suffix appended to generated Secret template name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for Secret template manifests
               nameChecksumInjection:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Inject Secret checksum into workload annotations (default: true)'
               additionalLabels:
                 type: string
@@ -1597,16 +1543,13 @@ $defs:
             description: ServiceAccount manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Whether to generate a ServiceAccount manifest (default: false)'
               nameSuffix:
                 type: string
                 description: Suffix appended to generated ServiceAccount name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for ServiceAccount manifests
               additionalLabels:
                 type: string
@@ -1621,23 +1564,20 @@ $defs:
             description: PodDisruptionBudget manifest generator configuration
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: Enable PDB generation
               nameSuffix:
                 type: string
                 description: Suffix appended to generated PDB name
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path for PDB manifests
               strategy:
                 type: string
                 enum: [max-unavailable, min-available]
                 description: 'PDB strategy (default: max-unavailable)'
               value:
-                type: string
+                $ref: "#/$defs/countOrPercentage"
                 description: 'PDB value (default: 1)'
               additionalLabels:
                 type: string
@@ -1655,13 +1595,18 @@ $defs:
               Environment and run-platform builds always generate their own
               Namespace into the deploy-manifests set and take its labels and
               annotations from spec.main.environment.namespace instead.
-            required: [name]
+            # name is only needed when generation is on, as the build skips the
+            # generator entirely otherwise.
+            if:
+              properties:
+                enabled:
+                  enum: [true, "true"]
+              required: [enabled]
+            then:
+              required: [name]
             properties:
               enabled:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: 'Whether to generate a Namespace manifest (default: false)'
               name:
                 type: string
@@ -1671,7 +1616,7 @@ $defs:
                   literal or token the build or its consumer resolves, such as
                   '${Environment}' or 'shared-tools'.
               combinedSubPath:
-                type: string
+                $ref: "#/$defs/combinedSubPath"
                 description: Combined sub-path the Namespace manifest is written to; does not affect its name
               additionalLabels:
                 type: string
@@ -1694,10 +1639,7 @@ $defs:
               hold only .yaml manifests and their modifier files; a symlink
               fails the build, and dotfiles are ignored.
           allowLocalOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: >
               When true, manifests from the local src/kubernetes directory may
               override manifests contributed by foreign sources (referenced
@@ -1717,10 +1659,7 @@ $defs:
                 type: string
                 description: 'Directory containing default token values (default: src/defaults)'
               allowLocalOverride:
-                oneOf:
-                  - type: boolean
-                  - type: string
-                    pattern: "^(true|false)$"
+                $ref: "#/$defs/booleanOrString"
                 description: >
                   When true, defaults from the local src/defaults directory may
                   override defaults contributed by foreign sources staged under
@@ -1854,12 +1793,12 @@ $defs:
               required: [imageAutoUpdateProvider]
               properties:
                 imageAutoUpdateProvider: { const: keel }
-          # When generateIdealEnvironmentDeployManifests is false the user
-          # supplies their own env deploy manifest set, so the fields that
-          # only drive generation (deployMode, imagePullSecrets, namespace and
-          # the imageAutoUpdate* family) must not be set. environmentDeployBaseImage is
-          # unaffected and may still be configured - it drives the
-          # Dockerfile FROM, not the manifests.
+          # When generateIdealEnvironmentDeployManifests is false the user supplies their
+          # own env deploy manifest set, so the fields that only drive generation
+          # (deployMode, the two jobPostDeploySleepAfter* fields, imagePullSecrets,
+          # namespace and the imageAutoUpdate* family) must not be set.
+          # environmentDeployBaseImage is unaffected and may still be configured - it drives
+          # the Dockerfile FROM, not the manifests.
           - if:
               required: [generateIdealEnvironmentDeployManifests]
               properties:
@@ -1885,10 +1824,7 @@ $defs:
         description: Change source tracking configuration
         properties:
           noteEnabled:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: >
               Write git notes recording the source branch and PR author during
               PR builds, read back during release builds (default: true)
@@ -1939,7 +1875,11 @@ $defs:
             description: 'Type of spec being built (schema or api)'
           jsonSchemaUrl:
             type: string
-            description: 'JSON Schema meta-schema file path or URL (default: src/schemas/json-schema-draft-2020-12.json)'
+            description: >
+              JSON Schema meta-schema file path or URL. A relative path is resolved from the
+              project root. Default: the Draft 2020-12 meta-schema bundled with the build
+              tooling, at src/schemas/json-schema-draft-2020-12.json relative to the build
+              tooling root.
 
       layer:
         type: object
@@ -1947,16 +1887,23 @@ $defs:
         description: Layer and layerset build configuration
         properties:
           tokenSubstitution:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             description: 'Apply token substitution to KaptainPM files in docker build and GitHub release (default: true)'
 
       vendorHelmRendered:
         type: object
         additionalProperties: false
         description: Vendor helm chart rendered to plain kubernetes manifests at build time
+        # Chart source: repoUrl and chartName go together, and that pair excludes
+        # ociChart. Having one of them at all is left to the build, as a layer may
+        # carry the other vendorHelmRendered settings without a chart.
+        dependentRequired:
+          repoUrl: [chartName]
+          chartName: [repoUrl]
+        not:
+          anyOf:
+            - required: [ociChart, repoUrl]
+            - required: [ociChart, chartName]
         properties:
           repoUrl:
             type: string
@@ -2099,10 +2046,7 @@ $defs:
                   not:
                     required: [sourceImageUri]
           useProjectNameAsFullnameOverride:
-            oneOf:
-              - type: boolean
-              - type: string
-                pattern: "^(true|false)$"
+            $ref: "#/$defs/booleanOrString"
             default: true
             description: >
               Pass --set fullnameOverride=<project-name> to helm template so
@@ -2117,10 +2061,7 @@ $defs:
   # ---------------------------------------------------------------------------
 
   runEnvAllowLocalManifestsOverride:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       When true, manifests from the local src/kubernetes directory may
       override manifests contributed by referenced children (matched by
@@ -2132,10 +2073,7 @@ $defs:
       collision regardless of this flag.
 
   runEnvFailOnUnreferencedConfigOrSecrets:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       When true (default), a value file under src/config or src/secrets
       that is not referenced by any token in the assembled manifest tree
@@ -2144,10 +2082,7 @@ $defs:
       permitted fallback.
 
   runEnvTrustedContributorsOnly:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     description: >
       Master disable for the sensitive-resource sign-off check. When false
       (default) every sensitive resource (Ingress, RBAC, webhooks, routes,
@@ -2197,7 +2132,7 @@ $defs:
 
   runEnvImageAutoUpdatePollSchedule:
     type: string
-    pattern: '^[0-9]+[smh]$'
+    pattern: '^[1-9][0-9]*[smh]$'
     description: >
       Poll cadence for the auto-update annotations as a plain duration
       (e.g. '1m', '300s', '1h'). Default '1m'. Rendered as
@@ -2286,10 +2221,7 @@ $defs:
         description: Additional annotations for the generated Namespace
 
   runEnvAutoGenerateImagePullSecrets:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     default: true
     description: >
       When true (default), the build generates one image pull Secret for
@@ -2399,9 +2331,12 @@ $defs:
       that the timing choice defers past.
 
   runEnvChecksumLength:
-    type: integer
-    minimum: 1
-    maximum: 52
+    oneOf:
+      - type: integer
+        minimum: 1
+        maximum: 52
+      - type: string
+        pattern: "^([1-9]|[1-4][0-9]|5[0-2])$"
     default: 5
     description: >
       Length in Base32 characters of the checksum suffix that replaces
@@ -2475,23 +2410,22 @@ $defs:
       No leading or trailing slash. Repo-root-relative only.
 
   runEnvGenerateIdealEnvironmentDeployManifests:
-    oneOf:
-      - type: boolean
-      - type: string
-        pattern: "^(true|false)$"
+    $ref: "#/$defs/booleanOrString"
     default: true
     description: >
-      When true (default), the build generates the env deploy manifest
-      set from the configured deployMode and imageAutoUpdateProvider
-      using standard internal templates. When false, the user supplies
-      the manifest set under <environmentDeploySourceBasePath>/kubernetes
-      (or, in future, via a template-set selection). In that mode
-      deployMode and imageAutoUpdateProvider MUST NOT be set since they
-      only drive generation; the schema enforces this.
+      When true (default), the build generates the env deploy manifest set from the
+      configured deployMode and imageAutoUpdateProvider using standard internal
+      templates. When false, the user supplies the manifest set under
+      <environmentDeploySourceBasePath>/kubernetes (or, in future, via a template-set
+      selection). In that mode the fields that only drive generation MUST NOT be set,
+      and the schema enforces this: deployMode, jobPostDeploySleepAfterSuccess,
+      jobPostDeploySleepAfterFailure, imagePullSecrets, namespace,
+      imageAutoUpdateProvider, imageAutoUpdatePolicy, imageAutoUpdateTrigger,
+      imageAutoUpdatePollSchedule and imageAutoUpdateFieldManagerStrategy.
 
-      environmentDeployBaseImage is unaffected and may still be set
-      independently - it drives the Dockerfile FROM line of the env
-      deploy image build, not the manifests.
+      environmentDeployBaseImage is unaffected and may still be set independently - it
+      drives the Dockerfile FROM line of the env deploy image build, not the
+      manifests.
 
   runEnvImageDeployManifestsApplyMode:
     type: string
@@ -2533,9 +2467,11 @@ $defs:
 
       Namespace handling mirrors spec.main.docker's targetNamespace /
       targetIncludeNamespace pair: includeNamespace is the explicit
-      registry-discriminator flag, defaulting true to match the
-      namespace default having a value, and the two must always be
-      resolvable together in one file.
+      registry-discriminator flag, defaulting true to match the namespace default
+      having a value. Unlike the docker pair, both are read from the merged final
+      KaptainPM, so a layer may supply either. A false includeNamespace with a
+      non-empty namespace is rejected in every variant; a project turning the flag off
+      against a layer's namespace sets namespace: "" to override it.
 
       All sub-fields are optional; the build's default-fill stage
       supplies any not set here.
@@ -2550,7 +2486,7 @@ $defs:
       - if:
           properties:
             includeNamespace:
-              const: false
+              enum: [false, "false"]
           required: [includeNamespace]
         then:
           properties:
@@ -2563,10 +2499,7 @@ $defs:
           OCI registry host (and optional port). Default ships with
           the Kaptain release.
       includeNamespace:
-        oneOf:
-          - type: boolean
-          - type: string
-            pattern: "^(true|false)$"
+        $ref: "#/$defs/booleanOrString"
         description: >
           Include the namespace segment in the composed base image
           reference. Default true. Set false for flat registry
@@ -2718,10 +2651,9 @@ $defs:
       type:
         type: string
         enum: [none, all, age, count]
-        default: none
         description: >
-          'none' (default) - no cleanup for this class; the build emits
-            no cleanup intent.
+          'none' - (default behaviour if a resource class is omitted.)
+            no cleanup for this class; the build emits no cleanup intent.
           'all' - clean every matching resource regardless of age.
             Intended for dev clusters and CI fixture teardown; never
             appropriate for production.
@@ -2732,15 +2664,14 @@ $defs:
             without the annotation are not candidates under this type.
       age:
         type: string
-        pattern: "^[0-9]+[smhdw]$"
+        pattern: "^[1-9][0-9]*[smhdw]$"
         description: >
           Age threshold, required when type is 'age'. K8s-style
           single-unit duration: an integer followed by s, m, h, d or w.
           Examples: '30d', '6h', '90s'. Compound durations like '1h30m'
           are not supported - pick the largest meaningful unit.
       count:
-        type: integer
-        minimum: 1
+        $ref: "#/$defs/positiveIntegerOrString"
         description: >
           Per-series retention count, required when type is 'count'.
           Keep the N most recent by creationTimestamp within each
@@ -2910,6 +2841,193 @@ $defs:
       followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
       is not accepted - write docker.io/library/nginx:1.25.
 
+  # BEGIN GENERATED: token patterns - do not edit, run bin/generate-token-reference.bash
+  tokenReference:
+    type: string
+    description: >
+      A whole-value token left for later substitution, in any supported
+      delimiter style and token name style, e.g. ${ReplicaCount},
+      {{ replica-count }} or {{ .Values.REPLICA_COUNT }}. Names follow one
+      name style throughout, path segments joined by /. Values the build
+      itself reads must be resolved before it does, e.g. by layer token
+      substitution.
+    # Grouped by delimiter style, one pattern per name style in each group.
+    anyOf:
+      # shell: ${Name}
+      - pattern: '^\$\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'                                                            # PascalCase
+      - pattern: '^\$\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'  # camelCase
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'                                          # UPPER_SNAKE
+      - pattern: '^\$\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'                                          # lower_snake
+      - pattern: '^\$\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'                                          # lower-kebab
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'                                          # UPPER-KEBAB
+      - pattern: '^\$\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'                                          # lower.dot
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'                                          # UPPER.DOT
+      # mustache: {{ Name }}
+      - pattern: '^\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
+      # helm: {{ .Values.Name }}
+      - pattern: '^\{\{ \.Values\.[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ \.Values\.([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
+      # erb: <%= Name %>
+      - pattern: '^<%= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* %>$'                                                            # PascalCase
+      - pattern: '^<%= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* %>$'  # camelCase
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* %>$'                                          # UPPER_SNAKE
+      - pattern: '^<%= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* %>$'                                          # lower_snake
+      - pattern: '^<%= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* %>$'                                          # lower-kebab
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* %>$'                                          # UPPER-KEBAB
+      - pattern: '^<%= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* %>$'                                          # lower.dot
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* %>$'                                          # UPPER.DOT
+      # github-actions: ${{ Name }}
+      - pattern: '^\$\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\$\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
+      # blade: {{ $Name }}
+      - pattern: '^\{\{ \$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ \$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
+      # stringtemplate: $Name$
+      - pattern: '^\$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\$$'                                                            # PascalCase
+      - pattern: '^\$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\$$'  # camelCase
+      - pattern: '^\$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\$$'                                          # UPPER_SNAKE
+      - pattern: '^\$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\$$'                                          # lower_snake
+      - pattern: '^\$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\$$'                                          # lower-kebab
+      - pattern: '^\$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\$$'                                          # UPPER-KEBAB
+      - pattern: '^\$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\$$'                                          # lower.dot
+      - pattern: '^\$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\$$'                                          # UPPER.DOT
+      # ognl: %{Name}
+      - pattern: '^%\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'                                                            # PascalCase
+      - pattern: '^%\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'  # camelCase
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'                                          # UPPER_SNAKE
+      - pattern: '^%\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'                                          # lower_snake
+      - pattern: '^%\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'                                          # lower-kebab
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'                                          # UPPER-KEBAB
+      - pattern: '^%\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'                                          # lower.dot
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'                                          # UPPER.DOT
+      # t4: <#= Name #>
+      - pattern: '^<#= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* #>$'                                                            # PascalCase
+      - pattern: '^<#= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* #>$'  # camelCase
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* #>$'                                          # UPPER_SNAKE
+      - pattern: '^<#= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* #>$'                                          # lower_snake
+      - pattern: '^<#= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* #>$'                                          # lower-kebab
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* #>$'                                          # UPPER-KEBAB
+      - pattern: '^<#= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* #>$'                                          # lower.dot
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* #>$'                                          # UPPER.DOT
+      # swift: \(Name)
+      - pattern: '^\\\([A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\)$'                                                            # PascalCase
+      - pattern: '^\\\(([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\)$'  # camelCase
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\)$'                                          # UPPER_SNAKE
+      - pattern: '^\\\([a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\)$'                                          # lower_snake
+      - pattern: '^\\\([a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\)$'                                          # lower-kebab
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\)$'                                          # UPPER-KEBAB
+      - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'                                          # lower.dot
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'                                          # UPPER.DOT
+
+  tokenName:
+    type: string
+    description: >
+      A token name in any supported token name style, e.g. ReplicaCount,
+      replica-count or VENDOR_ENVOY/REPLICAS. Names follow one name style
+      throughout, path segments joined by /.
+    # One pattern per name style.
+    anyOf:
+      - pattern: '^[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*$'                                                            # PascalCase
+      - pattern: '^([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*$'  # camelCase
+      - pattern: '^[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*$'                                          # UPPER_SNAKE
+      - pattern: '^[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*$'                                          # lower_snake
+      - pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$'                                          # lower-kebab
+      - pattern: '^[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*$'                                          # UPPER-KEBAB
+      - pattern: '^[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*$'                                          # lower.dot
+      - pattern: '^[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*$'                                          # UPPER.DOT
+  # END GENERATED: token patterns
+
+  linuxPlatformList:
+    type: string
+    pattern: "^linux/[a-z0-9]+(/v[0-9]+)?(,linux/[a-z0-9]+(/v[0-9]+)?)*$"
+    description: >
+      One or more linux platforms, comma-separated with no spaces, each
+      linux/<arch> with an optional /v<n> variant (e.g. linux/amd64,linux/arm/v7).
+
+  combinedSubPath:
+    description: >
+      Sub-path within combined/ for a generator's output, also used with /
+      turned into - in the generated resource names (e.g. tools/cron gives
+      <project>-tools-cron). Lowercase letters, digits and -, with / between
+      segments; each segment starts and ends with a letter or digit so the
+      resulting names are valid. Empty means not set.
+    anyOf:
+      - const: ""
+      - type: string
+        pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"
+
+  nonNegativeIntegerOrString:
+    description: >
+      A whole number of 0 or more, as an integer or the same as a string,
+      with no leading zeros.
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+        pattern: "^(0|[1-9][0-9]*)$"
+
+  positiveIntegerOrString:
+    description: A whole number of 1 or more, as an integer or the same as a string.
+    oneOf:
+      - type: integer
+        minimum: 1
+      - type: string
+        pattern: "^[1-9][0-9]*$"
+
+  portNumber:
+    description: A port number from 1 to 65535, as an integer or the same as a string.
+    oneOf:
+      - type: integer
+        minimum: 1
+        maximum: 65535
+      - type: string
+        pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+
+  countOrPercentage:
+    description: >
+      A pod count or a percentage of replicas, as Kubernetes takes for
+      rolling update and disruption budget limits: an integer, the same as a
+      string, a string ending in % (e.g. 25%), or a token left for later
+      substitution.
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+        pattern: "^(0|[1-9][0-9]*)%?$"
+      - $ref: "#/$defs/tokenReference"
+
+  booleanOrString:
+    description: A boolean, or the string 'true' or 'false'.
+    oneOf:
+      - type: boolean
+      - type: string
+        pattern: "^(true|false)$"
+
   imageDigest:
     type: string
     pattern: "^sha256:[0-9a-f]{64}$"
@@ -2961,13 +3079,10 @@ $defs:
           type:
             type: string
             const: github-token
-          token:
-            type: string
-            description: Token env var name (typically GITHUB_TOKEN)
           actor:
             type: string
             description: Login actor (typically github-actions)
-        required: [type, token]
+        required: [type]
 
       - description: AWS ECR with static IAM credentials
         additionalProperties: false
@@ -3102,8 +3217,10 @@ $defs:
       namespace:
         $ref: "#/$defs/registryNamespace"
         description: >
-          Target namespace/organisation (default: matches primary push).
-          Supports nested paths, but no leading/trailing slashes.
+          Target namespace/organisation. Supports nested paths, but no
+          leading/trailing slashes. Not inherited from the primary push: a
+          different registry has its own layout, so when omitted the image is
+          pushed to <registry>/<name>:<tag> with no namespace.
 
   probeConfig:
     type: object
@@ -3123,65 +3240,47 @@ $defs:
         description: 'HTTP scheme for http-get probes (default: HTTP)'
       tcpPort:
         oneOf:
-          - type: integer
-            minimum: 1
-            maximum: 65535
-          - type: string
-            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/portNumber"
+          - $ref: "#/$defs/tokenReference"
         description: TCP port for tcp-socket probes
       execCommand:
         type: string
         description: Command for exec probes
       grpcPort:
         oneOf:
-          - type: integer
-            minimum: 1
-            maximum: 65535
-          - type: string
-            pattern: "^([1-9]|[1-9][0-9]|[1-9][0-9]{2}|[1-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+          - $ref: "#/$defs/portNumber"
+          - $ref: "#/$defs/tokenReference"
         description: gRPC port for grpc probes
       grpcService:
         type: string
         description: gRPC service name for grpc probes
       initialDelaySeconds:
         oneOf:
-          - type: integer
-            minimum: 0
-          - type: string
-            pattern: "^[0-9]+$"
+          - $ref: "#/$defs/nonNegativeIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: Seconds after container start before first probe
       periodSeconds:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: How often to perform the probe in seconds
       timeoutSeconds:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: Seconds after which the probe times out
       failureThreshold:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: Consecutive failures before the probe is considered failed
       successThreshold:
         oneOf:
-          - type: integer
-            minimum: 1
-          - type: string
-            pattern: "^[1-9][0-9]*$"
+          - $ref: "#/$defs/positiveIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: Consecutive successes before the probe is considered successful
       terminationGracePeriodSeconds:
         oneOf:
-          - type: integer
-            minimum: 0
-          - type: string
-            pattern: "^[0-9]+$"
+          - $ref: "#/$defs/nonNegativeIntegerOrString"
+          - $ref: "#/$defs/tokenReference"
         description: Grace period override for pod termination on probe failure

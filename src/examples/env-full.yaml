@@ -13,6 +13,17 @@ metadata:
   description: "example env with all environment fields populated"
 
 spec:
+  data:
+    config:
+      LogLevel: info
+    secrets:
+      encryptionType: age
+      encryptedValues:
+        SmallApiKey: |
+          -----BEGIN AGE ENCRYPTED FILE-----
+          YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBleGFtcGxlLXBsYWNlaG9sZGVyCg==
+          -----END AGE ENCRYPTED FILE-----
+
   main:
     environment:
       allowLocalManifestsOverride: false

@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# useSourceVersionExact without a strategy in the same file is valid on its own,
+# as a layer often supplies the strategy. The build rejects it if the merged
+# strategy turns out to be the git-based default.
+
+apiVersion: kaptain.org/1.2
+kind: basic-quality-and-versioning
+spec:
+  global:
+    release:
+      versioning:
+        useSourceVersionExact: true

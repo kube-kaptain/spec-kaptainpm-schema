@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Rolling update and disruption budget limits take a bare integer, the same
+# as a string, a percentage, or a token.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  main:
+    generators:
+      deployment:
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: '25%'
+      daemonset:
+        updateStrategy:
+          maxUnavailable: '${DaemonsetMaxUnavailable}'
+      podDisruptionBudget:
+        value: '0'

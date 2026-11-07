@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# The string 'false' for includeNamespace contradicts a non-empty namespace
+# just as the boolean does.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-run-environment
+spec:
+  main:
+    environment:
+      environmentDeployBaseImage:
+        includeNamespace: 'false'
+        namespace: kube-kaptain

@@ -7,6 +7,11 @@ spec:
   layers:
     - layer-github-flow-strict:[1.4]
   global:
+    tokens:
+      # Must stay 1: src/config/VersionTokenStart and VersionTokenEnd join into
+      # a literal ${Version} in the schema text, which a second pass would
+      # substitute away.
+      substitutionPasses: '1'
     release:
       versioning:
         maxParts: '2'

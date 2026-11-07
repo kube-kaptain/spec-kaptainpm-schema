@@ -11,4 +11,3 @@ spec:
       logins:
         ghcr.io/kube-kaptain:
           type: github-token
-          token: GITHUB_TOKEN

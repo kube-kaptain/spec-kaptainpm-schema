@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# data.config keys are token names in any one name style, path segments
+# joined by /.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-app-docker-dockerfile
+spec:
+  data:
+    config:
+      AppPort: '8080'
+      log-level: info
+      VENDOR_ENVOY/REPLICAS: '2'

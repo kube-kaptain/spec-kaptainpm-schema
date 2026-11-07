@@ -51,8 +51,6 @@ spec:
     config:
       AppPort: '8080'
       LogLevel: info
-    secrets:
-      SmallApiKey: 'layer-default-value'
 
   global:
     outputSubPath: kaptain-out
@@ -106,7 +104,6 @@ spec:
       logins:
         ghcr.io:
           type: github-token
-          token: GITHUB_TOKEN
           actor: github-actions
       targetRegistry: ghcr.io
       targetAllowNoRegistry: false
@@ -407,7 +404,6 @@ spec:
       release:
         enabled: 'true'
         addVersionToFilenames: 'true'
-        notes: 'Layer release'
         notesFile: RELEASE_NOTES.md
         substitutedFiles: 'README.md'
         verbatimFiles: 'LICENSE.md'

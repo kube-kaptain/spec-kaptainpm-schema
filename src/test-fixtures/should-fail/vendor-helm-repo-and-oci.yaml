@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# repoUrl plus chartName and ociChart are mutually exclusive chart sources.
+
+apiVersion: kaptain.org/1.2
+kind: kubernetes-bundle-vendor-helm-rendered
+spec:
+  main:
+    vendorHelmRendered:
+      repoUrl: https://charts.example.com
+      chartName: my-chart
+      ociChart: oci://ghcr.io/example/charts/my-chart
