@@ -2403,7 +2403,7 @@ $defs:
       - if:
           properties:
             includeNamespace:
-              const: false
+              enum: [false, "false"]
           required: [includeNamespace]
         then:
           properties:
