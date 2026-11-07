@@ -28,8 +28,8 @@ $id: "https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version
 name: ${ProjectName}
 version: "${Version}"
 source: https://github.com/kube-kaptain/${ProjectName}
-latest: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/main/${ProjectName}.yaml
-tagged: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/${Version}/${ProjectName}.yaml
+latest: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/main/src/schema/${ProjectName}.yaml
+tagged: https://raw.githubusercontent.com/kube-kaptain/${ProjectName}/${Version}/src/schema/${ProjectName}.yaml
 release: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.yaml
 validate-using: https://github.com/kube-kaptain/${ProjectName}/releases/download/${Version}/${ProjectName}-layer-${Version}.json
 
