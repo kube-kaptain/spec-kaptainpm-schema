@@ -2622,10 +2622,9 @@ $defs:
       type:
         type: string
         enum: [none, all, age, count]
-        default: none
         description: >
-          'none' (default) - no cleanup for this class; the build emits
-            no cleanup intent.
+          'none' - (default behaviour if a resource class is omitted.)
+            no cleanup for this class; the build emits no cleanup intent.
           'all' - clean every matching resource regardless of age.
             Intended for dev clusters and CI fixture teardown; never
             appropriate for production.
