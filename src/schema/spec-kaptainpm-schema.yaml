@@ -892,7 +892,7 @@ $defs:
             properties:
               sourceRegistry:
                 $ref: "#/$defs/registryDomain"
-                description: 'Source registry domain (default: docker.io)'
+                description: 'Source registry domain (e.g. docker.io). Required, no default.'
               sourceNamespace:
                 $ref: "#/$defs/registryNamespace"
                 description: >
