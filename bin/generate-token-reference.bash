@@ -44,6 +44,29 @@ NAME_SEGMENTS=(
   '[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?'
 )
 
+# Print "<line>  # <comment>" pairs with the comments padded into one column,
+# two spaces past the longest commented line. Reads tab-separated line/comment
+# pairs; a line with no comment is printed as is and not measured.
+pad_comments() {
+  local line comment width=0
+  local lines=() comments=()
+  while IFS=$'\t' read -r line comment; do
+    lines+=("${line}")
+    comments+=("${comment}")
+    if [[ -n "${comment}" ]] && [[ ${#line} -gt ${width} ]]; then
+      width=${#line}
+    fi
+  done
+  local i
+  for ((i = 0; i < ${#lines[@]}; i++)); do
+    if [[ -z "${comments[i]}" ]]; then
+      echo "${lines[i]}"
+    else
+      printf '%-*s  # %s\n' "${width}" "${lines[i]}" "${comments[i]}"
+    fi
+  done
+}
+
 generate_block() {
   local d n segment
   echo "${BEGIN_MARKER} - do not edit, run bin/generate-token-reference.bash"
@@ -57,16 +80,19 @@ generate_block() {
       name style throughout, path segments joined by /. Values the build
       itself reads must be resolved before it does, e.g. by layer token
       substitution.
-    # Grouped by delimiter style. Each group lists the name styles in order:
+    # Grouped by delimiter style, one pattern per name style in each group.
+    anyOf:
 EOF
-  echo "    # ${NAME_STYLES[*]}"
-  echo "    anyOf:"
+  # Padded per delimiter group, so each group's comments sit just past its own lines
   for ((d = 0; d < ${#DELIM_NAMES[@]}; d++)); do
-    echo "      # ${DELIM_NAMES[d]}: ${DELIM_FORMS[d]}"
-    for ((n = 0; n < ${#NAME_STYLES[@]}; n++)); do
+    for ((n = -1; n < ${#NAME_STYLES[@]}; n++)); do
+      if [[ ${n} -lt 0 ]]; then
+        printf '%s\t\n' "      # ${DELIM_NAMES[d]}: ${DELIM_FORMS[d]}"
+        continue
+      fi
       segment="${NAME_SEGMENTS[n]}"
-      echo "      - pattern: '${DELIM_PREFIXES[d]}${segment}(/${segment})*${DELIM_SUFFIXES[d]}'"
-    done
+      printf '%s\t%s\n' "      - pattern: '${DELIM_PREFIXES[d]}${segment}(/${segment})*${DELIM_SUFFIXES[d]}'" "${NAME_STYLES[n]}"
+    done | pad_comments
   done
   cat << 'EOF'
 
@@ -76,14 +102,13 @@ EOF
       A token name in any supported token name style, e.g. ReplicaCount,
       replica-count or VENDOR_ENVOY/REPLICAS. Names follow one name style
       throughout, path segments joined by /.
-    # One pattern per name style, in order:
+    # One pattern per name style.
+    anyOf:
 EOF
-  echo "    # ${NAME_STYLES[*]}"
-  echo "    anyOf:"
   for ((n = 0; n < ${#NAME_STYLES[@]}; n++)); do
     segment="${NAME_SEGMENTS[n]}"
-    echo "      - pattern: '^${segment}(/${segment})*$'"
-  done
+    printf '%s\t%s\n' "      - pattern: '^${segment}(/${segment})*$'" "${NAME_STYLES[n]}"
+  done | pad_comments
   echo "${END_MARKER}"
 }
 

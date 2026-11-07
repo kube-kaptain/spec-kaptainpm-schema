@@ -2852,99 +2852,98 @@ $defs:
       name style throughout, path segments joined by /. Values the build
       itself reads must be resolved before it does, e.g. by layer token
       substitution.
-    # Grouped by delimiter style. Each group lists the name styles in order:
-    # PascalCase camelCase UPPER_SNAKE lower_snake lower-kebab UPPER-KEBAB lower.dot UPPER.DOT
+    # Grouped by delimiter style, one pattern per name style in each group.
     anyOf:
       # shell: ${Name}
-      - pattern: '^\$\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'
-      - pattern: '^\$\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'
-      - pattern: '^\$\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'
-      - pattern: '^\$\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'
-      - pattern: '^\$\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'
-      - pattern: '^\$\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'
-      - pattern: '^\$\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'
-      - pattern: '^\$\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'
+      - pattern: '^\$\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'                                                            # PascalCase
+      - pattern: '^\$\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'  # camelCase
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'                                          # UPPER_SNAKE
+      - pattern: '^\$\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'                                          # lower_snake
+      - pattern: '^\$\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'                                          # lower-kebab
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'                                          # UPPER-KEBAB
+      - pattern: '^\$\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'                                          # lower.dot
+      - pattern: '^\$\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'                                          # UPPER.DOT
       # mustache: {{ Name }}
-      - pattern: '^\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
-      - pattern: '^\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
-      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
       # helm: {{ .Values.Name }}
-      - pattern: '^\{\{ \.Values\.[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
-      - pattern: '^\{\{ \.Values\.([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
-      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \.Values\.[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ \.Values\.([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ \.Values\.[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ \.Values\.[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
       # erb: <%= Name %>
-      - pattern: '^<%= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* %>$'
-      - pattern: '^<%= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* %>$'
-      - pattern: '^<%= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* %>$'
-      - pattern: '^<%= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* %>$'
-      - pattern: '^<%= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* %>$'
-      - pattern: '^<%= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* %>$'
-      - pattern: '^<%= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* %>$'
-      - pattern: '^<%= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* %>$'
+      - pattern: '^<%= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* %>$'                                                            # PascalCase
+      - pattern: '^<%= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* %>$'  # camelCase
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* %>$'                                          # UPPER_SNAKE
+      - pattern: '^<%= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* %>$'                                          # lower_snake
+      - pattern: '^<%= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* %>$'                                          # lower-kebab
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* %>$'                                          # UPPER-KEBAB
+      - pattern: '^<%= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* %>$'                                          # lower.dot
+      - pattern: '^<%= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* %>$'                                          # UPPER.DOT
       # github-actions: ${{ Name }}
-      - pattern: '^\$\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
-      - pattern: '^\$\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
-      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\$\{\{ [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\$\{\{ ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\$\{\{ [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\$\{\{ [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
       # blade: {{ $Name }}
-      - pattern: '^\{\{ \$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'
-      - pattern: '^\{\{ \$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'
-      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'
-      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'
+      - pattern: '^\{\{ \$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* \}\}$'                                                            # PascalCase
+      - pattern: '^\{\{ \$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* \}\}$'  # camelCase
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* \}\}$'                                          # UPPER_SNAKE
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* \}\}$'                                          # lower_snake
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* \}\}$'                                          # lower-kebab
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* \}\}$'                                          # UPPER-KEBAB
+      - pattern: '^\{\{ \$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* \}\}$'                                          # lower.dot
+      - pattern: '^\{\{ \$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* \}\}$'                                          # UPPER.DOT
       # stringtemplate: $Name$
-      - pattern: '^\$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\$$'
-      - pattern: '^\$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\$$'
-      - pattern: '^\$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\$$'
-      - pattern: '^\$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\$$'
-      - pattern: '^\$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\$$'
-      - pattern: '^\$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\$$'
-      - pattern: '^\$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\$$'
-      - pattern: '^\$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\$$'
+      - pattern: '^\$[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\$$'                                                            # PascalCase
+      - pattern: '^\$([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\$$'  # camelCase
+      - pattern: '^\$[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\$$'                                          # UPPER_SNAKE
+      - pattern: '^\$[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\$$'                                          # lower_snake
+      - pattern: '^\$[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\$$'                                          # lower-kebab
+      - pattern: '^\$[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\$$'                                          # UPPER-KEBAB
+      - pattern: '^\$[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\$$'                                          # lower.dot
+      - pattern: '^\$[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\$$'                                          # UPPER.DOT
       # ognl: %{Name}
-      - pattern: '^%\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'
-      - pattern: '^%\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'
-      - pattern: '^%\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'
-      - pattern: '^%\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'
-      - pattern: '^%\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'
-      - pattern: '^%\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'
-      - pattern: '^%\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'
-      - pattern: '^%\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'
+      - pattern: '^%\{[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\}$'                                                            # PascalCase
+      - pattern: '^%\{([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\}$'  # camelCase
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\}$'                                          # UPPER_SNAKE
+      - pattern: '^%\{[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\}$'                                          # lower_snake
+      - pattern: '^%\{[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\}$'                                          # lower-kebab
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\}$'                                          # UPPER-KEBAB
+      - pattern: '^%\{[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\}$'                                          # lower.dot
+      - pattern: '^%\{[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\}$'                                          # UPPER.DOT
       # t4: <#= Name #>
-      - pattern: '^<#= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* #>$'
-      - pattern: '^<#= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* #>$'
-      - pattern: '^<#= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* #>$'
-      - pattern: '^<#= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* #>$'
-      - pattern: '^<#= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* #>$'
-      - pattern: '^<#= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* #>$'
-      - pattern: '^<#= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* #>$'
-      - pattern: '^<#= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* #>$'
+      - pattern: '^<#= [A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)* #>$'                                                            # PascalCase
+      - pattern: '^<#= ([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))* #>$'  # camelCase
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)* #>$'                                          # UPPER_SNAKE
+      - pattern: '^<#= [a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)* #>$'                                          # lower_snake
+      - pattern: '^<#= [a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)* #>$'                                          # lower-kebab
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)* #>$'                                          # UPPER-KEBAB
+      - pattern: '^<#= [a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)* #>$'                                          # lower.dot
+      - pattern: '^<#= [A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)* #>$'                                          # UPPER.DOT
       # swift: \(Name)
-      - pattern: '^\\\([A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\)$'
-      - pattern: '^\\\(([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\)$'
-      - pattern: '^\\\([A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\)$'
-      - pattern: '^\\\([a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\)$'
-      - pattern: '^\\\([a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\)$'
-      - pattern: '^\\\([A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\)$'
-      - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'
-      - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'
+      - pattern: '^\\\([A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*\)$'                                                            # PascalCase
+      - pattern: '^\\\(([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*\)$'  # camelCase
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*\)$'                                          # UPPER_SNAKE
+      - pattern: '^\\\([a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*\)$'                                          # lower_snake
+      - pattern: '^\\\([a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\)$'                                          # lower-kebab
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\)$'                                          # UPPER-KEBAB
+      - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'                                          # lower.dot
+      - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'                                          # UPPER.DOT
 
   tokenName:
     type: string
@@ -2952,17 +2951,16 @@ $defs:
       A token name in any supported token name style, e.g. ReplicaCount,
       replica-count or VENDOR_ENVOY/REPLICAS. Names follow one name style
       throughout, path segments joined by /.
-    # One pattern per name style, in order:
-    # PascalCase camelCase UPPER_SNAKE lower_snake lower-kebab UPPER-KEBAB lower.dot UPPER.DOT
+    # One pattern per name style.
     anyOf:
-      - pattern: '^[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*$'
-      - pattern: '^([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*$'
-      - pattern: '^[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*$'
-      - pattern: '^[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*$'
-      - pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$'
-      - pattern: '^[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*$'
-      - pattern: '^[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*$'
-      - pattern: '^[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*$'
+      - pattern: '^[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*$'                                                            # PascalCase
+      - pattern: '^([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*$'  # camelCase
+      - pattern: '^[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*$'                                          # UPPER_SNAKE
+      - pattern: '^[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*$'                                          # lower_snake
+      - pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$'                                          # lower-kebab
+      - pattern: '^[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*$'                                          # UPPER-KEBAB
+      - pattern: '^[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*$'                                          # lower.dot
+      - pattern: '^[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*$'                                          # UPPER.DOT
   # END GENERATED: token patterns
 
   linuxPlatformList:
