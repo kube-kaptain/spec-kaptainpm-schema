@@ -1565,7 +1565,15 @@ $defs:
               Environment and run-platform builds always generate their own
               Namespace into the deploy-manifests set and take its labels and
               annotations from spec.main.environment.namespace instead.
-            required: [name]
+            # name is only needed when generation is on, as the build skips the
+            # generator entirely otherwise.
+            if:
+              properties:
+                enabled:
+                  enum: [true, "true"]
+              required: [enabled]
+            then:
+              required: [name]
             properties:
               enabled:
                 $ref: "#/$defs/booleanOrString"
