@@ -1764,12 +1764,12 @@ $defs:
               required: [imageAutoUpdateProvider]
               properties:
                 imageAutoUpdateProvider: { const: keel }
-          # When generateIdealEnvironmentDeployManifests is false the user
-          # supplies their own env deploy manifest set, so the fields that
-          # only drive generation (deployMode, imagePullSecrets, namespace and
-          # the imageAutoUpdate* family) must not be set. environmentDeployBaseImage is
-          # unaffected and may still be configured - it drives the
-          # Dockerfile FROM, not the manifests.
+          # When generateIdealEnvironmentDeployManifests is false the user supplies their
+          # own env deploy manifest set, so the fields that only drive generation
+          # (deployMode, the two jobPostDeploySleepAfter* fields, imagePullSecrets,
+          # namespace and the imageAutoUpdate* family) must not be set.
+          # environmentDeployBaseImage is unaffected and may still be configured - it drives
+          # the Dockerfile FROM, not the manifests.
           - if:
               required: [generateIdealEnvironmentDeployManifests]
               properties:
@@ -2384,17 +2384,19 @@ $defs:
     $ref: "#/$defs/booleanOrString"
     default: true
     description: >
-      When true (default), the build generates the env deploy manifest
-      set from the configured deployMode and imageAutoUpdateProvider
-      using standard internal templates. When false, the user supplies
-      the manifest set under <environmentDeploySourceBasePath>/kubernetes
-      (or, in future, via a template-set selection). In that mode
-      deployMode and imageAutoUpdateProvider MUST NOT be set since they
-      only drive generation; the schema enforces this.
+      When true (default), the build generates the env deploy manifest set from the
+      configured deployMode and imageAutoUpdateProvider using standard internal
+      templates. When false, the user supplies the manifest set under
+      <environmentDeploySourceBasePath>/kubernetes (or, in future, via a template-set
+      selection). In that mode the fields that only drive generation MUST NOT be set,
+      and the schema enforces this: deployMode, jobPostDeploySleepAfterSuccess,
+      jobPostDeploySleepAfterFailure, imagePullSecrets, namespace,
+      imageAutoUpdateProvider, imageAutoUpdatePolicy, imageAutoUpdateTrigger,
+      imageAutoUpdatePollSchedule and imageAutoUpdateFieldManagerStrategy.
 
-      environmentDeployBaseImage is unaffected and may still be set
-      independently - it drives the Dockerfile FROM line of the env
-      deploy image build, not the manifests.
+      environmentDeployBaseImage is unaffected and may still be set independently - it
+      drives the Dockerfile FROM line of the env deploy image build, not the
+      manifests.
 
   runEnvImageDeployManifestsApplyMode:
     type: string
