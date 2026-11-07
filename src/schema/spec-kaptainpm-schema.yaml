@@ -533,6 +533,17 @@ $defs:
           versioning:
             type: object
             additionalProperties: false
+            # useSourceVersionExact works only with the file-based strategies.
+            # Rejected here only when both are set in the same file: the
+            # strategy is often supplied by a layer, so an unset strategy is
+            # left to the build.
+            not:
+              properties:
+                useSourceVersionExact:
+                  enum: [true, "true"]
+                strategy:
+                  const: git-auto-closest-highest
+              required: [useSourceVersionExact, strategy]
             properties:
               maxParts:
                 $ref: "#/$defs/positiveIntegerOrString"
@@ -553,7 +564,10 @@ $defs:
                 description: 'Pattern type for file-pattern-match strategies'
               useSourceVersionExact:
                 $ref: "#/$defs/booleanOrString"
-                description: 'Use the source version exactly without incrementing (default: false)'
+                description: >
+                  Use the source version exactly without incrementing (default:
+                  false). Only with the file-pattern-match and
+                  compound-file-pattern-match strategies.
               source:
                 type: object
                 additionalProperties: false
