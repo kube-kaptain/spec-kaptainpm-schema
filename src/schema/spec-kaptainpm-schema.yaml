@@ -783,10 +783,9 @@ $defs:
             type: string
             enum: [podman, docker]
             description: >
-              Container runtime override. When omitted, auto-detected:
-              build_server requires podman, local prefers podman but accepts
-              docker. validate-tooling checks availability and creates a
-              docker->podman symlink when podman is the runtime.
+              Local builds only: overrides the auto-detected container runtime (local builds
+              prefer podman but accept docker), and the build fails if it is not installed.
+              Build servers always use podman and ignore this setting.
           platform:
             $ref: "#/$defs/linuxPlatformList"
             description: >
