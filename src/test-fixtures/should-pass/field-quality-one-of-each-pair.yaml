@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# Copyright (c) 2025-2026 Kaptain contributors (Fred Cooke)
+#
+# Either flag of each contradictory pair may be on as long as the other is off.
+
+apiVersion: kaptain.org/1.2
+kind: basic-quality-and-versioning
+spec:
+  main:
+    quality:
+      branches:
+        blockSlashes: true
+        requireConventional: false
+      commits:
+        requireConventional: 'true'
+        blockConventional: 'false'

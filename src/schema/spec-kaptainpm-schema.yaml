@@ -667,6 +667,15 @@ $defs:
           branches:
             type: object
             additionalProperties: false
+            # Conventional branch names start with a prefix such as feature/,
+            # so they always contain a slash: no branch can pass both checks.
+            not:
+              properties:
+                blockSlashes:
+                  enum: [true, "true"]
+                requireConventional:
+                  enum: [true, "true"]
+              required: [blockSlashes, requireConventional]
             properties:
               blockSlashes:
                 $ref: "#/$defs/booleanOrString"
@@ -680,6 +689,15 @@ $defs:
           commits:
             type: object
             additionalProperties: false
+            # A commit message cannot be both required and blocked from using
+            # the conventional format.
+            not:
+              properties:
+                requireConventional:
+                  enum: [true, "true"]
+                blockConventional:
+                  enum: [true, "true"]
+              required: [requireConventional, blockConventional]
             properties:
               requireConventional:
                 $ref: "#/$defs/booleanOrString"
