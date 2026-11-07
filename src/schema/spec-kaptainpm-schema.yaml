@@ -2438,9 +2438,11 @@ $defs:
 
       Namespace handling mirrors spec.main.docker's targetNamespace /
       targetIncludeNamespace pair: includeNamespace is the explicit
-      registry-discriminator flag, defaulting true to match the
-      namespace default having a value, and the two must always be
-      resolvable together in one file.
+      registry-discriminator flag, defaulting true to match the namespace default
+      having a value. Unlike the docker pair, both are read from the merged final
+      KaptainPM, so a layer may supply either. A false includeNamespace with a
+      non-empty namespace is rejected in every variant; a project turning the flag off
+      against a layer's namespace sets namespace: "" to override it.
 
       All sub-fields are optional; the build's default-fill stage
       supplies any not set here.
