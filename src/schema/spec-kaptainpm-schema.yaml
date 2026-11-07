@@ -2103,7 +2103,7 @@ $defs:
 
   runEnvImageAutoUpdatePollSchedule:
     type: string
-    pattern: '^[0-9]+[smh]$'
+    pattern: '^[1-9][0-9]*[smh]$'
     description: >
       Poll cadence for the auto-update annotations as a plain duration
       (e.g. '1m', '300s', '1h'). Default '1m'. Rendered as
@@ -2634,7 +2634,7 @@ $defs:
             without the annotation are not candidates under this type.
       age:
         type: string
-        pattern: "^[0-9]+[smhdw]$"
+        pattern: "^[1-9][0-9]*[smhdw]$"
         description: >
           Age threshold, required when type is 'age'. K8s-style
           single-unit duration: an integer followed by s, m, h, d or w.
