@@ -294,10 +294,15 @@ $defs:
           container root (e.g. /scripts/build.bash)
       destination:
         type: string
+        minLength: 1
+        pattern: "^[^/]"
+        not:
+          pattern: "(^|/)\\.\\.(/|$)"
         description: >
           Relative directory path from repo root where contents land.
           mkdir -p is run before any copy or unpack operation.
-          (e.g. .kaptain/scripts/)
+          (e.g. .kaptain/scripts/). No leading / and no .. component, so a
+          layer cannot write outside the consuming repo.
       unpack:
         type: string
         enum:
