@@ -95,7 +95,6 @@ spec:
       logins:
         ghcr.io:
           type: github-token
-          token: GITHUB_TOKEN
           actor: github-actions
         docker.io:
           type: username-password

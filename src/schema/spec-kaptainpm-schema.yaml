@@ -3080,13 +3080,10 @@ $defs:
           type:
             type: string
             const: github-token
-          token:
-            type: string
-            description: Token env var name (typically GITHUB_TOKEN)
           actor:
             type: string
             description: Login actor (typically github-actions)
-        required: [type, token]
+        required: [type]
 
       - description: AWS ECR with static IAM credentials
         additionalProperties: false

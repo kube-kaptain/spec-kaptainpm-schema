@@ -97,7 +97,6 @@ spec:
       logins:
         ghcr.io:
           type: github-token
-          token: GITHUB_TOKEN
           actor: github-actions
       targetRegistry: ghcr.io
       targetAllowNoRegistry: false
