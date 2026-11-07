@@ -3221,8 +3221,10 @@ $defs:
       namespace:
         $ref: "#/$defs/registryNamespace"
         description: >
-          Target namespace/organisation (default: matches primary push).
-          Supports nested paths, but no leading/trailing slashes.
+          Target namespace/organisation. Supports nested paths, but no
+          leading/trailing slashes. Not inherited from the primary push: a
+          different registry has its own layout, so when omitted the image is
+          pushed to <registry>/<name>:<tag> with no namespace.
 
   probeConfig:
     type: object
