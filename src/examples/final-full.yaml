@@ -42,8 +42,6 @@ spec:
       AppPort: '8080'
       AppName: my-service
       LogLevel: info
-    secrets:
-      SmallApiKey: 'example-secret-value'
 
   global:
     outputSubPath: kaptain-out

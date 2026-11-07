@@ -51,8 +51,6 @@ spec:
     config:
       AppPort: '8080'
       LogLevel: info
-    secrets:
-      SmallApiKey: 'layer-default-value'
 
   global:
     outputSubPath: kaptain-out

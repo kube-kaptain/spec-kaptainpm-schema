@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: CC0-1.0
 # This file is released to the public domain. Use freely without attribution.
 #
-# Generates $defs.tokenReference in the source schema: one pattern per
-# delimiter style and token name style pair, grouped by delimiter style with
-# the name styles in the same order in every group.
+# Generates the token pattern definitions in the source schema:
+#   $defs.tokenReference - a whole-value token: one pattern per delimiter style
+#                          and token name style pair, grouped by delimiter style
+#                          with the name styles in the same order in every group
+#   $defs.tokenName      - a bare token name: one pattern per token name style
 #
 # The tables below mirror buildon-github-actions and must be kept in step
 # with it:
@@ -20,8 +22,8 @@
 set -euo pipefail
 
 SCHEMA="src/schema/spec-kaptainpm-schema.yaml"
-BEGIN_MARKER="  # BEGIN GENERATED: tokenReference"
-END_MARKER="  # END GENERATED: tokenReference"
+BEGIN_MARKER="  # BEGIN GENERATED: token patterns"
+END_MARKER="  # END GENERATED: token patterns"
 
 # Delimiter styles: name, display form, regex prefix, regex suffix
 DELIM_NAMES=(shell mustache helm erb github-actions blade stringtemplate ognl t4 swift)
@@ -66,6 +68,22 @@ EOF
       echo "      - pattern: '${DELIM_PREFIXES[d]}${segment}(/${segment})*${DELIM_SUFFIXES[d]}'"
     done
   done
+  cat << 'EOF'
+
+  tokenName:
+    type: string
+    description: >
+      A token name in any supported token name style, e.g. ReplicaCount,
+      replica-count or VENDOR_ENVOY/REPLICAS. Names follow one name style
+      throughout, path segments joined by /.
+    # One pattern per name style, in order:
+EOF
+  echo "    # ${NAME_STYLES[*]}"
+  echo "    anyOf:"
+  for ((n = 0; n < ${#NAME_STYLES[@]}; n++)); do
+    segment="${NAME_SEGMENTS[n]}"
+    echo "      - pattern: '^${segment}(/${segment})*$'"
+  done
   echo "${END_MARKER}"
 }
 
@@ -92,11 +110,11 @@ fi
 
 if [[ "${1:-}" == "--check" ]]; then
   if ! diff -u "${SCHEMA}" "${rendered_file}"; then
-    echo "tokenReference in ${SCHEMA} is out of date - run bin/generate-token-reference.bash" >&2
+    echo "Token patterns in ${SCHEMA} are out of date - run bin/generate-token-reference.bash" >&2
     exit 1
   fi
-  echo "tokenReference is up to date"
+  echo "Token patterns are up to date"
 else
   cp "${rendered_file}" "${SCHEMA}"
-  echo "Regenerated tokenReference in ${SCHEMA}"
+  echo "Regenerated token patterns in ${SCHEMA}"
 fi

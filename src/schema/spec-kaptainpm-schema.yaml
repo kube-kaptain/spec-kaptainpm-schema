@@ -245,6 +245,10 @@ allOf:
                         - clusterScopedDelegation
                         - clusterScopedKindsFile
                         - imageDeployManifestsApplyMode
+  # Only the run kinds take environment settings and inline encrypted secrets.
+  # Like the other kind gates this is stripped from the layer and layerset
+  # schemas, so layers may carry both for the run builds; the merged final
+  # catches either reaching the wrong kind.
   - if:
       required: [kind]
       not:
@@ -261,6 +265,10 @@ allOf:
               propertyNames:
                 not:
                   enum: [environment]
+            data:
+              propertyNames:
+                not:
+                  enum: [secrets]
 
 $defs:
 
@@ -417,15 +425,37 @@ $defs:
           Token values for all manifests. Field names are token names, field
           values are token values. Must not duplicate names declared in
           global.configSubPath files.
+        propertyNames:
+          $ref: "#/$defs/tokenName"
         additionalProperties:
           type: string
       secrets:
         type: object
+        additionalProperties: false
+        required: [encryptionType, encryptedValues]
         description: >
-          Token values for k8s Secret manifest contents only. Applied last,
-          after config substitution.
-        additionalProperties:
-          type: string
+          Encrypted token values for k8s Secret manifest contents only, applied last,
+          after config substitution. The inline counterpart of the encrypted files under
+          global.secretsSubPath: every value uses the one encryptionType, which must be
+          the type the environment's secret files use. Environment and run-platform builds
+          only; layers may carry it for them.
+        properties:
+          encryptionType:
+            type: string
+            # The decryption providers shipped in kaptain-deploy-scripts
+            # (src/scripts/plugins/decryption-providers/decrypt-<type>).
+            enum: [age, sha256.aes256, sha256.aes256.10k, sha256.aes256.100k, sha256.aes256.600k]
+            description: >
+              The encryption every encryptedValues entry uses - one of the types the
+              environment deploy image can decrypt.
+          encryptedValues:
+            type: object
+            description: Encrypted values keyed by token name.
+            propertyNames:
+              $ref: "#/$defs/tokenName"
+            additionalProperties:
+              type: string
+              minLength: 1
 
   # ---------------------------------------------------------------------------
   # spec.global
@@ -2812,7 +2842,7 @@ $defs:
       followed by an @sha256: digest. Docker Hub shorthand such as nginx:1.25
       is not accepted - write docker.io/library/nginx:1.25.
 
-  # BEGIN GENERATED: tokenReference - do not edit, run bin/generate-token-reference.bash
+  # BEGIN GENERATED: token patterns - do not edit, run bin/generate-token-reference.bash
   tokenReference:
     type: string
     description: >
@@ -2915,7 +2945,25 @@ $defs:
       - pattern: '^\\\([A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*\)$'
       - pattern: '^\\\([a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*\)$'
       - pattern: '^\\\([A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*\)$'
-  # END GENERATED: tokenReference
+
+  tokenName:
+    type: string
+    description: >
+      A token name in any supported token name style, e.g. ReplicaCount,
+      replica-count or VENDOR_ENVOY/REPLICAS. Names follow one name style
+      throughout, path segments joined by /.
+    # One pattern per name style, in order:
+    # PascalCase camelCase UPPER_SNAKE lower_snake lower-kebab UPPER-KEBAB lower.dot UPPER.DOT
+    anyOf:
+      - pattern: '^[A-Z0-9][a-zA-Z0-9]*(/[A-Z0-9][a-zA-Z0-9]*)*$'
+      - pattern: '^([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*)(/([0-9]|[a-z][a-zA-Z0-9]*|[0-9]+[A-Z][a-zA-Z0-9]*))*$'
+      - pattern: '^[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9_]*[A-Z0-9])?)*$'
+      - pattern: '^[a-z0-9]([a-z0-9_]*[a-z0-9])?(/[a-z0-9]([a-z0-9_]*[a-z0-9])?)*$'
+      - pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$'
+      - pattern: '^[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9-]*[A-Z0-9])?)*$'
+      - pattern: '^[a-z0-9]([a-z0-9.]*[a-z0-9])?(/[a-z0-9]([a-z0-9.]*[a-z0-9])?)*$'
+      - pattern: '^[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?(/[A-Z0-9]([A-Z0-9.]*[A-Z0-9])?)*$'
+  # END GENERATED: token patterns
 
   linuxPlatformList:
     type: string
